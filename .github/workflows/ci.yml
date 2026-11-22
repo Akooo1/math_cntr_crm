@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: matematika
+          POSTGRES_USER: mm
+          POSTGRES_PASSWORD: mm
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U mm" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      POSTGRES_HOST: localhost
+      DJANGO_SETTINGS_MODULE: config.settings.test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: "0.11.32"
+      - run: sudo apt-get update && sudo apt-get install -y gettext
+      - run: uv sync --frozen --python 3.12
+      - name: Lint
+        run: uv run ruff check . && uv run ruff format --check .
+      - name: Module boundaries
+        run: uv run lint-imports
+      - name: Migrations are up to date
+        run: uv run python manage.py makemigrations --check --dry-run
+      - name: UI strings are extracted and translated
+        run: |
+          source .venv/bin/activate
+          scripts/i18n.sh --check
+          python manage.py compilemessages -l uz --ignore=.venv
+      - name: Tests
+        run: uv run pytest --cov=apps --cov-report=term-missing:skip-covered

@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@source "../../templates";
+@source "../../apps";
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-600/30 disabled:opacity-50;
+  }
+  .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-600/30 disabled:opacity-50 bg-sky-700 text-white hover:bg-sky-800; }
+  .btn-secondary { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-600/30 disabled:opacity-50 border border-slate-300 bg-white text-slate-800 hover:bg-slate-50; }
+  .btn-danger { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-600/30 disabled:opacity-50 bg-rose-600 text-white hover:bg-rose-700; }
+  .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-600/30 disabled:opacity-50 text-slate-700 hover:bg-slate-100; }
+  .card { @apply rounded-xl border border-slate-200 bg-white shadow-sm; }
+  .badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium; }
+  .label { @apply mb-1 block text-sm font-medium text-slate-700; }
+  .table-head { @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500; }
+  .table-cell { @apply px-4 py-3 text-sm text-slate-800; }
+}
+
+/* Django's CheckboxSelectMultiple renders a <div> of <div><label><input> text</label></div> */
+.checkbox-list > div { @apply flex flex-wrap gap-2; }
+.checkbox-list label { @apply flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm; }

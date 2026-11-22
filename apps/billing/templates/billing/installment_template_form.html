@@ -1,0 +1,14 @@
+{% extends "settings/section_form.html" %}
+{% block after_form %}
+  {% if preview %}
+    <div class="card mt-4 p-5">
+      <h3 class="font-semibold">{% translate "Example" %}</h3>
+      <p class="mt-1 text-sm text-slate-500">{% blocktranslate with t=preview.total|som d=preview.start|sana %}Course price {{ t }}, start date {{ d }}:{% endblocktranslate %}</p>
+      <ul class="mt-3 divide-y divide-slate-100 text-sm">
+        {% for p in preview.parts %}
+          <li class="flex justify-between py-2"><span>{% blocktranslate with n=p.part_no %}Part {{ n }}{% endblocktranslate %} · {{ p.due_date|sana }}</span><span class="font-medium">{{ p.amount|som }}</span></li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+{% endblock %}

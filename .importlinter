@@ -1,0 +1,31 @@
+[importlinter]
+root_packages =
+    apps
+include_external_packages = True
+
+# Module dependency direction (docs/SPEC.md 4.2). Higher layers may import lower ones,
+# never the reverse. Modules separated by "|" sit on the same layer and must not import
+# each other. Phase 3 inserts apps.students between crm/billing and settings.
+[importlinter:contract:layers]
+name = Module layers
+type = layers
+layers =
+    apps.demo
+    apps.billing | apps.crm
+    apps.settings
+    apps.accounts
+    apps.core
+ignore_imports =
+    apps.*.migrations.* -> apps.**
+    apps.*.tests.** -> apps.**
+
+# Domain packages hold pure money math: no Django, no database.
+[importlinter:contract:pure-domain]
+name = Billing domain is pure Python
+type = forbidden
+source_modules =
+    apps.billing.domain
+forbidden_modules =
+    django
+    apps.billing.models
+    apps.billing.services

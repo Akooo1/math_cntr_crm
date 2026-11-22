@@ -1,0 +1,44 @@
+[project]
+name = "matematika-markazi"
+version = "0.1.0"
+description = "Matematika Markazi operations platform"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "django>=5.2,<5.3",
+    "psycopg[binary]>=3.2,<4",
+    "gunicorn>=23,<24",
+    "openpyxl>=3.1,<4",
+    "whitenoise>=6.7,<7",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "pytest-django>=4.9",
+    "pytest-cov>=5",
+    "factory-boy>=3.3",
+    "time-machine>=2.15",
+    "import-linter>=2.1",
+    "ruff>=0.7",
+    "polib>=1.2",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["test_*.py"]
+testpaths = ["apps", "tests"]
+addopts = "-q --strict-markers"
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["*/migrations/*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "DJ"]
+
+[tool.ruff.lint.per-file-ignores]
+"apps/core/icons.py" = ["E501"]

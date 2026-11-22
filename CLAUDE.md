@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **0 (plan)**. No application code exists yet. Update this line at the end of each phase.
+- Current phase: **1 done** (setup, login, roles, branch scoping, Sozlamalar, audit log). Next: phase 2 (CRM). Update this line at the end of each phase.
 
 ## Ask the owner before
 
@@ -18,23 +18,28 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 
 Python 3.12, Django 5.2 LTS, PostgreSQL 17, Django templates + HTMX 2 + Alpine.js 3 + Tailwind CSS 4 (standalone CLI, no Node at runtime), openpyxl, supercronic, gunicorn, Caddy, uv, pytest + pytest-django + factory_boy, import-linter. Deployed with Docker Compose.
 
-## Commands (planned, to be confirmed in phase 1)
+## Commands
 
 ```bash
-docker compose up                              # full local stack, seeds demo data on an empty DB
-docker compose exec web uv run pytest          # all tests
-docker compose exec web uv run pytest apps/billing
-docker compose exec web uv run lint-imports    # module boundary check
-docker compose exec web uv run python manage.py makemessages -l uz --no-obsolete
-docker compose exec web uv run python manage.py generate_monthly_charges --month 2026-12
-scripts/backup.sh
+docker compose up                              # full local stack; seeds demo data on an empty DB
+uv run pytest                                  # all tests (needs PostgreSQL; POSTGRES_* env vars)
+uv run pytest apps/billing                     # one module
+uv run lint-imports                            # module layer contracts (.importlinter)
+uv run ruff check . && uv run ruff format .    # lint + format
+uv run python manage.py makemigrations --check --dry-run
+scripts/i18n.sh                                # extract UI strings into locale/uz/.../django.po + compile
+scripts/i18n.sh --check                        # CI: fail if strings changed and were not extracted
+uv run python manage.py seed_demo              # demo data (apps/demo), idempotent
+npm run build:css                              # Tailwind -> static/dist/app.css (dev compose runs a watcher)
 ```
 
 ## Layout and module boundaries
 
 ```
-config/   apps/{core,accounts,settings,crm,students,billing,reports}/   templates/   static/   locale/   scripts/   docs/   tests/
+config/   apps/{core,accounts,settings,crm,students,billing,reports,demo}/   templates/   static/   locale/   scripts/   docs/   tests/
 ```
+
+`apps/demo` holds the demo seed command only; it sits above every module and nothing imports it.
 
 Dependency direction (enforced by `.importlinter`; CI fails on violations):
 
@@ -121,6 +126,25 @@ Inside a module:
 | Export to Excel | Excel'ga yuklash |
 
 Add new terms here before using them in the UI.
+
+## Building blocks that already exist (use them, don't re-invent)
+
+- `core.permissions`: `register_permission`, `has_perm`, `require_perm`, `perm_required` (view
+  decorator), `scope_by_branch`, `ensure_branch_access` (404), `accessible_branch_ids`.
+  `request.branch_filter` is the branch picked in the top-bar switcher (None = all).
+- `core.audit.record(...)` / `core.audit.snapshot(obj)`; `core.crud.save_form` / `set_active`
+  for audited reference-data writes.
+- `core.events.DomainEvent`, `publish`, `subscribe` (+ outbox).
+- `core.registry.registry.add_nav(NavItem(...))`, `.add_widget(DashboardWidget(...))`.
+- `core.settings_panel.SettingsSection` + `register_section` — a new Sozlamalar page is a
+  subclass registered in the module's `ready()`; see `apps/billing/sections.py`.
+- `core.system_settings.register_setting(SettingDef(...))` / `get_setting(key)` — typed
+  settings that appear automatically in Sozlamalar → Umumiy sozlamalar.
+- `core.forms`: `StyledForm`, `StyledModelForm`, `MoneyField`, `PhoneField`, `UzDateField`.
+- Template builtins (no `{% load %}` needed): `i18n`, `|som`, `|raqam`, `|sana`, `|sana_vaqt`,
+  `|telefon`, `user|can:"perm.code"`, `{% icon "name" %}`, `{% field form.x %}`.
+- `billing.domain.rounding.round_amount` — the only money rounding function.
+- URLs and slugs are Uzbek (`/sozlamalar/`, `/kirish/`); code identifiers stay English.
 
 ## Security and permissions
 

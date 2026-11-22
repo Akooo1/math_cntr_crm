@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ section.title }}{% endblock %}
+{% block heading %}{% translate "Settings" %}{% endblock %}
+{% block content %}
+  {% include "settings/_header.html" %}
+  <div class="grid gap-6 lg:grid-cols-2">
+    <form method="post" class="card space-y-4 p-5" novalidate>{% csrf_token %}
+      <h3 class="font-semibold">{% translate "Center details" %}</h3>
+      {% include "components/form_errors.html" %}
+      {% for f in form %}{% field f %}{% endfor %}
+      <div class="flex justify-end"><button class="btn-primary">{% translate "Save" %}</button></div>
+    </form>
+    <div class="card p-5">
+      <h3 class="font-semibold">{% translate "Branch overrides" %}</h3>
+      <p class="mt-1 text-sm text-slate-500">{% translate "Fill these only if a branch prints different details on its receipts." %}</p>
+      <ul class="mt-4 divide-y divide-slate-100">
+        {% for b in branches %}
+          <li class="flex items-center justify-between gap-3 py-3">
+            <span><span class="font-medium">{{ b.name }}</span>{% if b.receipt_info %}<span class="ml-2 badge bg-sky-100 text-sky-800">{% translate "Own details" %}</span>{% endif %}</span>
+            <a class="btn-secondary px-3 py-1.5" href="{% url 'settings:section_action' section.slug b.pk 'filial' %}">{% icon "pencil" "w-4 h-4" %}{% translate "Edit" %}</a>
+          </li>
+        {% empty %}<li class="py-3 text-sm text-slate-500">{% translate "Nothing here yet." %}</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}

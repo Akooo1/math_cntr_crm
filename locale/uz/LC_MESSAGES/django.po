@@ -1,0 +1,900 @@
+# Matematika Markazi - Uzbek (Latin) UI translations.
+# This file is the single source of all UI text. Keep every msgstr filled.
+msgid ""
+msgstr ""
+"Project-Id-Version: matematika-markazi\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-22 14:27+0500\n"
+"PO-Revision-Date: 2026-11-22 14:00+0500\n"
+"Last-Translator: Matematika Markazi\n"
+"Language-Team: Uzbek\n"
+"Language: uz\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Users"
+msgstr "Foydalanuvchilar"
+
+msgid "Phone"
+msgstr "Telefon"
+
+msgid "Password"
+msgstr "Parol"
+
+msgid "Current password"
+msgstr "Joriy parol"
+
+msgid "New password"
+msgstr "Yangi parol"
+
+msgid "At least 8 characters, not only digits."
+msgstr "Kamida 8 ta belgi, faqat raqamlardan iborat bo'lmasin."
+
+msgid "Repeat the new password"
+msgstr "Yangi parolni takrorlang"
+
+msgid "The current password is wrong."
+msgstr "Joriy parol noto'g'ri."
+
+msgid "The passwords don't match."
+msgstr "Parollar mos kelmadi."
+
+msgid "The new password must differ from the current one."
+msgstr "Yangi parol joriy paroldan farq qilishi kerak."
+
+msgid "Full name"
+msgstr "F.I.Sh."
+
+msgid "Role"
+msgstr "Rol"
+
+msgid "Active"
+msgstr "Faol"
+
+msgid "Must change password"
+msgstr "Parolni almashtirishi shart"
+
+msgid "User"
+msgstr "Foydalanuvchi"
+
+#, python-format
+msgid "The password must be at least %(n)d characters long."
+msgstr "Parol kamida %(n)d ta belgidan iborat bo'lishi kerak."
+
+msgid "The password can't consist of digits only."
+msgstr "Parol faqat raqamlardan iborat bo'lishi mumkin emas."
+
+msgid "The password can't be part of the phone number."
+msgstr "Parol telefon raqamining bir qismi bo'lishi mumkin emas."
+
+msgid "Too many failed attempts. Try again in 15 minutes."
+msgstr "Juda ko'p noto'g'ri urinish. 15 daqiqadan keyin qayta urinib ko'ring."
+
+msgid "Wrong phone number or password."
+msgstr "Telefon raqami yoki parol noto'g'ri."
+
+msgid "Password changed."
+msgstr "Parol o'zgartirildi."
+
+msgid "Payments"
+msgstr "To'lovlar"
+
+msgid "Course"
+msgstr "Kurs"
+
+msgid "Branch"
+msgstr "Filial"
+
+msgid "All branches"
+msgstr "Barcha filiallar"
+
+msgid "Amount"
+msgstr "Summa"
+
+msgid "Effective from"
+msgstr "Amal qilish sanasi"
+
+msgid "Note"
+msgstr "Izoh"
+
+msgid "Value"
+msgstr "Qiymat"
+
+msgid "For a percent enter e.g. 10 or 12,5. For a fixed amount enter so'm."
+msgstr ""
+"Foiz uchun masalan 10 yoki 12,5 kiriting. Belgilangan summa uchun so'mda "
+"kiriting."
+
+msgid "Enter a valid number."
+msgstr "To'g'ri son kiriting."
+
+msgid "A percent must be above 0 and at most 100."
+msgstr "Foiz 0 dan katta va 100 dan oshmasligi kerak."
+
+msgid "Shares of each part (%)"
+msgstr "Har bir qism ulushi (%)"
+
+msgid "Only for custom shares: e.g. 40, 30, 30. The total must be 100."
+msgstr ""
+"Faqat alohida ulushlar uchun: masalan 40, 30, 30. Jami 100 bo'lishi kerak."
+
+msgid "All installment courses"
+msgstr "Barcha bo'lib to'lanadigan kurslar"
+
+msgid "Choose the day of the month."
+msgstr "Oyning kunini tanlang."
+
+msgid "Enter numbers separated by commas."
+msgstr "Sonlarni vergul bilan ajratib kiriting."
+
+msgid "The number of shares must equal the number of parts."
+msgstr "Ulushlar soni qismlar soniga teng bo'lishi kerak."
+
+msgid "The shares must be above 0 and add up to 100."
+msgstr "Ulushlar 0 dan katta va jami 100 bo'lishi kerak."
+
+msgid "Monthly fee"
+msgstr "Oylik to'lov"
+
+msgid "Full course price"
+msgstr "Kursning to'liq narxi"
+
+msgid "Leave empty for all branches."
+msgstr "Barcha filiallar uchun bo'sh qoldiring."
+
+msgid "Price type"
+msgstr "Narx turi"
+
+msgid "Created by"
+msgstr "Kiritgan"
+
+msgid "Created at"
+msgstr "Kiritilgan vaqt"
+
+msgid "Price"
+msgstr "Narx"
+
+msgid "Prices"
+msgstr "Narxlar"
+
+msgid "The amount must be positive."
+msgstr "Summa musbat bo'lishi kerak."
+
+msgid "Equal parts"
+msgstr "Teng qismlar"
+
+msgid "Custom shares"
+msgstr "Alohida ulushlar"
+
+msgid "On the start date"
+msgstr "Boshlanish sanasida"
+
+msgid "On a fixed day of the month"
+msgstr "Oyning belgilangan kunida"
+
+msgid "Leave empty to allow it for every installment course."
+msgstr "Barcha bo'lib to'lanadigan kurslar uchun bo'sh qoldiring."
+
+msgid "Name"
+msgstr "Nomi"
+
+msgid "Number of parts"
+msgstr "Qismlar soni"
+
+msgid "Split"
+msgstr "Taqsimlash"
+
+msgid "First part due"
+msgstr "Birinchi qism muddati"
+
+msgid "Months between parts"
+msgstr "Qismlar orasidagi oylar"
+
+msgid "Due day of the month"
+msgstr "To'lov kuni (oyning sanasi)"
+
+msgid ""
+"Required for a fixed day. Optional otherwise: parts 2+ fall on this day."
+msgstr ""
+"Belgilangan kun uchun majburiy. Aks holda ixtiyoriy: 2-qismdan boshlab shu "
+"kunga tushadi."
+
+msgid "Installment template"
+msgstr "Bo'lib to'lash shabloni"
+
+msgid "Installment templates"
+msgstr "Bo'lib to'lash shablonlari"
+
+msgid "Percent"
+msgstr "Foiz"
+
+msgid "Fixed amount"
+msgstr "Belgilangan summa"
+
+msgid "Monthly courses"
+msgstr "Oylik to'lovli kurslar"
+
+msgid "Installment courses"
+msgstr "Bo'lib to'lanadigan kurslar"
+
+msgid "All courses"
+msgstr "Barcha kurslar"
+
+msgid "Discount type"
+msgstr "Chegirma turi"
+
+msgid "Percent in basis points (10% = 1000) or an amount in so'm."
+msgstr "Foiz bazis punktlarda (10% = 1000) yoki so'mdagi summa."
+
+msgid "Applies to"
+msgstr "Qo'llaniladi"
+
+msgid "Director may enter a custom value"
+msgstr "Direktor boshqa qiymat kirita oladi"
+
+msgid "Discount types"
+msgstr "Chegirma turlari"
+
+msgid "The value must be positive."
+msgstr "Qiymat musbat bo'lishi kerak."
+
+msgid "Provider"
+msgstr "Provayder"
+
+msgid "Counted in the daily cash report"
+msgstr "Kassa hisobotida hisoblanadi"
+
+msgid "Order"
+msgstr "Tartib"
+
+msgid "Payment method"
+msgstr "To'lov usuli"
+
+msgid "Payment methods"
+msgstr "To'lov usullari"
+
+msgid "Rounding of computed amounts"
+msgstr "Hisoblangan summalarni yaxlitlash"
+
+msgid ""
+"Prorated amounts, percent discounts and installment parts are rounded to "
+"this."
+msgstr ""
+"Qolgan darslar bo'yicha hisob, foizli chegirmalar va to'lov qismlari shunga "
+"yaxlitlanadi."
+
+msgid "1 so'm"
+msgstr "1 so'm"
+
+msgid "100 so'm"
+msgstr "100 so'm"
+
+msgid "1 000 so'm"
+msgstr "1 000 so'm"
+
+msgid "Monthly fee due day"
+msgstr "Oylik to'lov muddati (kun)"
+
+msgid "Day of the month the monthly fee is due."
+msgstr "Oylik to'lov to'lanishi kerak bo'lgan sana."
+
+msgid "Payment backdating window (days)"
+msgstr "To'lovni orqa sana bilan kiritish (kun)"
+
+msgid ""
+"How many days back a payment date may be. Closed days are always locked."
+msgstr ""
+"To'lov sanasi necha kun oldin bo'lishi mumkin. Yopilgan kunlar har doim "
+"qulflangan."
+
+msgid "Grace period before debt (days)"
+msgstr "Qarzdorlikgacha imtiyozli muddat (kun)"
+
+msgid "Days after the due date before a student appears in the debtors list."
+msgstr ""
+"Muddat o'tgach, o'quvchi qarzdorlar ro'yxatiga tushguncha o'tadigan kunlar."
+
+msgid "Courses and prices"
+msgstr "Kurslar va narxlar"
+
+msgid "Finance"
+msgstr "Moliya"
+
+msgid "Monthly fees and full course prices with effective dates and history."
+msgstr ""
+"Oylik to'lovlar va kurs narxlari, amal qilish sanalari va tarixi bilan."
+
+msgid "Number of parts and due-date rules for installment courses."
+msgstr "Bo'lib to'lanadigan kurslar uchun qismlar soni va muddat qoidalari."
+
+msgid "Percent or fixed discounts, e.g. siblings or promo."
+msgstr "Foizli yoki belgilangan chegirmalar, masalan aka-uka yoki promo."
+
+msgid "Cash, card terminal, bank transfer. Online methods come later."
+msgstr "Naqd, terminal, bank o'tkazmasi. Onlayn usullar keyinroq qo'shiladi."
+
+msgid "Example"
+msgstr "Namuna"
+
+#, python-format
+msgid "Course price %(t)s, start date %(d)s:"
+msgstr "Kurs narxi %(t)s, boshlanish sanasi %(d)s:"
+
+#, python-format
+msgid "Part %(n)s"
+msgstr "%(n)s-qism"
+
+msgid ""
+"If the effective date is in the past, charges already issued still keep "
+"their old amount."
+msgstr ""
+"Agar amal qilish sanasi o'tgan kunga qo'yilsa ham, avval hisoblangan "
+"to'lovlar eski summada qoladi."
+
+msgid "Settings"
+msgstr "Sozlamalar"
+
+msgid ""
+"A new price applies from the date you choose. Charges already issued never "
+"change. Every price stays in the history."
+msgstr ""
+"Yangi narx siz tanlagan sanadan amal qiladi. Avval hisoblangan to'lovlar "
+"o'zgarmaydi. Har bir narx tarixda saqlanadi."
+
+msgid "New price"
+msgstr "Yangi narx"
+
+#, python-format
+msgid "since %(d)s"
+msgstr "%(d)s dan beri"
+
+msgid "No price yet"
+msgstr "Narx kiritilmagan"
+
+#, python-format
+msgid "From %(d)s: %(a)s"
+msgstr "%(d)s dan: %(a)s"
+
+msgid "Change price"
+msgstr "Narxni o'zgartirish"
+
+msgid "History"
+msgstr "Tarix"
+
+msgid "Add courses first."
+msgstr "Avval kurs qo'shing."
+
+msgid "Core"
+msgstr "Asosiy"
+
+msgid "Created"
+msgstr "Yaratildi"
+
+msgid "Changed"
+msgstr "O'zgartirildi"
+
+msgid "Activated"
+msgstr "Faollashtirildi"
+
+msgid "Deactivated"
+msgstr "Faolsizlantirildi"
+
+msgid "Logged in"
+msgstr "Tizimga kirdi"
+
+msgid "Failed login"
+msgstr "Muvaffaqiyatsiz kirish"
+
+msgid "Logged out"
+msgstr "Tizimdan chiqdi"
+
+msgid "Changed password"
+msgstr "Parolni o'zgartirdi"
+
+msgid "Password reset"
+msgstr "Parol tiklandi"
+
+msgid "System setting"
+msgstr "Tizim sozlamasi"
+
+msgid "Yes"
+msgstr "Ha"
+
+msgid "No"
+msgstr "Yo'q"
+
+#, python-format
+msgid "Constraint “%(name)s” is violated."
+msgstr "Kiritilgan qiymat qoidaga mos emas (%(name)s)."
+
+#, python-format
+msgid "Ensure this value is a multiple of step size %(limit_value)s."
+msgstr "Qiymat %(limit_value)s ga karrali bo'lishi kerak."
+
+#, python-format
+msgid ""
+"ManagementForm data is missing or has been tampered with. Missing fields: "
+"%(field_names)s. You may need to file a bug report if the issue persists."
+msgstr ""
+"Shakl ma'lumotlari to'liq emas (%(field_names)s). Sahifani yangilang va "
+"qayta urinib ko'ring."
+
+msgid "…"
+msgstr "…"
+
+#, python-format
+msgid "Please submit at most %(num)d form."
+msgid_plural "Please submit at most %(num)d forms."
+msgstr[0] "Ko'pi bilan %(num)d ta shakl yuboring."
+msgstr[1] "Ko'pi bilan %(num)d ta shakl yuboring."
+
+#, python-format
+msgid "Please submit at least %(num)d form."
+msgid_plural "Please submit at least %(num)d forms."
+msgstr[0] "Kamida %(num)d ta shakl yuboring."
+msgstr[1] "Kamida %(num)d ta shakl yuboring."
+
+msgid "DD.MM.YYYY"
+msgstr "KK.OO.YYYY"
+
+msgid "Enter the date as DD.MM.YYYY."
+msgstr "Sanani KK.OO.YYYY ko'rinishida kiriting."
+
+msgid "Enter a whole amount in so'm, for example 450 000."
+msgstr "Summani butun so'mda kiriting, masalan 450 000."
+
+#, python-format
+msgid "The amount must be at least %(limit)s."
+msgstr "Summa kamida %(limit)s bo'lishi kerak."
+
+msgid "Enter a phone number in the format +998 90 123 45 67."
+msgstr "Telefon raqamini +998 90 123 45 67 ko'rinishida kiriting."
+
+msgid "Action"
+msgstr "Amal"
+
+msgid "Object type"
+msgstr "Obyekt turi"
+
+msgid "Object ID"
+msgstr "Obyekt raqami"
+
+msgid "Before"
+msgstr "Oldin"
+
+msgid "After"
+msgstr "Keyin"
+
+msgid "Reason"
+msgstr "Sabab"
+
+msgid "IP address"
+msgstr "IP manzil"
+
+msgid "Browser"
+msgstr "Brauzer"
+
+msgid "Time"
+msgstr "Vaqt"
+
+msgid "Audit log entry"
+msgstr "Jurnal yozuvi"
+
+msgid "Audit log"
+msgstr "Harakatlar jurnali"
+
+msgctxt "currency"
+msgid "sum"
+msgstr "so'm"
+
+msgid "View the dashboard"
+msgstr "Bosh sahifani ko'rish"
+
+msgid "View the audit log"
+msgstr "Harakatlar jurnalini ko'rish"
+
+msgid "Home"
+msgstr "Bosh sahifa"
+
+msgid "Session length (hours)"
+msgstr "Sessiya davomiyligi (soat)"
+
+msgid "How long a user stays logged in without activity."
+msgstr "Foydalanuvchi faoliyatsiz qancha vaqt tizimda qoladi."
+
+msgid "Director"
+msgstr "Direktor"
+
+msgid "Branch administrator"
+msgstr "Filial administratori"
+
+msgid "Sales manager"
+msgstr "Sotuv menejeri"
+
+msgid "Teacher"
+msgstr "O'qituvchi"
+
+msgid "From"
+msgstr "Dan"
+
+msgid "To"
+msgstr "Gacha"
+
+msgid "All users"
+msgstr "Barcha foydalanuvchilar"
+
+msgid "All objects"
+msgstr "Barcha obyektlar"
+
+msgid "Leads"
+msgstr "Lidlar"
+
+msgid "Lead source"
+msgstr "Lid manbasi"
+
+msgid "Lead sources"
+msgstr "Lid manbalari"
+
+msgid "New"
+msgstr "Yangi"
+
+msgid "Contacted"
+msgstr "Bog'lanildi"
+
+msgid "Booked for a trial lesson"
+msgstr "Sinov darsiga yozildi"
+
+msgid "Attended the trial lesson"
+msgstr "Sinov darsiga keldi"
+
+msgid "Enrolled"
+msgstr "O'qishga yozildi"
+
+msgid "Refused"
+msgstr "Rad etdi"
+
+msgid "Extra stage"
+msgstr "Qo'shimcha bosqich"
+
+msgid "Grey"
+msgstr "Kulrang"
+
+msgid "Blue"
+msgstr "Ko'k"
+
+msgid "Yellow"
+msgstr "Sariq"
+
+msgid "Purple"
+msgstr "Binafsha"
+
+msgid "Green"
+msgstr "Yashil"
+
+msgid "Red"
+msgstr "Qizil"
+
+msgid "Stage type"
+msgstr "Bosqich turi"
+
+msgid "Color"
+msgstr "Rang"
+
+msgid "Lead stage"
+msgstr "Lid bosqichi"
+
+msgid "Lead stages"
+msgstr "Lid bosqichlari"
+
+msgid "This stage type already exists."
+msgstr "Bu turdagi bosqich allaqachon mavjud."
+
+msgid "Refusal reason"
+msgstr "Rad etish sababi"
+
+msgid "Refusal reasons"
+msgstr "Rad etish sabablari"
+
+msgid "Where leads come from: Instagram, Telegram, phone calls, walk-ins."
+msgstr ""
+"Lidlar qayerdan keladi: Instagram, Telegram, qo'ng'iroqlar, o'zi kelganlar."
+
+msgid ""
+"Pipeline stages. The main stages can be renamed and reordered; extra stages "
+"can be added."
+msgstr ""
+"Voronka bosqichlari. Asosiy bosqichlarni qayta nomlash va tartibini "
+"o'zgartirish mumkin; qo'shimcha bosqich qo'shish mumkin."
+
+msgid "Reasons a lead refused, used for the Refused stage."
+msgstr "Lid rad etish sabablari, \"Rad etdi\" bosqichi uchun."
+
+msgid "Leave empty to use the center's details."
+msgstr "Markaz ma'lumotlari ishlatilishi uchun bo'sh qoldiring."
+
+msgid "Used to log in."
+msgstr "Tizimga kirish uchun ishlatiladi."
+
+msgid "Branches"
+msgstr "Filiallar"
+
+msgid "The director works in all branches automatically."
+msgstr "Direktor avtomatik ravishda barcha filiallarda ishlaydi."
+
+msgid "Temporary password"
+msgstr "Vaqtinchalik parol"
+
+msgid "The user must change it at first login."
+msgstr "Foydalanuvchi birinchi kirishda uni almashtirishi kerak."
+
+msgid "A user with this phone number already exists."
+msgstr "Bu telefon raqamli foydalanuvchi allaqachon mavjud."
+
+msgid "Choose at least one branch."
+msgstr "Kamida bitta filialni tanlang."
+
+msgid "New temporary password"
+msgstr "Yangi vaqtinchalik parol"
+
+msgid "The user must change it at next login."
+msgstr "Foydalanuvchi keyingi kirishda uni almashtirishi kerak."
+
+msgid "Address"
+msgstr "Manzil"
+
+msgid "Receipt prefix"
+msgstr "Chek prefiksi"
+
+msgid "1 to 5 capital Latin letters."
+msgstr "1 dan 5 tagacha lotin bosh harflari."
+
+msgid "Receipt numbers look like CH-000123."
+msgstr "Chek raqamlari CH-000123 ko'rinishida bo'ladi."
+
+msgid "Capacity"
+msgstr "Sig'imi"
+
+msgid "Room"
+msgstr "Xona"
+
+msgid "Rooms"
+msgstr "Xonalar"
+
+msgid "This branch already has a room with this name."
+msgstr "Bu filialda shu nomli xona allaqachon bor."
+
+msgid "Installments"
+msgstr "Bo'lib to'lash"
+
+msgid "Pricing model"
+msgstr "To'lov modeli"
+
+msgid "Duration (months)"
+msgstr "Davomiyligi (oy)"
+
+msgid "Description"
+msgstr "Tavsif"
+
+msgid "Courses"
+msgstr "Kurslar"
+
+msgid "Center name"
+msgstr "Markaz nomi"
+
+msgid "Legal name"
+msgstr "Yuridik nomi"
+
+msgid "Tax ID (STIR)"
+msgstr "STIR"
+
+msgid "The tax ID has 9 digits."
+msgstr "STIR 9 ta raqamdan iborat."
+
+msgid "Bank details"
+msgstr "Bank rekvizitlari"
+
+msgid "Receipt footer text"
+msgstr "Chek pastidagi matn"
+
+msgid "Center details"
+msgstr "Markaz ma'lumotlari"
+
+msgid "Branch receipt details"
+msgstr "Filial chek ma'lumotlari"
+
+msgid "Manage settings"
+msgstr "Sozlamalarni boshqarish"
+
+msgid "Organization"
+msgstr "Tashkilot"
+
+msgid "System"
+msgstr "Tizim"
+
+msgid "Branch names, addresses and receipt number prefixes."
+msgstr "Filial nomlari, manzillari va chek raqami prefikslari."
+
+msgid "Classrooms in each branch."
+msgstr "Har bir filialdagi o'quv xonalari."
+
+msgid "Courses and their pricing model."
+msgstr "Kurslar va ularning to'lov modeli."
+
+msgid "The password was reset."
+msgstr "Parol tiklandi."
+
+msgid "Reset password"
+msgstr "Parolni tiklash"
+
+msgid "Staff accounts, roles and branches."
+msgstr "Xodimlar hisoblari, rollari va filiallari."
+
+msgid "Saved."
+msgstr "Saqlandi."
+
+msgid "Receipt details"
+msgstr "Chek ma'lumotlari"
+
+msgid "Center name, legal details and receipt text, with branch overrides."
+msgstr ""
+"Markaz nomi, rekvizitlar va chek matni, filiallar uchun alohida qiymatlar "
+"bilan."
+
+msgid "Branch details"
+msgstr "Filial ma'lumotlari"
+
+msgid "General settings"
+msgstr "Umumiy sozlamalar"
+
+msgid "Rounding, due dates, backdating window, session length."
+msgstr ""
+"Yaxlitlash, to'lov muddatlari, orqa sana bilan kiritish, sessiya davomiyligi."
+
+msgid "You can't change your own role."
+msgstr "O'z rolingizni o'zgartira olmaysiz."
+
+msgid "You can't deactivate yourself."
+msgstr "O'zingizni faolsizlantira olmaysiz."
+
+msgid "Uzbek"
+msgstr "O'zbekcha"
+
+msgid "Log in"
+msgstr "Kirish"
+
+msgid "Log in to continue"
+msgstr "Davom etish uchun tizimga kiring"
+
+msgid "Forgot your password? Ask the director to reset it."
+msgstr "Parolni unutdingizmi? Direktordan uni tiklashni so'rang."
+
+msgid "Change password"
+msgstr "Parolni o'zgartirish"
+
+msgid "Set your own password before you continue."
+msgstr "Davom etishdan oldin o'z parolingizni o'rnating."
+
+msgid "Save"
+msgstr "Saqlash"
+
+msgid "Profile"
+msgstr "Profil"
+
+msgid "Log out"
+msgstr "Chiqish"
+
+msgid "All my branches"
+msgstr "Barcha filiallarim"
+
+msgid "More"
+msgstr "Yana"
+
+msgid "Previous"
+msgstr "Oldingi"
+
+#, python-format
+msgid "Page %(n)s of %(total)s"
+msgstr "%(n)s / %(total)s sahifa"
+
+msgid "Next"
+msgstr "Keyingi"
+
+msgid "Filter"
+msgstr "Saralash"
+
+msgid "Reset"
+msgstr "Tozalash"
+
+msgid "Details"
+msgstr "Batafsil"
+
+msgid "Field"
+msgstr "Maydon"
+
+msgid "Nothing found."
+msgstr "Hech narsa topilmadi."
+
+#, python-format
+msgid "Welcome, %(name)s!"
+msgstr "Xush kelibsiz, %(name)s!"
+
+msgid "Sections"
+msgstr "Bo'limlar"
+
+msgid "Bad request"
+msgstr "Noto'g'ri so'rov"
+
+msgid "The request could not be understood."
+msgstr "So'rovni tushunib bo'lmadi."
+
+msgid "No access"
+msgstr "Ruxsat yo'q"
+
+msgid "Your role does not allow this action."
+msgstr "Sizning rolingiz bu amalga ruxsat bermaydi."
+
+msgid "Page not found"
+msgstr "Sahifa topilmadi"
+
+msgid "The page does not exist or you can't see it."
+msgstr "Sahifa mavjud emas yoki uni ko'rish huquqingiz yo'q."
+
+msgid "Server error"
+msgstr "Server xatosi"
+
+msgid "Something went wrong. Try again in a minute."
+msgstr "Nimadir noto'g'ri ketdi. Bir daqiqadan so'ng qayta urinib ko'ring."
+
+msgid "Go to the home page"
+msgstr "Bosh sahifaga o'tish"
+
+msgid "The form expired"
+msgstr "Shakl muddati tugadi"
+
+msgid "Reload the page and try again."
+msgstr "Sahifani yangilang va qayta urinib ko'ring."
+
+msgid "Edit"
+msgstr "Tahrirlash"
+
+msgid "Deactivate this item?"
+msgstr "Ushbu yozuv faolsizlantirilsinmi?"
+
+msgid "Deactivate"
+msgstr "Faolsizlantirish"
+
+msgid "Activate"
+msgstr "Faollashtirish"
+
+msgid "Branch overrides"
+msgstr "Filiallar uchun alohida ma'lumotlar"
+
+msgid "Fill these only if a branch prints different details on its receipts."
+msgstr ""
+"Faqat filial chekida boshqa ma'lumotlar chiqishi kerak bo'lsa to'ldiring."
+
+msgid "Own details"
+msgstr "Alohida ma'lumotlar"
+
+msgid "Nothing here yet."
+msgstr "Hozircha bo'sh."
+
+msgid "Cancel"
+msgstr "Bekor qilish"
+
+msgid "All"
+msgstr "Hammasi"
+
+msgid "Add"
+msgstr "Qo'shish"
+
+msgid "Status"
+msgstr "Holat"
+
+msgid "Actions"
+msgstr "Amallar"
+
+msgid "Inactive"
+msgstr "Faol emas"

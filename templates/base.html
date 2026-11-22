@@ -1,0 +1,89 @@
+{% load static %}<!doctype html>
+<html lang="uz">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>{% block title %}{{ center_name }}{% endblock %} — {{ center_name }}</title>
+  <link rel="stylesheet" href="{% static 'dist/app.css' %}">
+  <script src="{% static 'vendor/htmx-2.0.4.min.js' %}" defer></script>
+  <script src="{% static 'vendor/alpine-3.14.8.min.js' %}" defer></script>
+  <script src="{% static 'js/app.js' %}" defer></script>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-900 antialiased">
+{% block body %}
+<div class="md:flex">
+  {# Desktop sidebar #}
+  <aside class="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 border-r border-slate-200 bg-white">
+    <div class="flex h-16 items-center gap-2 px-5 border-b border-slate-200">
+      <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-700 text-white font-bold">M</span>
+      <span class="font-semibold text-slate-900 leading-tight">{{ center_name }}</span>
+    </div>
+    <nav class="flex-1 overflow-y-auto p-3 space-y-1">
+      {% for n in nav %}
+        <a href="{{ n.url }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium {% if n.active %}bg-sky-50 text-sky-800{% else %}text-slate-700 hover:bg-slate-100{% endif %}">
+          {% icon n.item.icon "w-5 h-5" %}<span>{{ n.item.label }}</span>
+        </a>
+      {% endfor %}
+    </nav>
+    <div class="border-t border-slate-200 p-3">
+      <a href="{% url 'accounts:profile' %}" class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">
+        {% icon "user" "w-5 h-5" %}
+        <span class="min-w-0"><span class="block truncate font-medium">{{ user.full_name }}</span><span class="block text-xs text-slate-500">{{ user.get_role_display }}</span></span>
+      </a>
+      <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
+        <button class="mt-1 flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-700 hover:bg-slate-100">{% icon "logout" "w-5 h-5" %}{% translate "Log out" %}</button>
+      </form>
+    </div>
+  </aside>
+
+  <div class="flex-1 md:pl-64">
+    {# Top bar #}
+    <header class="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-slate-200 bg-white/95 px-4 backdrop-blur md:h-16 md:px-8">
+      <span class="md:hidden flex h-8 w-8 items-center justify-center rounded-lg bg-sky-700 text-white text-sm font-bold">M</span>
+      <h1 class="min-w-0 flex-1 truncate text-base font-semibold md:text-lg">{% block heading %}{{ center_name }}{% endblock %}</h1>
+      {% if branch_options %}
+        <form method="post" action="{% url 'core:switch_branch' %}" class="shrink-0">{% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <label class="sr-only" for="branch-switch">{% translate "Branch" %}</label>
+          <select id="branch-switch" name="branch" onchange="this.form.submit()" class="max-w-[10rem] rounded-lg border border-slate-300 bg-white py-1.5 pl-2 pr-7 text-sm">
+            <option value="">{% if user.is_director %}{% translate "All branches" %}{% else %}{% translate "All my branches" %}{% endif %}</option>
+            {% for b in branch_options.branches %}<option value="{{ b.id }}" {% if branch_options.current == b.id %}selected{% endif %}>{{ b.name }}</option>{% endfor %}
+          </select>
+        </form>
+      {% endif %}
+    </header>
+
+    <main class="mx-auto w-full max-w-6xl px-4 pb-28 pt-4 md:px-8 md:pb-10 md:pt-6">
+      {% include "components/messages.html" %}
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+{# Phone bottom navigation #}
+<nav class="md:hidden fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white pb-[env(safe-area-inset-bottom)]" x-data="{ more: false }">
+  <div class="flex">
+    {% for n in nav_mobile %}
+      <a href="{{ n.url }}" class="flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium {% if n.active %}text-sky-700{% else %}text-slate-600{% endif %}">
+        {% icon n.item.icon "w-6 h-6" %}<span class="truncate max-w-[4.5rem]">{{ n.item.label }}</span>
+      </a>
+    {% endfor %}
+    <button type="button" @click="more = !more" class="flex flex-1 flex-col items-center gap-0.5 py-2 text-[11px] font-medium text-slate-600">
+      {% icon "dots" "w-6 h-6" %}<span>{% translate "More" %}</span>
+    </button>
+  </div>
+  <div x-show="more" x-cloak @click.outside="more = false" class="absolute inset-x-2 bottom-16 rounded-xl border border-slate-200 bg-white p-2 shadow-lg">
+    {% for n in nav_mobile_more %}
+      <a href="{{ n.url }}" class="flex items-center gap-3 rounded-lg px-3 py-3 text-sm text-slate-800 hover:bg-slate-100">{% icon n.item.icon %}{{ n.item.label }}</a>
+    {% endfor %}
+    <a href="{% url 'accounts:profile' %}" class="flex items-center gap-3 rounded-lg px-3 py-3 text-sm text-slate-800 hover:bg-slate-100">{% icon "user" %}{% translate "Profile" %}</a>
+    <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}
+      <button class="flex w-full items-center gap-3 rounded-lg px-3 py-3 text-sm text-slate-800 hover:bg-slate-100">{% icon "logout" %}{% translate "Log out" %}</button>
+    </form>
+  </div>
+</nav>
+{% endblock %}
+<style>[x-cloak]{display:none!important}</style>
+</body>
+</html>

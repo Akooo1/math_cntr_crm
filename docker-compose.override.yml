@@ -1,0 +1,26 @@
+# Development: live code reload, demo data, CSS watcher. Loaded automatically by
+# `docker compose up`.
+services:
+  web:
+    image: matematika-web:dev
+    build:
+      target: dev
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      DJANGO_SECRET_KEY: dev-insecure-key-change-me
+      DEMO_SEED: "1"
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+
+  css:
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm ci --no-audit --no-fund && npx tailwindcss -i static/src/app.css -o static/dist/app.css --watch=always"
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+
+volumes:
+  node_modules:

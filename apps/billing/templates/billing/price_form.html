@@ -1,0 +1,7 @@
+{% extends "settings/section_form.html" %}
+{% block fields %}
+  <div class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+    {% translate "If the effective date is in the past, charges already issued still keep their old amount." %}
+  </div>
+  {% for f in form %}{% field f %}{% endfor %}
+{% endblock %}

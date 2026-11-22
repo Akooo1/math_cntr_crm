@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ section.title }}{% endblock %}
+{% block heading %}{% translate "Settings" %}{% endblock %}
+{% block content %}
+  {% include "settings/_header.html" %}
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+    {% if has_active_flag %}
+      <div class="flex gap-1 rounded-lg bg-slate-100 p-1 text-sm">
+        <a href="?" class="rounded-md px-3 py-1.5 {% if not show_inactive %}bg-white shadow-sm font-medium{% else %}text-slate-600{% endif %}">{% translate "Active" %}</a>
+        <a href="?nofaol=1" class="rounded-md px-3 py-1.5 {% if show_inactive %}bg-white shadow-sm font-medium{% else %}text-slate-600{% endif %}">{% translate "All" %}</a>
+      </div>
+    {% else %}<span></span>{% endif %}
+    {% if can_create %}<a href="{% url 'settings:section_create' section.slug %}" class="btn-primary">{% icon "plus" %}{% translate "Add" %}</a>{% endif %}
+  </div>
+
+  {% if not rows %}
+    <div class="card p-8 text-center text-sm text-slate-500">{% translate "Nothing here yet." %}</div>
+  {% else %}
+    {# Phone: cards #}
+    <div class="space-y-3 md:hidden">
+      {% for r in rows %}
+        <div class="card p-4 {% if r.obj.is_active is False %}opacity-60{% endif %}">
+          {% for col in section.columns %}{% column_value col r.obj as v %}
+            {% if col.primary %}<p class="font-semibold">{% include "settings/_value.html" %}</p>
+            {% else %}<p class="mt-1 flex justify-between gap-3 text-sm"><span class="text-slate-500">{{ col.label }}</span><span class="text-right">{% include "settings/_value.html" %}</span></p>{% endif %}
+          {% endfor %}
+          {% include "settings/_row_actions.html" %}
+        </div>
+      {% endfor %}
+    </div>
+    {# Desktop: table #}
+    <div class="card hidden overflow-x-auto md:block">
+      <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50"><tr>
+          {% for col in section.columns %}<th class="table-head">{{ col.label }}</th>{% endfor %}
+          {% if has_active_flag %}<th class="table-head">{% translate "Status" %}</th>{% endif %}
+          <th class="table-head"><span class="sr-only">{% translate "Actions" %}</span></th>
+        </tr></thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for r in rows %}
+            <tr class="{% if r.obj.is_active is False %}opacity-60{% endif %}">
+              {% for col in section.columns %}{% column_value col r.obj as v %}<td class="table-cell {% if col.primary %}font-medium{% endif %}">{% include "settings/_value.html" %}</td>{% endfor %}
+              {% if has_active_flag %}<td class="table-cell">{% if r.obj.is_active %}<span class="badge bg-emerald-100 text-emerald-800">{% translate "Active" %}</span>{% else %}<span class="badge bg-slate-100 text-slate-600">{% translate "Inactive" %}</span>{% endif %}</td>{% endif %}
+              <td class="table-cell text-right">{% include "settings/_row_actions.html" %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+{% endblock %}

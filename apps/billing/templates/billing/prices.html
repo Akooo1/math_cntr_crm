@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{{ section.title }}{% endblock %}
+{% block heading %}{% translate "Settings" %}{% endblock %}
+{% block content %}
+  {% include "settings/_header.html" %}
+  <div class="mb-4 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+    {% translate "A new price applies from the date you choose. Charges already issued never change. Every price stays in the history." %}
+  </div>
+  <div class="mb-4 flex justify-end"><a href="{% url 'settings:section_create' section.slug %}" class="btn-primary">{% icon "plus" %}{% translate "New price" %}</a></div>
+  <div class="space-y-4">
+    {% for r in rows %}
+      <div class="card p-4" x-data="{ open: false }">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p class="font-semibold">{{ r.course.name }}</p>
+            <p class="text-sm text-slate-500">{{ r.course.get_pricing_model_display }}</p>
+          </div>
+          <div class="text-right">
+            {% if r.current %}
+              <p class="text-lg font-semibold">{{ r.current.amount|som }}</p>
+              <p class="text-xs text-slate-500">{% blocktranslate with d=r.current.effective_from|sana %}since {{ d }}{% endblocktranslate %}</p>
+            {% else %}
+              <p class="badge bg-amber-100 text-amber-900">{% translate "No price yet" %}</p>
+            {% endif %}
+          </div>
+        </div>
+        {% for u in r.upcoming %}{% if not u.branch %}
+          <p class="mt-2 text-sm text-sky-800">{% blocktranslate with a=u.amount|som d=u.effective_from|sana %}From {{ d }}: {{ a }}{% endblocktranslate %}</p>
+        {% endif %}{% endfor %}
+        <div class="mt-3 flex flex-wrap gap-2">
+          <a class="btn-secondary px-3 py-1.5" href="{% url 'settings:section_create' section.slug %}?kurs={{ r.course.pk }}">{% icon "plus" "w-4 h-4" %}{% translate "Change price" %}</a>
+          {% if r.history %}<button type="button" class="btn-ghost px-3 py-1.5" @click="open = !open">{% icon "list" "w-4 h-4" %}{% translate "History" %} ({{ r.history|length }})</button>{% endif %}
+        </div>
+        <div x-show="open" x-cloak class="mt-3 overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead><tr class="text-left text-xs uppercase text-slate-500"><th class="py-2 pr-4">{% translate "Effective from" %}</th><th class="py-2 pr-4">{% translate "Amount" %}</th><th class="py-2 pr-4">{% translate "Branch" %}</th><th class="py-2 pr-4">{% translate "Note" %}</th><th class="py-2">{% translate "Created by" %}</th></tr></thead>
+            <tbody class="divide-y divide-slate-100">
+              {% for p in r.history %}
+                <tr><td class="py-2 pr-4">{{ p.effective_from|sana }}</td><td class="py-2 pr-4 font-medium">{{ p.amount|som }}</td><td class="py-2 pr-4">{% if p.branch %}{{ p.branch.name }}{% else %}{% translate "All branches" %}{% endif %}</td><td class="py-2 pr-4">{{ p.note|default:"—" }}</td><td class="py-2">{{ p.created_by.full_name }}<br><span class="text-xs text-slate-500">{{ p.created_at|sana_vaqt }}</span></td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% empty %}
+      <div class="card p-8 text-center text-sm text-slate-500">{% translate "Add courses first." %}</div>
+    {% endfor %}
+  </div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block body %}
+<main class="flex min-h-screen items-center justify-center px-4">
+  <div class="card max-w-md p-8 text-center">
+    <p class="text-5xl font-bold text-sky-700">{% block code %}{% endblock %}</p>
+    <h1 class="mt-3 text-xl font-semibold">{% block message %}{% endblock %}</h1>
+    <p class="mt-2 text-sm text-slate-500">{% block hint %}{% endblock %}</p>
+    <a href="/" class="btn-primary mt-6">{% translate "Go to the home page" %}</a>
+  </div>
+</main>
+{% endblock %}

@@ -1,0 +1,42 @@
+# Base services. `docker compose up` also loads docker-compose.override.yml (development).
+# Production (phase 5): docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+name: matematika
+
+x-db-env: &db-env
+  POSTGRES_DB: ${POSTGRES_DB:-matematika}
+  POSTGRES_USER: ${POSTGRES_USER:-mm}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mm}
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      <<: *db-env
+      TZ: Asia/Tashkent
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  web:
+    image: matematika-web:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      target: prod
+    environment:
+      <<: *db-env
+      POSTGRES_HOST: db
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:

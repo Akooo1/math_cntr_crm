@@ -1,0 +1,13 @@
+# Display and input formats: DD.MM.YYYY everywhere (docs/SPEC.md section 3).
+DATE_FORMAT = "d.m.Y"
+SHORT_DATE_FORMAT = "d.m.Y"
+DATETIME_FORMAT = "d.m.Y H:i"
+SHORT_DATETIME_FORMAT = "d.m.Y H:i"
+TIME_FORMAT = "H:i"
+DATE_INPUT_FORMATS = ["%d.%m.%Y"]
+DATETIME_INPUT_FORMATS = ["%d.%m.%Y %H:%M"]
+TIME_INPUT_FORMATS = ["%H:%M"]
+FIRST_DAY_OF_WEEK = 1
+DECIMAL_SEPARATOR = ","
+THOUSAND_SEPARATOR = " "
+NUMBER_GROUPING = 3

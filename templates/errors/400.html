@@ -1,0 +1,4 @@
+{% extends "errors/_error.html" %}
+{% block title %}{% translate "Bad request" %}{% endblock %}
+{% block code %}400{% endblock %}{% block message %}{% translate "Bad request" %}{% endblock %}
+{% block hint %}{% translate "The request could not be understood." %}{% endblock %}

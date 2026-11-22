@@ -2,7 +2,7 @@
 
 ## Module 1 specification: CRM, students, payment control
 
-Status: **Phase 0 draft, waiting for approval.** After approval, this document and the data model in section 5 are frozen. Changes to the data model need the owner's explicit approval (see CLAUDE.md).
+Status: **Approved** (all section 9 recommendations accepted). The data model in section 5 is frozen; changes need the owner's explicit approval (see CLAUDE.md). Implementation notes per phase are in section 12.
 
 Language: this document is in English for developers. Everything a user sees is in Uzbek, Latin script.
 
@@ -617,3 +617,30 @@ Each has my recommendation. Reply with "accept all" or list the numbers you want
 7. Data model changes to existing modules need the owner's approval.
 
 Example, teacher salaries: subscribe to `LessonHeld` and `EnrollmentCreated`, add a "Ish haqi stavkalari" (salary rates) settings section, add a "Ish haqi" (salaries) nav item for the Direktor, and read attendance through `students.selectors`. No module 1 code changes.
+
+---
+
+## 12. Implementation notes
+
+### Phase 1 (setup, login, roles, scoping, settings, audit)
+
+These are placement and tooling decisions. None changes a table, column or business rule
+in section 5.
+
+- `accounts_user_branch` keeps its approved table name, but its Django model (`UserBranch`)
+  lives in the `settings` app. `accounts` sits below `settings` in the module graph, so it
+  can't reference `Branch`.
+- `billing_price.group_id` (group-level override) is added in phase 3, in the same migration
+  that creates `students_group`. Until then a price applies to a course, optionally per branch.
+- The opening-balance payment method is the row with `provider_code = 'opening_balance'`,
+  an internal provider that can't be edited, deactivated or picked for payment entry.
+- Django admin is not installed at all (section 4.5 said dev-only). Everything is managed
+  through Sozlamalar.
+- Static files are served by WhiteNoise inside gunicorn. Caddy (phase 5) only terminates TLS
+  and proxies.
+- Login throttling uses Django's database cache table `core_cache` (created by
+  `createcachetable`). This is infrastructure, not business data.
+- The demo seed command lives in `apps/demo` (top layer), not in `core`.
+- Module boundaries are checked twice: `lint-imports` (layer direction, pure `billing/domain`)
+  and `tests/test_module_boundaries.py` (other modules only through
+  services/selectors/events/models/policies).

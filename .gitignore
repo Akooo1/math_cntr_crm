@@ -1,0 +1,14 @@
+node_modules/
+static/dist/
+staticfiles/
+media/
+.venv/
+__pycache__/
+*.pyc
+.env
+.pytest_cache/
+.coverage
+htmlcov/
+.ruff_cache/
+locale/*/LC_MESSAGES/*.mo
+backups/

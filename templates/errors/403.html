@@ -1,0 +1,4 @@
+{% extends "errors/_error.html" %}
+{% block title %}{% translate "No access" %}{% endblock %}
+{% block code %}403{% endblock %}{% block message %}{% translate "No access" %}{% endblock %}
+{% block hint %}{% translate "Your role does not allow this action." %}{% endblock %}
