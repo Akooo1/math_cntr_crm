@@ -1,0 +1,7 @@
+<li class="card flex flex-wrap items-center justify-between gap-3 p-3">
+  <a href="{% url 'crm:lead' tr.lead_id %}" class="min-w-0">
+    <p class="font-medium">{{ tr.lead.full_name }}</p>
+    <p class="text-sm text-slate-500">{{ tr.scheduled_date|sana }}{% if tr.scheduled_date == today %} · <span class="font-semibold text-sky-700">{% translate "Today" %}</span>{% endif %}{% if tr.lead.course %} · {{ tr.lead.course.name }}{% endif %}</p>
+  </a>
+  {% if tr.status == 'booked' %}{% include "crm/_trial_actions.html" %}{% else %}<span class="badge {% if tr.status == 'attended' %}bg-emerald-100 text-emerald-800{% else %}bg-slate-100 text-slate-600{% endif %}">{{ tr.get_status_display }}</span>{% endif %}
+</li>

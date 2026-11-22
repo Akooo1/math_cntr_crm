@@ -5,6 +5,7 @@ Safe to run twice: it does nothing when demo users already exist.
 """
 
 import datetime as dt
+import random
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
@@ -13,6 +14,8 @@ from django.db import transaction
 from apps.billing.models import DiscountType, InstallmentTemplate, InstallmentTemplatePart, Price
 from apps.core import dates
 from apps.core.roles import Role
+from apps.crm import services as crm_services
+from apps.crm.models import Lead, LeadSource, LeadStage, RefusalReason, TrialLesson
 from apps.settings.models import Branch, Course, Room, UserBranch
 
 DEMO_PASSWORD = "demo12345"
@@ -40,19 +43,162 @@ COURSES = [
 ]
 
 
+FIRST_NAMES = [
+    "Aziz",
+    "Bobur",
+    "Dilshod",
+    "Elyor",
+    "Farrux",
+    "Jahongir",
+    "Javohir",
+    "Otabek",
+    "Sardor",
+    "Shoxrux",
+    "Ulug'bek",
+    "Asal",
+    "Dilnoza",
+    "Gulnoza",
+    "Kamola",
+    "Madina",
+    "Malika",
+    "Nilufar",
+    "Sevara",
+    "Shahzoda",
+    "Zarina",
+    "Mohinur",
+    "Ozoda",
+    "Sanjar",
+    "Temur",
+]
+LAST_NAMES = [
+    "Abdullayev",
+    "Aliyev",
+    "Karimov",
+    "Rahimov",
+    "Tursunov",
+    "Yusupov",
+    "Ergashev",
+    "Qodirov",
+    "Xolmatov",
+    "Saidov",
+    "Normatov",
+    "Mirzayev",
+    "To'xtayev",
+    "G'aniyev",
+    "Nazarov",
+    "Sobirov",
+    "Islomov",
+    "Hamidov",
+]
+PARENT_NAMES = ["Anvar", "Bahodir", "Dilfuza", "Gulchehra", "Ravshan", "Shavkat", "Zulfiya"]
+NOTES = ["", "", "Onasi qo'ng'iroq qildi", "Kechki guruh kerak", "Instagramdagi reklamadan"]
+CALL_NOTES = [
+    "Narxni so'radi, o'ylab ko'rishini aytdi",
+    "Dars vaqtlarini so'radi",
+    "Ota-onasi bilan maslahatlashadi",
+    "Sinov darsiga qiziqdi",
+]
+TASK_TITLES = ["Qayta qo'ng'iroq qilish", "Narxlarni yuborish", "Sinov darsini eslatish"]
+
+
 class Command(BaseCommand):
     help = "Create demo data (idempotent)."
 
     def handle(self, *args, **options):
         User = get_user_model()
-        if User.objects.filter(phone=USERS[0][0]).exists():
+        created = False
+        if not User.objects.filter(phone=USERS[0][0]).exists():
+            with transaction.atomic():
+                self._seed(User)
+            created = True
+        if not Lead.objects.exists():
+            with transaction.atomic():
+                self._seed_crm(User)
+            created = True
+        if not created:
             self.stdout.write("Demo data already present.")
             return
-        with transaction.atomic():
-            self._seed(User)
         self.stdout.write(self.style.SUCCESS("Demo data created."))
         for phone, name, role, _b in USERS:
             self.stdout.write(f"  {phone}  {DEMO_PASSWORD}  {role}  {name}")
+
+    def _seed_crm(self, User):
+        """About 45 leads per the brief: every stage, tasks, trials, a few conversions."""
+        rnd = random.Random(42)
+        now = dates.now()
+        today = dates.today()
+        sources = list(LeadSource.objects.filter(is_active=True))
+        reasons = list(RefusalReason.objects.filter(is_active=True))
+        courses = list(Course.objects.all())
+        stages = {s.kind: s for s in LeadStage.objects.exclude(kind="custom")}
+        branches = list(Branch.objects.order_by("id"))
+        phone_seq = iter(range(1_000_000, 9_999_999, 7_919))
+        plan = ["new"] * 8 + ["contacted"] * 7 + ["trial_booked"] * 6 + ["trial_attended"] * 5
+        plan += ["won"] * 4 + ["lost"] * 5
+        for b_index, branch in enumerate(branches):
+            manager = User.objects.get(phone=USERS[2 + b_index * 4][0])
+            admin = User.objects.get(phone=USERS[1 + b_index * 4][0])
+            for i, kind in enumerate(plan):
+                first = rnd.choice(FIRST_NAMES)
+                last = rnd.choice(LAST_NAMES)
+                phone = f"+99893{next(phone_seq):07d}"
+                lead = crm_services.create_lead(
+                    actor=manager,
+                    branch=branch,
+                    data={
+                        "full_name": f"{last} {first}",
+                        "phone": phone,
+                        "source": rnd.choice(sources),
+                        "course": rnd.choice(courses),
+                        "manager": manager,
+                        "notes": rnd.choice(NOTES),
+                    },
+                    confirm_duplicate=True,
+                )
+                if kind != "new":
+                    crm_services.add_activity(
+                        actor=manager, lead=lead, kind="call", text=rnd.choice(CALL_NOTES)
+                    )
+                if kind in ("contacted", "trial_booked", "trial_attended", "won", "lost"):
+                    crm_services.change_stage(actor=manager, lead=lead, stage=stages["contacted"])
+                if kind in ("trial_booked", "trial_attended", "won"):
+                    trial = crm_services.book_trial(
+                        actor=manager, lead=lead, scheduled_date=today + dt.timedelta(days=i % 5)
+                    )
+                    if kind in ("trial_attended", "won"):
+                        crm_services.set_trial_status(actor=manager, trial=trial, status="attended")
+                if kind == "won":
+                    crm_services.convert(
+                        actor=admin,
+                        lead=lead,
+                        student_data={
+                            "first_name": first,
+                            "last_name": last,
+                            "phone": phone,
+                            "parent_name": f"{last} {rnd.choice(PARENT_NAMES)}",
+                            "parent_phone": f"+99890{next(phone_seq):07d}",
+                        },
+                        confirm_duplicate=True,
+                    )
+                elif kind == "lost":
+                    crm_services.refuse(
+                        actor=manager, lead=lead, reason=rnd.choice(reasons), note=""
+                    )
+                else:
+                    # Overdue, today and upcoming follow-ups.
+                    offset = [-2, -1, 0, 0, 1, 2, 3][i % 7]
+                    due = now.replace(hour=10, minute=0, second=0, microsecond=0)
+                    crm_services.create_task(
+                        actor=manager,
+                        lead=lead,
+                        assigned_to=manager,
+                        due_at=due + dt.timedelta(days=offset),
+                        title=rnd.choice(TASK_TITLES),
+                    )
+            # One trial from yesterday whose result was never marked.
+            lead = Lead.objects.filter(branch=branch, stage=stages["trial_booked"]).first()
+            if lead:
+                TrialLesson.objects.create(lead=lead, scheduled_date=today - dt.timedelta(days=1))
 
     def _seed(self, User):
         today = dates.today()

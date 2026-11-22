@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 14:27+0500\n"
+"POT-Creation-Date: 2026-11-22 16:57+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -452,6 +452,9 @@ msgstr "Summa kamida %(limit)s bo'lishi kerak."
 msgid "Enter a phone number in the format +998 90 123 45 67."
 msgstr "Telefon raqamini +998 90 123 45 67 ko'rinishida kiriting."
 
+msgid "Choose"
+msgstr "Tanlang"
+
 msgid "Action"
 msgstr "Amal"
 
@@ -531,6 +534,87 @@ msgstr "Barcha obyektlar"
 msgid "Leads"
 msgstr "Lidlar"
 
+msgid "Extra phone"
+msgstr "Qo'shimcha telefon"
+
+msgid "Source"
+msgstr "Manba"
+
+msgid "Course of interest"
+msgstr "Qiziqqan kursi"
+
+msgid "Manager"
+msgstr "Menejer"
+
+msgid "Notes"
+msgstr "Izohlar"
+
+msgid "Next follow-up"
+msgstr "Keyingi bog'lanish"
+
+msgid "A follow-up task is created for the manager."
+msgstr "Menejer uchun vazifa yaratiladi."
+
+msgid "Save anyway"
+msgstr "Baribir saqlash"
+
+msgid "Stage"
+msgstr "Bosqich"
+
+msgid "Refusal reason"
+msgstr "Rad etish sababi"
+
+msgid "Type"
+msgstr "Turi"
+
+msgid "Call"
+msgstr "Qo'ng'iroq"
+
+msgid "Text"
+msgstr "Matn"
+
+msgid "Task"
+msgstr "Vazifa"
+
+msgid "Call back"
+msgstr "Qayta qo'ng'iroq qilish"
+
+msgid "Date"
+msgstr "Sana"
+
+msgid "Assigned to"
+msgstr "Mas'ul"
+
+msgid "Trial lesson date"
+msgstr "Sinov darsi sanasi"
+
+msgid "The trial lesson date can't be in the past."
+msgstr "Sinov darsi sanasi o'tgan kun bo'lishi mumkin emas."
+
+msgid "Last name"
+msgstr "Familiya"
+
+msgid "First name"
+msgstr "Ism"
+
+msgid "Middle name"
+msgstr "Otasining ismi"
+
+msgid "Date of birth"
+msgstr "Tug'ilgan sana"
+
+msgid "Student's phone"
+msgstr "O'quvchining telefoni"
+
+msgid "Parent's name"
+msgstr "Ota-onasining ismi"
+
+msgid "Parent's phone"
+msgstr "Ota-onasining telefoni"
+
+msgid "Enter the student's or the parent's phone."
+msgstr "O'quvchi yoki ota-onasining telefonini kiriting."
+
 msgid "Lead source"
 msgstr "Lid manbasi"
 
@@ -591,11 +675,89 @@ msgstr "Lid bosqichlari"
 msgid "This stage type already exists."
 msgstr "Bu turdagi bosqich allaqachon mavjud."
 
-msgid "Refusal reason"
-msgstr "Rad etish sababi"
-
 msgid "Refusal reasons"
 msgstr "Rad etish sabablari"
+
+msgid "Refusal note"
+msgstr "Rad etish izohi"
+
+msgid "Student"
+msgstr "O'quvchi"
+
+msgid "Converted at"
+msgstr "O'quvchiga aylantirilgan vaqt"
+
+msgid "Updated at"
+msgstr "O'zgartirilgan vaqt"
+
+msgid "Lead"
+msgstr "Lid"
+
+msgid "Stage change"
+msgstr "Bosqich o'zgardi"
+
+msgid "Trial lesson"
+msgstr "Sinov darsi"
+
+msgid "Converted to a student"
+msgstr "O'quvchiga aylantirildi"
+
+msgid "Edited"
+msgstr "Tahrirlandi"
+
+msgid "Lead created"
+msgstr "Lid yaratildi"
+
+msgid "Lead activity"
+msgstr "Lid tarixi yozuvi"
+
+msgid "Lead activities"
+msgstr "Lid tarixi"
+
+msgid "Due"
+msgstr "Muddat"
+
+msgid "Done at"
+msgstr "Bajarilgan vaqt"
+
+msgid "Follow-up task"
+msgstr "Vazifa"
+
+msgid "Follow-up tasks"
+msgstr "Vazifalar"
+
+msgid "Booked"
+msgstr "Yozilgan"
+
+msgid "Attended"
+msgstr "Keldi"
+
+msgid "Did not come"
+msgstr "Kelmadi"
+
+msgid "Cancelled"
+msgstr "Bekor qilindi"
+
+msgid "Status"
+msgstr "Holat"
+
+msgid "Trial lessons"
+msgstr "Sinov darslari"
+
+msgid "View leads"
+msgstr "Lidlarni ko'rish"
+
+msgid "Work with leads"
+msgstr "Lidlar bilan ishlash"
+
+msgid "Convert leads to students"
+msgstr "Lidni o'quvchiga aylantirish"
+
+msgid "See everyone's tasks"
+msgstr "Barchaning vazifalarini ko'rish"
+
+msgid "Tasks"
+msgstr "Vazifalar"
 
 msgid "Where leads come from: Instagram, Telegram, phone calls, walk-ins."
 msgstr ""
@@ -610,6 +772,209 @@ msgstr ""
 
 msgid "Reasons a lead refused, used for the Refused stage."
 msgstr "Lid rad etish sabablari, \"Rad etdi\" bosqichi uchun."
+
+msgid "This phone number already exists. Check before saving."
+msgstr "Bu telefon raqami allaqachon mavjud. Saqlashdan oldin tekshiring."
+
+msgid "The manager must work in the lead's branch."
+msgstr "Menejer lid filialida ishlashi kerak."
+
+msgid "Follow up"
+msgstr "Qayta bog'lanish"
+
+msgid "The lead is already a student; its stage can't change."
+msgstr "Lid allaqachon o'quvchi; bosqichini o'zgartirib bo'lmaydi."
+
+msgid "This stage is not active."
+msgstr "Bu bosqich faol emas."
+
+msgid "Use 'Convert to student' to enroll a lead."
+msgstr ""
+"Lidni o'qishga yozish uchun \"O'quvchiga aylantirish\" tugmasidan "
+"foydalaning."
+
+msgid "Choose a refusal reason to mark the lead as refused."
+msgstr "Lidni \"Rad etdi\" deb belgilash uchun sababini tanlang."
+
+msgid "Choose a refusal reason."
+msgstr "Rad etish sababini tanlang."
+
+msgid "Only a refused lead can be reopened."
+msgstr "Faqat rad etgan lidni qayta ochish mumkin."
+
+msgid "Unknown entry type."
+msgstr "Noma'lum yozuv turi."
+
+msgid "Write the text."
+msgstr "Matnni yozing."
+
+msgid "Reopen the lead before booking a trial lesson."
+msgstr "Sinov darsiga yozishdan oldin lidni qayta oching."
+
+msgid "Unknown status."
+msgstr "Noma'lum holat."
+
+msgid "This lead is already a student."
+msgstr "Bu lid allaqachon o'quvchi bo'lgan."
+
+msgid "This phone number already exists:"
+msgstr "Bu telefon raqami allaqachon mavjud:"
+
+msgid "lead"
+msgstr "lid"
+
+msgid "student"
+msgstr "o'quvchi"
+
+#, python-format
+msgid "This number exists in another branch: %(name)s"
+msgstr "Bu raqam boshqa filialda mavjud: %(name)s"
+
+msgid "My tasks"
+msgstr "Mening vazifalarim"
+
+msgid "Overdue"
+msgstr "Muddati o'tgan"
+
+msgid "Today"
+msgstr "Bugun"
+
+msgid "Upcoming"
+msgstr "Keyingi"
+
+msgid "Done"
+msgstr "Bajarildi"
+
+msgid "Came"
+msgstr "Keldi"
+
+msgid "Cancel"
+msgstr "Bekor qilish"
+
+msgid "Search"
+msgstr "Qidirish"
+
+msgid "Name or phone"
+msgstr "Ism yoki telefon"
+
+msgid "Filters"
+msgstr "Saralash"
+
+msgid "New lead"
+msgstr "Yangi lid"
+
+msgid "All sources"
+msgstr "Barcha manbalar"
+
+msgid "All managers"
+msgstr "Barcha menejerlar"
+
+msgid "Apply"
+msgstr "Qo'llash"
+
+msgid "Board"
+msgstr "Doska"
+
+msgid "No leads in this stage."
+msgstr "Bu bosqichda lid yo'q."
+
+msgid "Show all"
+msgstr "Hammasini ko'rsatish"
+
+msgid "Convert to student"
+msgstr "O'quvchiga aylantirish"
+
+#, python-format
+msgid ""
+"The student is created in %(b)s. The lead and its history are kept. The "
+"branch administrator then enrolls the student into a group."
+msgstr ""
+"O'quvchi %(b)s da yaratiladi. Lid va uning tarixi saqlanadi. Keyin filial "
+"administratori o'quvchini guruhga qo'shadi."
+
+msgid "Create student"
+msgstr "O'quvchi yaratish"
+
+#, python-format
+msgid "Converted to student %(name)s on %(d)s."
+msgstr "%(d)s da %(name)s o'quvchiga aylantirildi."
+
+msgid "Move"
+msgstr "O'tkazish"
+
+msgid "Edit"
+msgstr "Tahrirlash"
+
+msgid "Reopen"
+msgstr "Qayta ochish"
+
+msgid "Add"
+msgstr "Qo'shish"
+
+msgid "Save"
+msgstr "Saqlash"
+
+msgid "No open tasks."
+msgstr "Ochiq vazifa yo'q."
+
+msgid "Book"
+msgstr "Yozish"
+
+msgid "No trial lessons yet."
+msgstr "Hali sinov darsi yo'q."
+
+msgid "Add to history"
+msgstr "Tarixga qo'shish"
+
+msgid "Edit lead"
+msgstr "Lidni tahrirlash"
+
+msgid "Mark as refused"
+msgstr "\"Rad etdi\" deb belgilash"
+
+msgid "Open tasks of this lead will be closed."
+msgstr "Bu lidning ochiq vazifalari yopiladi."
+
+msgid "Mine"
+msgstr "Meniki"
+
+msgid "Everyone's"
+msgstr "Barchaniki"
+
+msgid "Result not marked"
+msgstr "Natija belgilanmagan"
+
+msgid "No upcoming trial lessons."
+msgstr "Yaqin kunlarda sinov darsi yo'q."
+
+msgid "Recent results"
+msgstr "So'nggi natijalar"
+
+msgid "Leads by stage"
+msgstr "Lidlar bosqichlar bo'yicha"
+
+msgid "Lead created."
+msgstr "Lid yaratildi."
+
+msgid "Saved."
+msgstr "Saqlandi."
+
+msgid "The lead is marked as refused."
+msgstr "Lid \"Rad etdi\" deb belgilandi."
+
+msgid "The lead is reopened."
+msgstr "Lid qayta ochildi."
+
+msgid "Task added."
+msgstr "Vazifa qo'shildi."
+
+msgid "Booked for a trial lesson."
+msgstr "Sinov darsiga yozildi."
+
+msgid ""
+"The student was created. Enrollment into a group is done by the branch "
+"administrator."
+msgstr "O'quvchi yaratildi. Guruhga qo'shishni filial administratori bajaradi."
 
 msgid "Leave empty to use the center's details."
 msgstr "Markaz ma'lumotlari ishlatilishi uchun bo'sh qoldiring."
@@ -731,9 +1096,6 @@ msgstr "Parolni tiklash"
 msgid "Staff accounts, roles and branches."
 msgstr "Xodimlar hisoblari, rollari va filiallari."
 
-msgid "Saved."
-msgstr "Saqlandi."
-
 msgid "Receipt details"
 msgstr "Chek ma'lumotlari"
 
@@ -758,6 +1120,12 @@ msgstr "O'z rolingizni o'zgartira olmaysiz."
 msgid "You can't deactivate yourself."
 msgstr "O'zingizni faolsizlantira olmaysiz."
 
+msgid "Students"
+msgstr "O'quvchilar"
+
+msgid "Create students"
+msgstr "O'quvchi yaratish"
+
 msgid "Uzbek"
 msgstr "O'zbekcha"
 
@@ -775,9 +1143,6 @@ msgstr "Parolni o'zgartirish"
 
 msgid "Set your own password before you continue."
 msgstr "Davom etishdan oldin o'z parolingizni o'rnating."
-
-msgid "Save"
-msgstr "Saqlash"
 
 msgid "Profile"
 msgstr "Profil"
@@ -856,9 +1221,6 @@ msgstr "Shakl muddati tugadi"
 msgid "Reload the page and try again."
 msgstr "Sahifani yangilang va qayta urinib ko'ring."
 
-msgid "Edit"
-msgstr "Tahrirlash"
-
 msgid "Deactivate this item?"
 msgstr "Ushbu yozuv faolsizlantirilsinmi?"
 
@@ -881,17 +1243,8 @@ msgstr "Alohida ma'lumotlar"
 msgid "Nothing here yet."
 msgstr "Hozircha bo'sh."
 
-msgid "Cancel"
-msgstr "Bekor qilish"
-
 msgid "All"
 msgstr "Hammasi"
-
-msgid "Add"
-msgstr "Qo'shish"
-
-msgid "Status"
-msgstr "Holat"
 
 msgid "Actions"
 msgstr "Amallar"

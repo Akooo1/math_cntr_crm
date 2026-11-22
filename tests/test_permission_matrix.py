@@ -6,12 +6,14 @@ use it.
 """
 
 import pytest
+from django.utils import timezone
 
 from apps.billing.models import DiscountType, InstallmentTemplate, PaymentMethod
+from apps.core.dates import today
 from apps.core.roles import Role
 from apps.core.settings_panel import sections
 from apps.crm.models import LeadSource, LeadStage, RefusalReason
-from tests.factories import CourseFactory, RoomFactory
+from tests.factories import CourseFactory, RoomFactory, make_lead
 from tests.urls_inventory import Case, all_url_names
 
 D, A, M, T = Role.DIRECTOR, Role.BRANCH_ADMIN, Role.SALES_MANAGER, Role.TEACHER
@@ -24,11 +26,58 @@ def only(role_status: dict, default: int) -> dict:
 
 DIRECTOR_ONLY = only({D: 200}, 403)
 EVERYONE = only({}, 200)
+CRM = {**only({D: 200, A: 200, M: 200}, 403), "anon": 302}
+CRM_POST = {**only({D: 302, A: 302, M: 302}, 403), "anon": 302}
+# Object in another branch: the director still reaches it; branch staff get 404.
+CRM_OTHER = {**only({D: 200, A: 404, M: 404}, 403), "anon": 302}
+CRM_OTHER_POST = {**only({D: 302, A: 404, M: 404}, 403), "anon": 302}
+
+
+def crm_cases(o) -> dict[str, list[Case]]:
+    def pair(name, url_fmt, method="get", data=None, key="lead"):
+        same = CRM if method == "get" else CRM_POST
+        other = CRM_OTHER if method == "get" else CRM_OTHER_POST
+        return name, [
+            Case(url_fmt.format(o[f"{key}_a"].pk), method, same, data or {}),
+            Case(url_fmt.format(o[f"{key}_b"].pk), method, other, data or {}),
+        ]
+
+    stage = {"stage": o["stage"].pk}
+    return dict(
+        [
+            ("crm:board", [Case("/lidlar/", expect=CRM), Case("/lidlar/?bosqich=1", expect=CRM)]),
+            ("crm:lead_create", [Case("/lidlar/yangi/", expect=CRM)]),
+            ("crm:duplicate_check", [Case("/lidlar/dublikat/?phone=901234567", expect=CRM)]),
+            (
+                "crm:tasks",
+                [Case("/vazifalar/", expect=CRM), Case("/vazifalar/?hammasi=1", expect=CRM)],
+            ),
+            ("crm:trials", [Case("/sinov-darslari/", expect=CRM)]),
+            pair("crm:lead", "/lidlar/{}/"),
+            pair("crm:lead_edit", "/lidlar/{}/tahrirlash/"),
+            pair("crm:refuse", "/lidlar/{}/rad-etish/"),
+            pair("crm:convert", "/lidlar/{}/oquvchi/"),
+            pair("crm:move", "/lidlar/{}/bosqich/", "post", stage),
+            pair("crm:add_activity", "/lidlar/{}/izoh/", "post", {"kind": "note", "text": "x"}),
+            pair("crm:reopen", "/lidlar/{}/qayta-ochish/", "post"),
+            pair("crm:task_create", "/lidlar/{}/vazifa/", "post", {"title": "x"}),
+            pair("crm:trial_book", "/lidlar/{}/sinov-darsi/", "post"),
+            pair("crm:task_done", "/vazifalar/{}/bajarildi/", "post", key="task"),
+            pair(
+                "crm:trial_status",
+                "/sinov-darslari/{}/holat/",
+                "post",
+                {"status": "no_show"},
+                key="trial",
+            ),
+        ]
+    )
 
 
 @pytest.fixture
-def objects(director, branch_a, admin_a):
+def objects(director, branch_a, branch_b, admin_a):
     from apps.billing import services
+    from apps.crm import services as crm
 
     course = CourseFactory()
     room = RoomFactory(branch=branch_a)
@@ -37,7 +86,17 @@ def objects(director, branch_a, admin_a):
     )
     template = InstallmentTemplate.objects.create(name="T", parts_count=2)
     discount = DiscountType.objects.create(name="D", kind="percent", value=1000)
+    leads = {}
+    for key, branch in (("a", branch_a), ("b", branch_b)):
+        lead = make_lead(director, branch)
+        leads[f"lead_{key}"] = lead
+        leads[f"task_{key}"] = crm.create_task(
+            actor=director, lead=lead, assigned_to=director, due_at=timezone.now(), title="t"
+        )
+        leads[f"trial_{key}"] = crm.book_trial(actor=director, lead=lead, scheduled_date=today())
     return {
+        **leads,
+        "stage": LeadStage.objects.get(kind="contacted"),
         "foydalanuvchilar": admin_a,
         "filiallar": branch_a,
         "xonalar": room,
@@ -75,6 +134,7 @@ def cases(objects) -> dict[str, list[Case]]:
         "settings:section_toggle": [],
         "settings:section_action": [],
     }
+    c.update(crm_cases(objects))
     for s in sections():
         base = f"/sozlamalar/{s.slug}/"
         obj = objects[s.slug]

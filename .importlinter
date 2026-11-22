@@ -5,13 +5,14 @@ include_external_packages = True
 
 # Module dependency direction (docs/SPEC.md 4.2). Higher layers may import lower ones,
 # never the reverse. Modules separated by "|" sit on the same layer and must not import
-# each other. Phase 3 inserts apps.students between crm/billing and settings.
+# each other.
 [importlinter:contract:layers]
 name = Module layers
 type = layers
 layers =
     apps.demo
     apps.billing | apps.crm
+    apps.students
     apps.settings
     apps.accounts
     apps.core

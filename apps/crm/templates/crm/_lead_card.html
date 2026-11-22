@@ -1,0 +1,12 @@
+<a href="{% url 'crm:lead' lead.pk %}" class="block rounded-lg border border-slate-200 bg-white p-3 shadow-sm hover:border-sky-300" data-lead="{{ lead.pk }}">
+  <p class="font-medium leading-snug">{{ lead.full_name }}</p>
+  <p class="mt-0.5 text-sm text-slate-600">{{ lead.phone|telefon }}</p>
+  <div class="mt-2 flex flex-wrap items-center gap-1.5 text-xs">
+    <span class="badge bg-slate-100 text-slate-700">{{ lead.source.name }}</span>
+    {% if lead.course %}<span class="badge bg-sky-50 text-sky-800">{{ lead.course.name }}</span>{% endif %}
+    {% if lead.next_follow_up_at %}
+      <span class="badge {% if lead.next_follow_up_at < now %}bg-rose-100 text-rose-800{% else %}bg-amber-50 text-amber-800{% endif %}">{% icon "clock" "w-3.5 h-3.5 mr-1" %}{{ lead.next_follow_up_at|sana }}</span>
+    {% endif %}
+  </div>
+  <p class="mt-2 text-xs text-slate-500">{% if lead.manager %}{{ lead.manager.full_name }}{% endif %}{% if user.is_director and not request.branch_filter %}{% if lead.manager %} · {% endif %}{{ lead.branch.name }}{% endif %}</p>
+</a>

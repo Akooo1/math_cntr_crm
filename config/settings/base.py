@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.accounts",
     "apps.settings",
+    "apps.students",
     "apps.crm",
     "apps.billing",
     "apps.demo",

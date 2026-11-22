@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{% translate "Trial lessons" %}{% endblock %}
+{% block heading %}{% translate "Trial lessons" %}{% endblock %}
+{% block content %}
+  {% include "crm/_tabs.html" with tab="trials" %}
+  {% if past_open %}
+    <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-rose-700">{% translate "Result not marked" %}</h2>
+    <ul class="mb-5 space-y-2">{% for tr in past_open %}{% include "crm/_trial_row.html" %}{% endfor %}</ul>
+  {% endif %}
+  <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">{% translate "Upcoming" %}</h2>
+  <ul class="mb-5 space-y-2">
+    {% for tr in upcoming %}{% include "crm/_trial_row.html" %}{% empty %}<li class="card p-6 text-center text-sm text-slate-500">{% translate "No upcoming trial lessons." %}</li>{% endfor %}
+  </ul>
+  {% if recent %}
+    <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">{% translate "Recent results" %}</h2>
+    <ul class="space-y-2">{% for tr in recent %}{% include "crm/_trial_row.html" %}{% endfor %}</ul>
+  {% endif %}
+{% endblock %}

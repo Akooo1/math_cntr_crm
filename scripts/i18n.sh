@@ -18,4 +18,7 @@ if [[ "${1:-}" == "--check" ]]; then
   exit 0
 fi
 python manage.py makemessages -l uz --no-obsolete --no-location "${IGNORES[@]}"
+# msgmerge "fuzzy"-guesses new strings from similar old ones, often wrongly. Blank them so
+# every new msgid is translated by a person.
+msgattrib --clear-fuzzy --empty -o "$PO" "$PO"
 python manage.py compilemessages -l uz --ignore=.venv --ignore=node_modules

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ lead.full_name }}{% endblock %}
+{% block heading %}{% translate "Leads" %}{% endblock %}
+{% block content %}
+  <div class="mb-4"><a href="{% url 'crm:lead' lead.pk %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{{ lead.full_name }}</a></div>
+  <div class="mx-auto max-w-xl">
+    <h2 class="text-xl font-semibold">{% translate "Convert to student" %}</h2>
+    <p class="mb-4 mt-1 text-sm text-slate-500">{% blocktranslate with b=lead.branch.name %}The student is created in {{ b }}. The lead and its history are kept. The branch administrator then enrolls the student into a group.{% endblocktranslate %}</p>
+    <form method="post" class="card space-y-4 p-5" novalidate>{% csrf_token %}
+      {% include "components/form_errors.html" %}
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% field form.last_name %}
+        {% field form.first_name %}
+        {% field form.middle_name %}
+        {% field form.birth_date %}
+        {% field form.phone %}
+        {% field form.parent_name %}
+        <div class="sm:col-span-2">{% field form.parent_phone %}</div>
+      </div>
+      {% field form.notes %}
+      {% if duplicates %}{% include "crm/_duplicates.html" %}{% field form.confirm_duplicate %}{% endif %}
+      <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <a href="{% url 'crm:lead' lead.pk %}" class="btn-secondary">{% translate "Cancel" %}</a>
+        <button class="btn-primary">{% icon "user-plus" %}{% translate "Create student" %}</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

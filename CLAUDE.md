@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **1 done** (setup, login, roles, branch scoping, Sozlamalar, audit log). Next: phase 2 (CRM). Update this line at the end of each phase.
+- Current phase: **2 done** (CRM). Next: phase 3 (students, groups, attendance, Excel import). Update this line at the end of each phase.
 
 ## Ask the owner before
 
@@ -117,7 +117,11 @@ Inside a module:
 | Lead stages | Yangi, Bog'lanildi, Sinov darsiga yozildi, Sinov darsiga keldi, O'qishga yozildi, Rad etdi |
 | Refusal reason | Rad etish sababi |
 | Source | Manba |
-| Follow-up task | Vazifa (my tasks: Mening vazifalarim) |
+| Follow-up task | Vazifa (my tasks: Mening vazifalarim; overdue: Muddati o'tgan) |
+| Lead (single) / manager / assignee | Lid / Menejer / Mas'ul |
+| Pipeline board | Doska |
+| Convert to student | O'quvchiga aylantirish |
+| Next follow-up | Keyingi bog'lanish |
 | Settings | Sozlamalar |
 | Reports / dashboard | Hisobotlar / Bosh sahifa |
 | Audit log | Harakatlar jurnali |

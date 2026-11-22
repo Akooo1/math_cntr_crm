@@ -119,7 +119,9 @@ class StyledFormMixin:
             else:
                 w.attrs.setdefault("class", INPUT_CSS)
             if isinstance(w, forms.Textarea):
-                w.attrs.setdefault("rows", 3)
+                w.attrs["rows"] = 3
+            if isinstance(f, forms.ModelChoiceField) and f.empty_label == "---------":
+                f.empty_label = _("Choose")
 
 
 class StyledForm(StyledFormMixin, forms.Form):

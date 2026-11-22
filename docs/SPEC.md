@@ -644,3 +644,18 @@ in section 5.
 - Module boundaries are checked twice: `lint-imports` (layer direction, pure `billing/domain`)
   and `tests/test_module_boundaries.py` (other modules only through
   services/selectors/events/models/policies).
+
+### Phase 2 (CRM)
+
+- `students_student` was created in phase 2 (not phase 3) because lead conversion creates a
+  student. Its columns match section 5.5 except `import_batch_id`, which arrives with the
+  import tables in phase 3. Student screens are phase 3.
+- `crm_trial_lesson` has no `group_id` / `lesson_id` yet: groups and lessons don't exist
+  until phase 3. The phase 3 migration adds both, and booking then picks a group lesson.
+- `crm_lead.phone` is E.164; `crm_lead.phone_normalized` holds the digits only, so staff can
+  search by any part of the number.
+- `crm_lead_activity.kind` has one extra value, `created`. It records lead creation in the
+  history.
+- `scripts/i18n.sh` blanks gettext's "fuzzy" guesses (msgmerge copies translations from
+  similar strings, often wrongly), so every new string is translated by hand.
+- Module notes: [docs/modules/crm.md](modules/crm.md).

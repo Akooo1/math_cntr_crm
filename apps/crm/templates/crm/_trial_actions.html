@@ -1,0 +1,6 @@
+<form method="post" action="{% url 'crm:trial_status' tr.pk %}" class="flex gap-1">{% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  <button name="status" value="attended" class="btn-secondary px-2.5 py-1 text-emerald-700">{% translate "Came" %}</button>
+  <button name="status" value="no_show" class="btn-secondary px-2.5 py-1">{% translate "Did not come" %}</button>
+  <button name="status" value="cancelled" class="btn-ghost px-2.5 py-1">{% translate "Cancel" %}</button>
+</form>

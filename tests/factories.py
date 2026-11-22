@@ -58,3 +58,20 @@ def page_text(response) -> str:
     import html
 
     return html.unescape(response.content.decode())
+
+
+_lead_seq = iter(range(1, 10_000_000))
+
+
+def make_lead(actor, branch, **data):
+    """Create a lead through the service (so stage, history and checks are real)."""
+    from apps.crm import services
+    from apps.crm.models import LeadSource
+
+    payload = {
+        "full_name": data.pop("full_name", "Karimov Aziz"),
+        "phone": data.pop("phone", f"+99897{next(_lead_seq):07d}"),
+        "source": data.pop("source", None) or LeadSource.objects.first(),
+        **data,
+    }
+    return services.create_lead(actor=actor, branch=branch, data=payload, confirm_duplicate=True)

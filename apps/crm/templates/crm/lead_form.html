@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{% if lead %}{{ lead.full_name }}{% else %}{% translate "New lead" %}{% endif %}{% endblock %}
+{% block heading %}{% translate "Leads" %}{% endblock %}
+{% block content %}
+  <div class="mb-4"><a href="{% if lead %}{% url 'crm:lead' lead.pk %}{% else %}{% url 'crm:board' %}{% endif %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{% if lead %}{{ lead.full_name }}{% else %}{% translate "Leads" %}{% endif %}</a></div>
+  <div class="mx-auto max-w-xl">
+    <h2 class="mb-4 text-xl font-semibold">{% if lead %}{% translate "Edit lead" %}{% else %}{% translate "New lead" %}{% endif %}</h2>
+    <form method="post" class="card space-y-4 p-5" novalidate>{% csrf_token %}
+      {% include "components/form_errors.html" %}
+      {% field form.full_name %}
+      <div>
+        <div hx-get="{% url 'crm:duplicate_check' %}" hx-trigger="change from:#id_phone, change from:#id_extra_phone"
+             hx-include="#id_phone, #id_extra_phone" {% if lead %}hx-vals='{"lead": "{{ lead.pk }}"}'{% endif %} hx-target="#dup-box" class="space-y-4">
+          {% field form.phone %}
+          {% field form.extra_phone %}
+        </div>
+        <div id="dup-box" class="mt-3">{% include "crm/_duplicates.html" %}</div>
+        {% if duplicates %}<div class="mt-3">{% field form.confirm_duplicate %}</div>{% endif %}
+      </div>
+      {% if form.branch %}{% field form.branch %}{% endif %}
+      {% field form.source %}
+      {% field form.course %}
+      {% field form.manager %}
+      {% if form.follow_up_date %}{% field form.follow_up_date %}{% endif %}
+      {% field form.notes %}
+      <div class="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+        <a href="{% if lead %}{% url 'crm:lead' lead.pk %}{% else %}{% url 'crm:board' %}{% endif %}" class="btn-secondary">{% translate "Cancel" %}</a>
+        <button class="btn-primary">{% translate "Save" %}</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

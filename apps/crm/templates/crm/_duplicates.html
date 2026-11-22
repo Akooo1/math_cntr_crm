@@ -1,0 +1,10 @@
+{% if duplicates %}
+  <div class="rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+    <p class="font-semibold">{% translate "This phone number already exists:" %}</p>
+    <ul class="mt-1 list-disc space-y-0.5 pl-5">
+      {% for d in duplicates.leads %}<li><a class="underline" href="{% url 'crm:lead' d.pk %}" target="_blank">{{ d.full_name }}</a> — {% translate "lead" %}, {{ d.stage.name }}</li>{% endfor %}
+      {% for s in duplicates.students %}<li>{{ s.full_name }} — {% translate "student" %}, {{ s.branch.name }}</li>{% endfor %}
+      {% for name in duplicates.other_branches %}<li>{% blocktranslate %}This number exists in another branch: {{ name }}{% endblocktranslate %}</li>{% endfor %}
+    </ul>
+  </div>
+{% endif %}
