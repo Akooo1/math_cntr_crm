@@ -7,6 +7,12 @@ from django.utils.translation import gettext_lazy as _
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
+# Local runs: values Compose couldn't pass are read from the project's .env (config/dotenv.py).
+if not os.environ.get("MM_IGNORE_DOTENV"):
+    from config import dotenv
+
+    dotenv.load(BASE_DIR / ".env")
+
 
 def env(name: str, default: str | None = None) -> str:
     value = os.environ.get(name, default)

@@ -262,3 +262,14 @@ class TestDiagnostics:
         call_command("telegram_check")
         out = capsys.readouterr().out
         assert "@markaz_bot" in out and "FAIL" not in out
+
+
+def test_check_explains_misnamed_env_file(settings, tmp_path, capsys):
+    settings.TELEGRAM_BOT_TOKEN = ""
+    settings.BASE_DIR = tmp_path
+    tg.set_client(None)
+    (tmp_path / ".env.txt").write_text("TELEGRAM_BOT_TOKEN=123:ABC\n", encoding="utf-8")
+    call_command("telegram_check")
+    out = capsys.readouterr().out
+    assert ".env.txt: has the token" in out and "named exactly .env" in out
+    assert "123:ABC" not in out
