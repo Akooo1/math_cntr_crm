@@ -230,3 +230,24 @@ def test_excel_templates_have_no_english():
         ws = load_workbook(io.BytesIO(importing.template_workbook(kind))).active
         headers = " ".join(str(c.value) for c in ws[1])
         assert not english_words(headers), f"{kind.key}: {headers}"
+
+
+def test_every_audited_field_has_an_uzbek_label():
+    """The audit viewer must never show a raw English field name."""
+    from django.apps import apps
+
+    from apps.core import audit_display
+
+    missing = []
+    for app in ("billing", "students", "crm", "center_settings", "accounts"):
+        for model in apps.get_app_config(app).get_models():
+            if not model._meta.managed:
+                continue
+            for field in model._meta.concrete_fields:
+                if field.primary_key or field.name in {"password", "last_login"}:
+                    continue
+                if field.name in audit_display.HIDDEN:
+                    continue
+                if audit_display.label_for(model, field.name) is None:
+                    missing.append(f"{model._meta.label}.{field.name}")
+    assert not missing, f"Add a verbose_name or an audit label: {missing}"

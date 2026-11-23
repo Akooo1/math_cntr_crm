@@ -1,0 +1,6 @@
+<a href="{% url 'billing:debtors' %}" class="card block p-5 hover:border-sky-300">
+  <p class="text-sm font-medium text-slate-500">{% translate "Overdue debt" %}</p>
+  <p class="mt-2 text-3xl font-semibold {% if ctx.total %}text-rose-700{% endif %}">{{ ctx.total|som }}</p>
+  <p class="text-sm text-slate-500">{% blocktranslate count n=ctx.count %}{{ n }} debtor{% plural %}{{ n }} debtors{% endblocktranslate %}</p>
+  <ul class="mt-2 space-y-1 text-sm">{% for r in ctx.top %}<li class="flex justify-between gap-2"><span class="truncate">{{ r.student.full_name }}</span><span class="text-rose-700">{{ r.overdue|som }}</span></li>{% endfor %}</ul>
+</a>

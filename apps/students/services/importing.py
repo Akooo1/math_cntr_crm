@@ -5,7 +5,9 @@ in ONE transaction, or nothing. Each kind (groups, students; billing adds openin
 is registered here and owns its columns, row parser and writer.
 """
 
+import datetime as dt
 import io
+import re
 from collections.abc import Callable
 from dataclasses import dataclass, field
 
@@ -15,11 +17,71 @@ from django.utils.translation import gettext as _
 from openpyxl import Workbook, load_workbook
 
 from apps.core import audit
+from apps.core import phone as phones
+from apps.core.dates import parse_date
 from apps.core.permissions import ensure_branch_access, require_perm
+from apps.core.text import search_key
 
 from ..models import ImportBatch
 
 MAX_ROWS = 5000
+WEEKDAYS = {"du": 1, "se": 2, "cho": 3, "pa": 4, "ju": 5, "sh": 6, "ya": 7}
+
+
+# --- cell parsing (shared with other modules' import kinds) ----------------------------
+
+
+def text(value) -> str:
+    if value is None:
+        return ""
+    if isinstance(value, float) and value.is_integer():
+        value = int(value)
+    return " ".join(str(value).split())
+
+
+def as_date(value):
+    if value in (None, ""):
+        return None
+    if isinstance(value, dt.datetime):
+        return value.date()
+    if isinstance(value, dt.date):
+        return value
+    return parse_date(text(value))  # raises ValueError
+
+
+def as_time(value):
+    if isinstance(value, dt.datetime):
+        return value.time().replace(second=0, microsecond=0)
+    if isinstance(value, dt.time):
+        return value.replace(second=0, microsecond=0)
+    match = re.fullmatch(r"(\d{1,2})[:.](\d{2})", text(value))
+    if not match:
+        raise ValueError(value)
+    return dt.time(int(match[1]), int(match[2]))
+
+
+def as_weekdays(value) -> list[int]:
+    out = []
+    for token in re.split(r"[,\s;/]+", search_key(text(value))):
+        if not token:
+            continue
+        if token.isdigit() and 1 <= int(token) <= 7:
+            out.append(int(token))
+            continue
+        for prefix, day in WEEKDAYS.items():
+            if token.startswith(prefix):
+                out.append(day)
+                break
+        else:
+            raise ValueError(token)
+    if not out:
+        raise ValueError(value)
+    return sorted(set(out))
+
+
+def as_phone(value) -> str:
+    raw = text(value)
+    return phones.normalize(raw) if raw else ""
 
 
 @dataclass

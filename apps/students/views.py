@@ -173,7 +173,7 @@ def _action_view(request, *, student, form, title, build_action, execute, back):
     confirm = None
     if request.method == "POST" and form.is_valid():
         action = build_action(form.cleaned_data)
-        pending = extensions.previews(action)
+        pending = extensions.previews(action, request.POST)
         if pending and not request.POST.get("tasdiq"):
             confirm = pending
         else:
@@ -186,7 +186,12 @@ def _action_view(request, *, student, form, title, build_action, execute, back):
             else:
                 messages.success(request, _("Saved."))
                 return redirect(back)
-    hidden = [(k, v) for k, v in request.POST.items() if k not in ("csrfmiddlewaretoken", "tasdiq")]
+    hidden = [
+        (k, v)
+        for k, v in request.POST.items()
+        if k not in ("csrfmiddlewaretoken", "tasdiq", "qayta")
+        and not k.startswith(extensions.FIELD_PREFIX)
+    ]
     return render(
         request,
         "students/enrollment_action.html",

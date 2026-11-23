@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{% translate "Payments" %}{% endblock %}
+{% block heading %}{% translate "Payments" %}{% endblock %}
+{% block content %}
+  <div class="mb-4 flex flex-wrap items-end justify-between gap-2">
+    <form method="get" class="flex flex-wrap items-end gap-2">
+      <div><label class="label" for="dan">{% translate "From" %}</label><input id="dan" name="dan" value="{{ start|sana }}" data-mask="date" inputmode="numeric" class="w-32 rounded-lg border border-slate-300 bg-white px-3 py-2 text-base"></div>
+      <div><label class="label" for="gacha">{% translate "To" %}</label><input id="gacha" name="gacha" value="{{ end|sana }}" data-mask="date" inputmode="numeric" class="w-32 rounded-lg border border-slate-300 bg-white px-3 py-2 text-base"></div>
+      <div><label class="label" for="usul">{% translate "Payment method" %}</label><select id="usul" name="usul" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-base"><option value="">{% translate "All" %}</option>{% for m in methods %}<option value="{{ m.pk }}" {% if request.GET.usul == m.pk|stringformat:"s" %}selected{% endif %}>{{ m.name }}</option>{% endfor %}</select></div>
+      <button class="btn-secondary">{% translate "Filter" %}</button>
+    </form>
+    {% if user|can:"billing.payment.create" %}<a href="{% url 'billing:payment_create' %}" class="btn-primary">{% icon "plus" %}{% translate "Take payment" %}</a>{% endif %}
+  </div>
+  <ul class="space-y-2">
+    {% for p in page %}
+      <li><a href="{% url 'billing:payment' p.pk %}" class="card flex items-center justify-between gap-3 p-3 hover:border-sky-300">
+        <div class="min-w-0"><p class="font-medium">{{ p.student.full_name }}</p><p class="text-sm text-slate-500">{{ p.receipt_number }} · {{ p.paid_on|sana }} · {{ p.method.name }}{% if p.kind != 'payment' %} · {{ p.get_kind_display }}{% endif %}</p></div>
+        <span class="font-semibold {% if p.kind != 'payment' %}text-rose-700{% endif %}">{% if p.kind != 'payment' %}−{% endif %}{{ p.amount|som }}</span>
+      </a></li>
+    {% empty %}<li class="card p-6 text-center text-sm text-slate-500">{% translate "Nothing found." %}</li>{% endfor %}
+  </ul>
+  {% include "components/pagination.html" %}
+{% endblock %}

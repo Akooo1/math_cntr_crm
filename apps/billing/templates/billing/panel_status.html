@@ -1,0 +1,6 @@
+{% if not user|can:"billing.view" %}
+<section class="card flex items-center justify-between gap-3 p-5">
+  <p class="font-semibold">{% translate "Payment" %}</p>
+  {% if ctx.status == "paid" %}<span class="badge bg-emerald-100 text-emerald-800">{% translate "Paid" %}</span>{% elif ctx.status == "debt" %}<span class="badge bg-rose-100 text-rose-800">{% translate "Owes" %}</span>{% elif ctx.status == "waiting" %}<span class="badge bg-amber-100 text-amber-900">{% translate "Payment expected" %}</span>{% else %}<span class="badge bg-slate-100 text-slate-600">{% translate "No charges yet" %}</span>{% endif %}
+</section>
+{% endif %}

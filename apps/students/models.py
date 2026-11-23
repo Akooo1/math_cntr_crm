@@ -17,6 +17,7 @@ class ImportBatch(models.Model):
         GROUPS = "groups", _("Groups")
         STUDENTS = "students", _("Students")
         OPENING_BALANCES = "opening_balances", _("Opening balances")
+        DISCOUNTS = "discounts", _("Discounts")
 
     class Status(models.TextChoices):
         VALIDATED = "validated", _("Checked, ready to import")

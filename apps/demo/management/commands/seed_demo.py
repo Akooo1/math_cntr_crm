@@ -11,15 +11,25 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from apps.billing.models import DiscountType, InstallmentTemplate, InstallmentTemplatePart, Price
+from apps.billing import services as billing
+from apps.billing.models import (
+    ChargeNet,
+    DiscountType,
+    InstallmentTemplate,
+    InstallmentTemplatePart,
+    Payment,
+    PaymentMethod,
+    Price,
+)
 from apps.core import dates
 from apps.core.roles import Role
+from apps.core.system_settings import get_setting, set_settings
 from apps.crm import services as crm_services
 from apps.crm.models import Lead, LeadSource, LeadStage, RefusalReason, TrialLesson
 from apps.settings.models import Branch, Course, Room, UserBranch
 from apps.students import selectors as student_selectors
 from apps.students import services as student_services
-from apps.students.models import Attendance, Enrollment, Group, Lesson
+from apps.students.models import Attendance, Enrollment, Group, Lesson, Student
 
 DEMO_PASSWORD = "demo12345"
 
@@ -121,6 +131,10 @@ class Command(BaseCommand):
         if not Lead.objects.exists():
             with transaction.atomic():
                 self._seed_crm(User)
+            created = True
+        if not Payment.objects.exists():
+            with transaction.atomic():
+                self._seed_money(User)
             created = True
         if not created:
             self.stdout.write("Demo data already present.")
@@ -237,6 +251,111 @@ class Command(BaseCommand):
                         start_date=max(today, group.start_date),
                         capacity_override=True,
                     )
+
+    def _seed_money(self, User):
+        """Payments for the charges the enrollments created: most families pay on time, some
+        owe, a few overpaid; one reversal and one refund per branch; past days closed except
+        the last two (so the cash report shows an open day and the dashboard a reminder)."""
+        rnd = random.Random(11)
+        today = dates.today()
+        director = User.objects.get(phone=USERS[0][0])
+        methods = list(PaymentMethod.objects.filter(provider_code="manual", is_active=True))
+        old_window = get_setting("billing.backdate_days")
+        set_settings({"billing.backdate_days": 31}, actor=director)  # demo history only
+        # Discounts: a few siblings get 10% from next month on.
+        sibling = DiscountType.objects.get(name="Aka-uka / opa-singil")
+        for e in Enrollment.objects.filter(status="active", group__course__pricing_model="monthly")[
+            :4
+        ]:
+            billing.discounts.assign(
+                actor=director,
+                enrollment=e,
+                discount_type=sibling,
+                valid_from=dates.add_months(today.replace(day=1), 1),
+                reason="Ikkinchi farzand",
+            )
+        payments = []  # (date, student, amount)
+        for student in Student.objects.all():
+            charges = list(
+                ChargeNet.objects.filter(student=student, due_date__lte=today, net__gt=0).order_by(
+                    "due_date"
+                )
+            )
+            if not charges:
+                continue
+            habit = rnd.random()
+            if habit < 0.12:
+                charges = charges[:-2]  # two months behind
+            elif habit < 0.30:
+                charges = charges[:-1]  # behind on the latest charge
+            for c in charges:
+                day = min(today, c.due_date + dt.timedelta(days=rnd.randint(0, 6)))
+                if (today - day).days > 30:
+                    day = today - dt.timedelta(days=rnd.randint(20, 30))
+                payments.append((day, student, c.net))
+            if habit > 0.95:
+                payments.append((today, student, 100_000))  # overpaid: credit
+        payments.sort(key=lambda p: p[0])
+        admins = {
+            b.pk: User.objects.get(phone=USERS[1 + i * 4][0])
+            for i, b in enumerate(Branch.objects.order_by("id"))
+        }
+        recorded = []
+        for day, student, amount in payments:
+            if (today - day).days > 31:
+                continue
+            recorded.append(
+                billing.payments.record_payment(
+                    actor=admins[student.branch_id],
+                    student=student,
+                    amount=amount,
+                    method=rnd.choice(methods),
+                    paid_on=day,
+                    comment="",
+                )
+            )
+        set_settings({"billing.backdate_days": old_window}, actor=director)
+        # One wrong payment reversed and re-entered today, one refund of a credit, per branch.
+        for branch_id, admin in admins.items():
+            student = Student.objects.filter(branch_id=branch_id).first()
+            wrong = billing.payments.record_payment(
+                actor=admin, student=student, amount=1_500_000, method=methods[0], paid_on=today
+            )
+            billing.payments.reverse_payment(
+                actor=director,
+                payment=wrong,
+                reason="Summa xato kiritildi: 150 000 o'rniga 1 500 000",
+            )
+            billing.payments.record_payment(
+                actor=admin, student=student, amount=150_000, method=methods[0], paid_on=today
+            )
+            credit = next(
+                (
+                    p.student
+                    for p in recorded
+                    if p.branch_id == branch_id and billing.payments.credit_of(p.student_id) > 0
+                ),
+                None,
+            )
+            if credit is not None:
+                billing.payments.refund(
+                    actor=director,
+                    student=credit,
+                    amount=50_000,
+                    method=methods[0],
+                    reason="Ota-onasi so'radi",
+                )
+        # Close every past day with payments except the last two.
+        days = sorted(
+            {
+                (p.branch_id, p.paid_on)
+                for p in Payment.objects.filter(paid_on__lt=today - dt.timedelta(days=2))
+            }
+        )
+        for branch_id, day in days:
+            billing.cash.close_day(
+                actor=admins[branch_id], branch=Branch.objects.get(pk=branch_id), day=day
+            )
 
     def _seed_groups(self, User):
         """9 groups with schedules and lessons, ~52 students, attendance, lifecycle examples."""

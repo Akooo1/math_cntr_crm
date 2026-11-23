@@ -700,3 +700,41 @@ in section 5.
 - **A frozen student keeps their seat.** Frozen enrollments count toward group capacity.
 - **Discounts and opening balances in the import arrive in phase 4.** The student import gets
   a discount column, and opening balances become a third import type.
+
+### Phase 4 (billing)
+
+**Small data model additions** (columns only, no semantic change):
+- `billing_payment.import_batch_id`: an opening credit points back to its Excel import, like
+  every other imported row.
+- `billing_charge.created_by` is nullable: NULL means the monthly job created it.
+- `billing_charge_adjustment.kind` has two more values: `proration_join` (back from a freeze)
+  and `move`.
+- The `billing_charge_net` view also exposes branch, group, course, enrollment, kind, due date
+  and month, so debtors and reports can filter without joins.
+
+**How the rules were implemented** (all follow section 6 and 9):
+- **One proration engine** (`billing.services.monthly`). For any enrollment and month:
+  `total` = lessons the schedule has that month minus cancelled lessons; `billable` = those
+  inside the enrollment window and outside freezes; `base` = price × billable / total, rounded
+  to the setting's step; then discounts. Join, leave, freeze, unfreeze, move and the monthly
+  job all use it, so they can't disagree.
+- **Backdated enrollment** charges every month from the start month up to the current one, so
+  a late entry doesn't lose months.
+- **Leave, freeze and move adjust existing charges**, including months the job already
+  generated, by adding an adjustment row. The target is computed from the charge's list price.
+- **The group's end date is its last day** (inclusive). The month the group ends is prorated
+  automatically (Q-11).
+- **Enrollment is refused when the course has no price** (or, for installment courses, no
+  template). Billing can't silently skip a student.
+- **A discount can be chosen on the enroll step**, so the first charge already has it.
+  "Qayta hisoblash" (Recalculate) shows the new amounts before confirming.
+- **Refunds take money from the newest payments**, so a refund never un-pays a charge.
+- **Discounts import** is its own Excel template (phone, group, discount type, start date)
+  rather than a column in the student import, so billing doesn't change the students module.
+- **Daily jobs:** `generate_monthly_charges` and `generate_lessons`. Both are idempotent;
+  phase 5's cron runs them.
+
+**Decision taken without the owner (please confirm):**
+- **Freezing an installment course doesn't change its plan.** The price is for the course,
+  not the month. To shift due dates, an admin edits the plan with a reason.
+- Module notes: [docs/modules/billing.md](modules/billing.md).

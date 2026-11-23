@@ -97,7 +97,17 @@ def make_group(
     from apps.students.models import Group
 
     teacher = teacher or UserFactory(role=Role.TEACHER, branches=[branch])
-    course = course or CourseFactory()
+    if course is None:  # a priced monthly course, so enrolling works with billing active
+        from apps.billing.models import Price
+
+        course = CourseFactory()
+        Price.objects.create(
+            course=course,
+            kind=Price.Kind.MONTHLY,
+            amount=300_000,
+            effective_from=dt.date(2000, 1, 1),
+            created_by=actor,
+        )
     group = Group(
         branch=branch,
         course=course,

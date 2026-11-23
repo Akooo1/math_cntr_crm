@@ -149,3 +149,101 @@ class InstallmentTemplateForm(StyledModelForm):
             else:
                 self.shares_bp = shares
         return data
+
+
+# =========================================================================================
+# Ledger forms
+# =========================================================================================
+
+_UzDate = UzDateField
+
+
+class PaymentForm(StyledForm):
+    amount = MoneyField(label=_("Amount"), min_value=1)
+    method = forms.ModelChoiceField(
+        label=_("Payment method"), queryset=PaymentMethod.objects.none(), empty_label=None
+    )
+    paid_on = _UzDate(label=_("Date"))
+    comment = forms.CharField(label=_("Comment"), max_length=255, required=False)
+    branch = forms.ModelChoiceField(
+        label=_("Branch"), queryset=Branch.objects.none(), required=False
+    )
+
+    def __init__(self, *args, methods, branches=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["method"].queryset = methods
+        if branches is not None and branches.count() > 1:
+            self.fields["branch"].queryset = branches
+            self.fields["branch"].empty_label = _("Student's branch")
+        else:
+            del self.fields["branch"]
+
+
+class ReasonForm(StyledForm):
+    reason = forms.CharField(label=_("Reason"), widget=forms.Textarea)
+
+
+class RefundForm(StyledForm):
+    amount = MoneyField(label=_("Amount"), min_value=1)
+    method = forms.ModelChoiceField(
+        label=_("Payment method"), queryset=PaymentMethod.objects.none(), empty_label=None
+    )
+    reason = forms.CharField(label=_("Reason"), widget=forms.Textarea)
+
+    def __init__(self, *args, methods, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["method"].queryset = methods
+
+
+class DiscountAssignForm(StyledForm):
+    enrollment = forms.ModelChoiceField(label=_("Group"), queryset=None, empty_label=None)
+    discount_type = forms.ModelChoiceField(
+        label=_("Discount type"), queryset=DiscountType.objects.none()
+    )
+    value_text = forms.CharField(
+        label=_("Custom value"),
+        required=False,
+        help_text=_(
+            "Only the director, and only for discounts that allow it. Empty = the type's value."
+        ),
+    )
+    valid_from = _UzDate(label=_("From"))
+    valid_to = _UzDate(label=_("To"), required=False)
+    reason = forms.CharField(label=_("Reason"), widget=forms.Textarea, required=False)
+
+    def __init__(self, *args, enrollments, can_custom, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["enrollment"].queryset = enrollments
+        self.fields["enrollment"].label_from_instance = lambda e: e.group.name
+        self.fields["discount_type"].queryset = DiscountType.objects.filter(is_active=True)
+        if not can_custom:
+            del self.fields["value_text"]
+
+    def custom_value(self):
+        raw = (self.cleaned_data.get("value_text") or "").strip()
+        dtype = self.cleaned_data.get("discount_type")
+        if not raw or dtype is None:
+            return None
+        try:
+            return parse_percent_bp(raw) if dtype.kind == "percent" else money.parse_amount(raw)
+        except ValueError as exc:
+            raise forms.ValidationError(_("Enter a valid number.")) from exc
+
+
+class EndDateForm(StyledForm):
+    valid_to = _UzDate(label=_("Last day of the discount"))
+
+
+class CorrectionForm(StyledForm):
+    new_net = MoneyField(label=_("New amount"), min_value=0, help_text=_("0 cancels the charge."))
+    reason = forms.CharField(label=_("Reason"), widget=forms.Textarea)
+
+
+class ManualChargeForm(StyledForm):
+    description = forms.CharField(label=_("What is it for"), max_length=255)
+    amount = MoneyField(label=_("Amount"), min_value=1)
+    due_date = _UzDate(label=_("Due date"))
+
+
+class CashCloseForm(StyledForm):
+    note = forms.CharField(label=_("Note"), max_length=255, required=False)

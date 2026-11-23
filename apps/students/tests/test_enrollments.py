@@ -162,7 +162,7 @@ class FakeBilling:
     def __init__(self):
         self.applied = []
 
-    def preview(self, action):
+    def preview(self, action, data=None):
         return {"kind": action.kind}
 
     def validate(self, action, data):

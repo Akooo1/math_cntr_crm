@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{% translate "Installment plan" %}{% endblock %}
+{% block heading %}{% translate "Installment plan" %}{% endblock %}
+{% block content %}
+  <div class="mb-4"><a href="{% url 'students:detail' student.pk %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{{ student.full_name }}</a></div>
+  <div class="mx-auto max-w-2xl space-y-4">
+    <div><h2 class="text-xl font-semibold">{{ plan.enrollment.group.name }}</h2>
+      <p class="text-sm text-slate-500">{% blocktranslate with p=plan.full_price|som t=plan.template_snapshot.name %}Course price {{ p }} · template {{ t }}{% endblocktranslate %}</p></div>
+    {% for e in errors %}<p class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">{{ e }}</p>{% endfor %}
+    <form method="post" class="card space-y-3 p-5">{% csrf_token %}
+      <p class="text-sm text-slate-500">{% translate "Change the amount or the due date of unpaid parts. Every change is kept in the history." %}</p>
+      {% for r in rows %}
+        <div class="grid grid-cols-[4rem_1fr_1fr] items-center gap-2">
+          <span class="text-sm font-medium">{% blocktranslate with n=r.charge.part_no %}Part {{ n }}{% endblocktranslate %}</span>
+          <label class="sr-only" for="due_{{ r.charge.pk }}">{% translate "Due date" %}</label>
+          <input id="due_{{ r.charge.pk }}" name="due_{{ r.charge.pk }}" value="{{ r.charge.due_date|sana }}" data-mask="date" inputmode="numeric" class="rounded-lg border border-slate-300 px-3 py-2 text-base">
+          <label class="sr-only" for="amount_{{ r.charge.pk }}">{% translate "Amount" %}</label>
+          <input id="amount_{{ r.charge.pk }}" name="amount_{{ r.charge.pk }}" value="{{ r.net|raqam }}" data-money="1" inputmode="numeric" class="rounded-lg border border-slate-300 px-3 py-2 text-right text-base">
+        </div>
+      {% empty %}<p class="text-sm text-slate-500">{% translate "All parts are paid or cancelled." %}</p>{% endfor %}
+      <div><label class="label" for="reason">{% translate "Reason" %} <span class="text-rose-600">*</span></label>
+        <textarea id="reason" name="reason" rows="2" class="block w-full rounded-lg border border-slate-300 px-3 py-2 text-base">{{ reason }}</textarea></div>
+      <div class="flex justify-end"><button class="btn-primary">{% translate "Save" %}</button></div>
+    </form>
+    {% if revisions %}
+      <section class="card p-5">
+        <h3 class="font-semibold">{% translate "History" %}</h3>
+        <ul class="mt-2 space-y-1 text-sm">{% for r in revisions %}<li>{{ r.created_at|sana_vaqt }} · {{ r.created_by.full_name }} — {{ r.reason }}</li>{% endfor %}</ul>
+      </section>
+    {% endif %}
+  </div>
+{% endblock %}

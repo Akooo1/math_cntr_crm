@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **3 done** (students, groups, attendance, Excel import). Next: phase 4 (billing). Update this line at the end of each phase.
+- Current phase: **4 done** (billing, payments, debtors, cash report). Next: phase 5 (reports, Excel export, production deployment, backups). Update this line at the end of each phase.
 
 ## Ask the owner before
 
@@ -129,6 +129,12 @@ Inside a module:
 | Seats | O'rinlar |
 | Import / template | Import / Namuna |
 | Studying / left (student status) | O'qiyapti / Ketgan |
+| Charges (list) / suggested | Hisoblanganlar / Taklif |
+| Recalculate / confirm | Qayta hisoblash / Tasdiqlash |
+| Take payment | To'lov qabul qilish |
+| Paid / owes / payment expected (manager badge) | To'lagan / Qarzi bor / To'lov kutilmoqda |
+| Opening balance | Boshlang'ich qoldiq |
+| Additional charge | Qo'shimcha hisob |
 | Settings | Sozlamalar |
 | Reports / dashboard | Hisobotlar / Bosh sahifa |
 | Audit log | Harakatlar jurnali |
@@ -157,6 +163,13 @@ Add new terms here before using them in the UI.
   freeze / unfreeze / leave), `register_profile_panel`, `register_list_badge`,
   `register_import_kind`. Billing uses these in phase 4; don't edit the students module.
 - `NavItem.role_priority` orders the phone bottom bar per role.
+- `billing.services.monthly.side_lines()`: the one engine that says what a month costs for an
+  enrollment (lessons in window minus freezes, minus cancelled lessons, discounts). Joining,
+  leaving, freezing, moving and the monthly job all use it. Don't write a second one.
+- `billing.services.ledger.create_charge()` / `adjust()`: the only ways to write money rows.
+  `billing.services.allocation.rebuild_for_student()` after any change (they do it for you).
+- `core.audit_display.register_labels({...})`: Uzbek labels for custom audit keys. A test
+  fails if a model field would show up in the audit log without an Uzbek label.
 - Template builtins (no `{% load %}` needed): `i18n`, `|som`, `|raqam`, `|sana`, `|sana_vaqt`,
   `|telefon`, `user|can:"perm.code"`, `{% icon "name" %}`, `{% field form.x %}`.
 - `billing.domain.rounding.round_amount` — the only money rounding function.

@@ -1,0 +1,81 @@
+{# Billing step of enroll / move / freeze / unfreeze / leave. Fields start with "x_". #}
+<section class="card space-y-4 p-5">
+  <div>
+    <h3 class="font-semibold">{% translate "Payment changes" %}</h3>
+    <p class="text-sm text-slate-500">{% translate "Check the suggested amounts. You can type another amount; then write the reason." %}</p>
+  </div>
+  {% for e in ctx.errors %}<p class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">{{ e }}</p>{% endfor %}
+  <input type="hidden" name="x_seen" value="1">
+
+  {% if ctx.discount_types %}
+    <div class="grid gap-3 sm:grid-cols-2">
+      <div>
+        <label class="label" for="x_discount">{% translate "Discount" %}</label>
+        <select id="x_discount" name="x_discount" class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base">
+          <option value="">{% translate "No discount" %}</option>
+          {% for d in ctx.discount_types %}<option value="{{ d.pk }}" {% if ctx.data.x_discount == d.pk|stringformat:"s" %}selected{% endif %}>{{ d.name }}</option>{% endfor %}
+        </select>
+      </div>
+      {% if user|can:"billing.discount.custom" %}
+        <div>
+          <label class="label" for="x_discount_value">{% translate "Custom value" %}</label>
+          <input id="x_discount_value" name="x_discount_value" value="{{ ctx.data.x_discount_value|default:'' }}" class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base">
+        </div>
+      {% endif %}
+    </div>
+    <p class="text-xs text-slate-500">{% translate "After choosing a discount press Recalculate to see the new amounts." %}</p>
+  {% endif %}
+
+  {% for side in ctx.sides %}
+    <div class="rounded-lg border border-slate-200 p-3">
+      <p class="font-medium">{{ side.title }}</p>
+      {% for line in side.lines %}
+        {% if line.kind == "error" %}
+          <p class="mt-2 rounded-lg bg-rose-50 px-3 py-2 text-sm text-rose-800">{{ line.message }}</p>
+        {% else %}
+          <div class="mt-3 grid gap-2 sm:grid-cols-[1fr_11rem] sm:items-end">
+            <div class="text-sm">
+              <p class="font-medium">{{ line.month|date:"F Y" }} · {% if line.kind == "new" %}{% translate "new charge" %}{% else %}{% translate "change of an issued charge" %}{% endif %}</p>
+              <p class="text-slate-500">{% blocktranslate with b=line.billable t=line.total %}{{ b }} of {{ t }} lessons{% endblocktranslate %}{% if line.kind == "new" %} · {% blocktranslate with p=line.base_amount|som %}price {{ p }}{% endblocktranslate %}{% else %} · {% blocktranslate with c=line.current_net|som %}now {{ c }}{% endblocktranslate %}{% endif %}</p>
+              {% for k, a in line.discount_lines %}{% if a %}<p class="text-emerald-700">{{ k }}: −{{ a|som }}</p>{% endif %}{% endfor %}
+              <p class="text-slate-500">{% translate "Suggested" %}: <span class="font-medium text-slate-800">{{ line.suggested|som }}</span>{% if line.kind == "new" and line.discount_lines %} · {% translate "after discounts" %} {{ line.suggested_net|som }}{% endif %}</p>
+            </div>
+            <div>
+              <label class="sr-only" for="x_{{ line.key }}">{% translate "Amount" %}</label>
+              <input id="x_{{ line.key }}" name="x_{{ line.key }}" data-money="1" inputmode="numeric" value="{% if line.posted %}{{ line.posted }}{% else %}{{ line.suggested|raqam }}{% endif %}" class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-right text-base">
+              <p class="mt-0.5 text-right text-xs text-slate-500">{% if line.kind == "new" %}{% translate "before discounts" %}{% else %}{% translate "month total after the change" %}{% endif %}</p>
+            </div>
+          </div>
+        {% endif %}
+      {% endfor %}
+
+      {% for charge, net, checked in side.cancel_rows %}
+        <label class="mt-3 flex items-center justify-between gap-3 text-sm">
+          <span class="flex items-center gap-2"><input type="checkbox" name="x_cp{{ charge.pk }}" value="1" class="h-5 w-5 rounded border-slate-300" {% if checked %}checked{% endif %}>
+            {% blocktranslate with n=charge.part_no d=charge.due_date|sana %}Cancel part {{ n }} due {{ d }}{% endblocktranslate %}</span>
+          <span class="font-medium">{{ net|som }}</span>
+        </label>
+      {% endfor %}
+
+      {% if side.templates %}
+        <div class="mt-3 space-y-3" x-data="{ t: '{{ side.chosen_template }}' }">
+          <label class="label" for="x_template">{% translate "Installment template" %}</label>
+          <select id="x_template" name="x_template" x-model="t" class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base">
+            {% for t, price, rows in side.templates %}<option value="{{ t.pk }}">{{ t.name }}</option>{% endfor %}
+          </select>
+          {% for t, price, rows in side.templates %}
+            <div x-show="t === '{{ t.pk }}'" class="rounded-lg bg-slate-50 p-3 text-sm">
+              {% if price %}<p class="mb-2 text-slate-600">{% blocktranslate with p=price.amount|som %}Course price {{ p }}{% endblocktranslate %}</p>{% endif %}
+              <ul class="space-y-1">{% for part, dl, net in rows %}<li class="flex justify-between"><span>{% blocktranslate with n=part.part_no %}Part {{ n }}{% endblocktranslate %} · {{ part.due_date|sana }}</span><span class="font-medium">{{ net|som }}</span></li>{% endfor %}</ul>
+            </div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    </div>
+  {% endfor %}
+
+  <div>
+    <label class="label" for="x_reason">{% translate "Reason (if you changed an amount)" %}</label>
+    <textarea id="x_reason" name="x_reason" rows="2" class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base">{{ ctx.data.x_reason|default:'' }}</textarea>
+  </div>
+</section>

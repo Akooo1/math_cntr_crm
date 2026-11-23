@@ -58,7 +58,7 @@ def _check_group(group: Group, student: Student, day, *, capacity_override: bool
         raise ValidationError(_("The group has finished."))
     if day < group.start_date:
         raise ValidationError(_("The date is before the group starts."))
-    if group.end_date and day >= group.end_date:
+    if group.end_date and day > group.end_date:  # the group's end date is its last day
         raise ValidationError(_("The date is after the group ends."))
     if Enrollment.objects.filter(student=student, group=group, status__in=Enrollment.OPEN).exists():
         raise ValidationError(_("The student is already in this group."))

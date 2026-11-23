@@ -13,7 +13,7 @@ from apps.core.permissions import apply_branch_filter, require_perm, scope_by_br
 from apps.core.roles import Role
 from apps.core.search import text_search
 
-from .domain.schedule import is_active_on, is_frozen_on
+from .domain.schedule import Slot, is_active_on, is_frozen_on, lesson_plan
 from .models import Enrollment, Group, Lesson, Student
 
 OPEN = Enrollment.OPEN
@@ -172,3 +172,17 @@ def recent_lessons(group: Group, limit=10):
         )
         .order_by("-date", "-start_time")[:limit]
     )
+
+
+def planned_lesson_dates(group: Group, first: dt.date, last: dt.date) -> list[dt.date]:
+    """Lesson dates the weekly schedule gives between `first` and `last` (inclusive), minus
+    lessons cancelled by hand. Billing prorates by these (SPEC 6.4.2)."""
+    slots = [Slot(s.weekday, s.start_time, s.end_time) for s in group.slots.all()]
+    cancelled = set(
+        Lesson.objects.filter(
+            group=group, date__gte=first, date__lte=last, status=Lesson.Status.CANCELLED
+        ).values_list("date", "start_time")
+    )
+    return [
+        p.date for p in lesson_plan(slots, first, last) if (p.date, p.start_time) not in cancelled
+    ]

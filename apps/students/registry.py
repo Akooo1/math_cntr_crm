@@ -1,5 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 
+from apps.core.audit_display import register_labels as register_audit_labels
 from apps.core.permissions import register_permission
 from apps.core.registry import DashboardWidget, NavItem, registry
 from apps.core.roles import Role
@@ -107,3 +108,23 @@ registry.add_widget(
 )
 
 import_kinds.register()
+
+register_audit_labels(
+    {
+        "schedule": _("Schedule"),
+        "over_capacity": _("Over capacity"),
+        "new_group": _("New group"),
+        "from_date": _("From"),
+        "to_date": _("To"),
+        "rows": _("Rows"),
+        "groups_created": _("Groups created"),
+        "students_created": _("Students created"),
+        "students_updated": _("Students updated"),
+        "enrollments_created": _("Enrolled into groups"),
+        "balances_created": _("Balances created"),
+        "discounts_created": _("Discounts created"),
+        "related_enrollment": _("Moved from another group"),
+        "marked_by": _("Marked by"),
+        "marked_at": _("Marked at"),
+    }
+)

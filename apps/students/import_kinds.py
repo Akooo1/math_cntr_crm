@@ -1,14 +1,10 @@
 """Import kinds owned by the students module: groups and students (docs/SPEC.md 6.5)."""
 
-import datetime as dt
-import re
-
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 
 from apps.core import phone as phones
-from apps.core.dates import parse_date
 from apps.core.roles import Role
 from apps.core.text import search_key
 from apps.settings.models import Course, Room
@@ -17,66 +13,17 @@ from .models import Enrollment, Group, Student
 from .services import enrollments as enrollment_services
 from .services import groups as group_services
 from .services import students as student_services
-from .services.importing import ImportKind, ParseResult, RowError, register_import_kind
-
-WEEKDAYS = {"du": 1, "se": 2, "cho": 3, "pa": 4, "ju": 5, "sh": 6, "ya": 7}
-
-
-# --- cell parsing ----------------------------------------------------------------------
-
-
-def text(value) -> str:
-    if value is None:
-        return ""
-    if isinstance(value, float) and value.is_integer():
-        value = int(value)
-    return " ".join(str(value).split())
-
-
-def as_date(value):
-    if value in (None, ""):
-        return None
-    if isinstance(value, dt.datetime):
-        return value.date()
-    if isinstance(value, dt.date):
-        return value
-    return parse_date(text(value))  # raises ValueError
-
-
-def as_time(value):
-    if isinstance(value, dt.datetime):
-        return value.time().replace(second=0, microsecond=0)
-    if isinstance(value, dt.time):
-        return value.replace(second=0, microsecond=0)
-    match = re.fullmatch(r"(\d{1,2})[:.](\d{2})", text(value))
-    if not match:
-        raise ValueError(value)
-    return dt.time(int(match[1]), int(match[2]))
-
-
-def as_weekdays(value) -> list[int]:
-    out = []
-    for token in re.split(r"[,\s;/]+", search_key(text(value))):
-        if not token:
-            continue
-        if token.isdigit() and 1 <= int(token) <= 7:
-            out.append(int(token))
-            continue
-        for prefix, day in WEEKDAYS.items():
-            if token.startswith(prefix):
-                out.append(day)
-                break
-        else:
-            raise ValueError(token)
-    if not out:
-        raise ValueError(value)
-    return sorted(set(out))
-
-
-def as_phone(value) -> str:
-    raw = text(value)
-    return phones.normalize(raw) if raw else ""
-
+from .services.importing import (
+    ImportKind,
+    ParseResult,
+    RowError,
+    as_date,
+    as_phone,
+    as_time,
+    as_weekdays,
+    register_import_kind,
+    text,
+)
 
 # --- groups ------------------------------------------------------------------------------
 

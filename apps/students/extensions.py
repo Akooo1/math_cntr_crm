@@ -30,8 +30,9 @@ class EnrollmentExtension(Protocol):
     key: str
     template: str  # partial shown on the confirmation step
 
-    def preview(self, action: EnrollmentAction) -> dict | None:
-        """Context for the confirmation step, or None when there is nothing to confirm."""
+    def preview(self, action: EnrollmentAction, data=None) -> dict | None:
+        """Context for the confirmation step, or None when there is nothing to confirm.
+        `data` is the submitted step (for "recalculate"); fields must start with "x_"."""
 
     def validate(self, action: EnrollmentAction, data) -> list[str]:
         """Errors for the submitted confirmation data (already translated)."""
@@ -51,10 +52,13 @@ def all_extensions() -> list[EnrollmentExtension]:
     return list(_extensions.values())
 
 
-def previews(action: EnrollmentAction) -> list[tuple[EnrollmentExtension, dict]]:
+FIELD_PREFIX = "x_"  # extension form fields; not copied into the step's hidden fields
+
+
+def previews(action: EnrollmentAction, data=None) -> list[tuple[EnrollmentExtension, dict]]:
     out = []
     for ext in all_extensions():
-        ctx = ext.preview(action)
+        ctx = ext.preview(action, data)
         if ctx is not None:
             out.append((ext, ctx))
     return out

@@ -11,7 +11,7 @@ from apps.core import audit
 from apps.core.permissions import require_perm
 from apps.settings.models import Course
 
-from .models import InstallmentTemplate, InstallmentTemplatePart, Price
+from ..models import InstallmentTemplate, InstallmentTemplatePart, Price
 
 
 def price_kind_for(course: Course) -> str:

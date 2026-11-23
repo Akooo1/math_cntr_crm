@@ -1,10 +1,13 @@
 from django.utils.translation import gettext_lazy as _
 
+from apps.core.audit_display import register_labels as register_audit_labels
 from apps.core.permissions import register_permission
 from apps.core.registry import DashboardWidget, NavItem, registry
 from apps.core.roles import Role
 
 from . import sections  # noqa: F401 - registers Sozlamalar sections
+
+register_audit_labels({"from_stage": _("Stage"), "to_stage": _("Stage"), "done_by": _("Done")})
 
 CRM_ROLES = {Role.DIRECTOR, Role.BRANCH_ADMIN, Role.SALES_MANAGER}
 
@@ -25,7 +28,7 @@ registry.add_nav(
         order=10,
         mobile_priority=10,
         active_prefix="/lidlar/",
-        role_priority={Role.BRANCH_ADMIN: 20},
+        role_priority={Role.BRANCH_ADMIN: 20, Role.DIRECTOR: 20},
     )
 )
 registry.add_nav(
@@ -38,7 +41,7 @@ registry.add_nav(
         order=11,
         mobile_priority=11,
         active_prefix="/vazifalar/",
-        role_priority={Role.BRANCH_ADMIN: 21},
+        role_priority={Role.BRANCH_ADMIN: 21, Role.DIRECTOR: 21},
     )
 )
 

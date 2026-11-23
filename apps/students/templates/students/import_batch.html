@@ -19,6 +19,7 @@
           {% if batch.report.summary.students_created is not None %}<div class="flex justify-between"><dt>{% translate "Students created" %}</dt><dd class="font-medium">{{ batch.report.summary.students_created }}</dd></div>
           <div class="flex justify-between"><dt>{% translate "Students updated" %}</dt><dd class="font-medium">{{ batch.report.summary.students_updated }}</dd></div>
           <div class="flex justify-between"><dt>{% translate "Enrolled into groups" %}</dt><dd class="font-medium">{{ batch.report.summary.enrollments_created }}</dd></div>{% endif %}
+          {% if batch.report.summary.discounts_created is not None %}<div class="flex justify-between"><dt>{% translate "Discounts created" %}</dt><dd class="font-medium">{{ batch.report.summary.discounts_created }}</dd></div>{% endif %}
           {% if batch.report.summary.balances_created is not None %}<div class="flex justify-between"><dt>{% translate "Balances created" %}</dt><dd class="font-medium">{{ batch.report.summary.balances_created }}</dd></div>{% endif %}
         </dl>
       {% endif %}

@@ -200,6 +200,51 @@ def students_cases(o) -> dict[str, list[Case]]:
     )
 
 
+def billing_cases(o) -> dict[str, list[Case]]:
+    """Finance: Direktor everything; admin own branch except reversals/refunds/corrections;
+    Sotuv menejeri and O'qituvchi never."""
+    fin = expect({D: 200, A: 200})
+    fin_other = expect({D: 200, A: 404})
+    director = expect({D: 200})
+
+    def two(name, fmt, key, same, other, method="get", data=None):
+        return name, [
+            Case(fmt.format(o[f"{key}_a"].pk), method, same, data or {}),
+            Case(fmt.format(o[f"{key}_b"].pk), method, other, data or {}),
+        ]
+
+    return dict(
+        [
+            ("billing:payments", [Case("/tolovlar/", expect=fin)]),
+            (
+                "billing:payment_create",
+                [
+                    Case("/tolovlar/yangi/", expect=fin),
+                    Case(f"/tolovlar/yangi/?oquvchi={o['student_a'].pk}", expect=fin),
+                ],
+            ),
+            ("billing:student_search", [Case("/tolovlar/qidirish/?q=Kar", expect=fin)]),
+            two("billing:payment", "/tolovlar/{}/", "payment", fin, fin_other),
+            two("billing:receipt", "/tolovlar/{}/chek/", "payment", fin, fin_other),
+            two("billing:reverse", "/tolovlar/{}/bekor-qilish/", "payment", director, director),
+            two("billing:refund", "/hisob/{}/pul-qaytarish/", "student", director, director),
+            two("billing:discount_assign", "/hisob/{}/chegirma/", "student", fin, fin_other),
+            two("billing:manual_charge", "/hisob/{}/qoshimcha/", "student", director, director),
+            two("billing:discount_end", "/chegirmalar/{}/tugatish/", "discount", fin, fin_other),
+            two(
+                "billing:charge_correct", "/hisoblangan/{}/tuzatish/", "charge", director, director
+            ),
+            two("billing:plan_edit", "/bolib-tolash-reja/{}/", "plan", fin, fin_other),
+            ("billing:debtors", [Case("/qarzdorlar/", expect=fin)]),
+            ("billing:cash", [Case("/kassa/", expect=fin)]),
+            (
+                "billing:cash_close",
+                [Case("/kassa/yopish/", "post", expect({D: 302, A: 302}), {"sana": "01.01.2020"})],
+            ),
+        ]
+    )
+
+
 @pytest.fixture
 def objects(director, branch_a, branch_b, admin_a, teacher_a):
     from apps.billing import services
@@ -212,16 +257,33 @@ def objects(director, branch_a, branch_b, admin_a, teacher_a):
     )
     template = InstallmentTemplate.objects.create(name="T", parts_count=2)
     discount = DiscountType.objects.create(name="D", kind="percent", value=1000)
+    from apps.billing import services as billing
+    from apps.billing.models import Charge
     from apps.students import services as st
     from apps.students.services import importing
 
     leads = {}
     start = today() - dt.timedelta(days=30)
+    monthly = CourseFactory(name="Oylik kurs")
+    services.add_price(
+        actor=director, course=monthly, branch=None, amount=400_000, effective_from=start
+    )
+    installment = CourseFactory(name="Bo'lib kurs", pricing_model="installment")
+    services.add_price(
+        actor=director, course=installment, branch=None, amount=900_000, effective_from=start
+    )
+    InstallmentTemplate.objects.create(name="2 qism", parts_count=2, course=installment)
+    cash = PaymentMethod.objects.get(name="Naqd")
     for key, branch in (("a", branch_a), ("b", branch_b)):
         # Group A is taught by teacher_a; group B by a teacher of branch B.
         teacher = teacher_a if key == "a" else UserFactory(role=T, branches=[branch])
         group = make_group(
-            director, branch, teacher=teacher, start=start, days=(1, 2, 3, 4, 5, 6, 7)
+            director,
+            branch,
+            teacher=teacher,
+            course=monthly,
+            start=start,
+            days=(1, 2, 3, 4, 5, 6, 7),
         )
         student = make_student(director, branch)
         enrollment = st.enroll(actor=director, student=student, group=group, start_date=start)
@@ -229,6 +291,23 @@ def objects(director, branch_a, branch_b, admin_a, teacher_a):
         leads[f"group_{key}"] = group
         leads[f"student_{key}"] = student
         leads[f"enrollment_{key}"] = enrollment
+        leads[f"charge_{key}"] = Charge.objects.filter(enrollment=enrollment).first()
+        leads[f"payment_{key}"] = billing.payments.record_payment(
+            actor=director, student=student, amount=100_000, method=cash, paid_on=today()
+        )
+        leads[f"discount_{key}"] = billing.discounts.assign(
+            actor=director,
+            enrollment=enrollment,
+            valid_from=today(),
+            discount_type=DiscountType.objects.get_or_create(
+                name="Promo", kind="fixed", value=10_000
+            )[0],
+        )
+        igroup = make_group(director, branch, teacher=teacher, course=installment, start=start)
+        ie = st.enroll(
+            actor=director, student=make_student(director, branch), group=igroup, start_date=start
+        )
+        leads[f"plan_{key}"] = ie.installment_plan
         leads[f"past_lesson_{key}"] = lessons.filter(date__lt=today()).last()
         leads[f"future_lesson_{key}"] = lessons.filter(date__gt=today()).first()
         upload = SimpleUploadedFile("x.xlsx", b"not an excel file")
@@ -288,6 +367,7 @@ def cases(objects) -> dict[str, list[Case]]:
     }
     c.update(crm_cases(objects))
     c.update(students_cases(objects))
+    c.update(billing_cases(objects))
     for s in sections():
         base = f"/sozlamalar/{s.slug}/"
         obj = objects[s.slug]

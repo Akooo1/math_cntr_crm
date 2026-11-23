@@ -9,11 +9,11 @@
       <form method="post" class="space-y-4" novalidate>{% csrf_token %}
         {% include "components/form_errors.html" %}
         {% for k, v in hidden %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
-        <input type="hidden" name="tasdiq" value="1">
         {% for ext, ctx in confirm %}{% include ext.template %}{% endfor %}
         <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <a href="{{ back }}" class="btn-secondary">{% translate "Cancel" %}</a>
-          <button class="btn-primary">{% translate "Confirm" %}</button>
+          <button name="qayta" value="1" class="btn-secondary">{% icon "refresh" "w-4 h-4" %}{% translate "Recalculate" %}</button>
+          <button name="tasdiq" value="1" class="btn-primary">{% translate "Confirm" %}</button>
         </div>
       </form>
     {% else %}

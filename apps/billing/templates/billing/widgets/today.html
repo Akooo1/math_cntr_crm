@@ -1,0 +1,6 @@
+<a href="{% url 'billing:cash' %}" class="card block p-5 hover:border-sky-300">
+  <p class="text-sm font-medium text-slate-500">{% translate "Collected today" %}</p>
+  <p class="mt-2 text-3xl font-semibold">{{ ctx.total|som }}</p>
+  <ul class="mt-2 space-y-1 text-sm text-slate-600">{% for r in ctx.rows %}<li class="flex justify-between"><span>{{ r.method }}</span><span>{{ r.net|som }}</span></li>{% endfor %}</ul>
+  {% if ctx.unclosed %}<p class="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">{% blocktranslate count n=ctx.unclosed|length %}{{ n }} day not closed{% plural %}{{ n }} days not closed{% endblocktranslate %}</p>{% endif %}
+</a>

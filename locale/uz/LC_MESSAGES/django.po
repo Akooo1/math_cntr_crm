@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 10:24+0500\n"
+"POT-Creation-Date: 2026-11-23 11:01+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -81,6 +81,26 @@ msgstr "Parol o'zgartirildi."
 msgid "Payments"
 msgstr "To'lovlar"
 
+msgid "No active installment template fits this course. Add one in Settings."
+msgstr ""
+"Bu kurs uchun faol bo'lib to'lash shabloni yo'q. Sozlamalarda qo'shing."
+
+#, python-format
+msgid "The course %(course)s has no full price for %(day)s."
+msgstr "%(course)s kursining %(day)s uchun to'liq narxi kiritilmagan."
+
+msgid "Enter a whole amount in so'm, for example 450 000."
+msgstr "Summani butun so'mda kiriting, masalan 450 000."
+
+msgid "The amount can't be negative."
+msgstr "Summa manfiy bo'lishi mumkin emas."
+
+msgid "You changed a suggested amount: write the reason."
+msgstr "Taklif qilingan summani o'zgartirdingiz: sababini yozing."
+
+msgid "Left the course"
+msgstr "Kursni tark etdi"
+
 msgid "Course"
 msgstr "Kurs"
 
@@ -143,6 +163,124 @@ msgstr "Ulushlar soni qismlar soniga teng bo'lishi kerak."
 
 msgid "The shares must be above 0 and add up to 100."
 msgstr "Ulushlar 0 dan katta va jami 100 bo'lishi kerak."
+
+msgid "Payment method"
+msgstr "To'lov usuli"
+
+msgid "Date"
+msgstr "Sana"
+
+msgid "Comment"
+msgstr "Izoh"
+
+msgid "Student's branch"
+msgstr "O'quvchining filiali"
+
+msgid "Reason"
+msgstr "Sabab"
+
+msgid "Discount type"
+msgstr "Chegirma turi"
+
+msgid "Custom value"
+msgstr "Boshqa qiymat"
+
+msgid ""
+"Only the director, and only for discounts that allow it. Empty = the type's "
+"value."
+msgstr ""
+"Faqat direktor va faqat bunga ruxsat berilgan chegirmalar uchun. Bo'sh "
+"qoldirilsa, turdagi qiymat olinadi."
+
+msgid "From"
+msgstr "Dan"
+
+msgid "To"
+msgstr "Gacha"
+
+msgid "Last day of the discount"
+msgstr "Chegirmaning oxirgi kuni"
+
+msgid "New amount"
+msgstr "Yangi summa"
+
+msgid "0 cancels the charge."
+msgstr "0 kiritilsa, hisob bekor qilinadi."
+
+msgid "What is it for"
+msgstr "Nima uchun"
+
+msgid "Due date"
+msgstr "To'lov muddati"
+
+msgid "Student's or parent's phone"
+msgstr "O'quvchi yoki ota-onasining telefoni"
+
+msgid "Amount (debt +, credit -)"
+msgstr "Summa (qarz +, avans -)"
+
+msgid "Debt date"
+msgstr "Qarz sanasi"
+
+msgid "a phone number is wrong (use +998 90 123 45 67)"
+msgstr "telefon raqami noto'g'ri (+998 90 123 45 67 ko'rinishida yozing)"
+
+msgid "no student with this phone in this branch"
+msgstr "bu filialda shu telefonli o'quvchi yo'q"
+
+msgid "several students have this phone; use the student's own phone"
+msgstr "bu telefon bir nechta o'quvchida; o'quvchining o'z telefonini yozing"
+
+msgid "the phone is empty"
+msgstr "telefon bo'sh"
+
+msgid "the amount must be a whole number, not 0"
+msgstr "summa 0 dan farqli butun son bo'lishi kerak"
+
+msgid "a date is wrong (use DD.MM.YYYY)"
+msgstr "sana noto'g'ri (KK.OO.YYYY ko'rinishida yozing)"
+
+#, python-format
+msgid "the student repeats row %(n)d of the file"
+msgstr "o'quvchi faylning %(n)d-qatorida takrorlangan"
+
+msgid "this student already has an opening balance"
+msgstr "bu o'quvchida boshlang'ich qoldiq allaqachon bor"
+
+msgid "Opening balance"
+msgstr "Boshlang'ich qoldiq"
+
+msgid "Group name"
+msgstr "Guruh nomi"
+
+#, python-format
+msgid "discount type \"%(v)s\" not found in Settings"
+msgstr "\"%(v)s\" chegirma turi Sozlamalarda topilmadi"
+
+#, python-format
+msgid "the student is not in group \"%(v)s\""
+msgstr "o'quvchi \"%(v)s\" guruhida emas"
+
+msgid "the custom value is wrong"
+msgstr "boshqa qiymat noto'g'ri"
+
+msgid "Imported from Excel"
+msgstr "Excel'dan import qilindi"
+
+msgid "Opening balances"
+msgstr "Boshlang'ich qoldiqlar"
+
+msgid "Import students first. Debt is a positive amount, credit negative."
+msgstr "Avval o'quvchilarni import qiling. Qarz musbat, avans manfiy summa."
+
+msgid "Discounts"
+msgstr "Chegirmalar"
+
+msgid ""
+"Import students into groups first. Applies to charges from the start date."
+msgstr ""
+"Avval o'quvchilarni guruhlarga import qiling. Boshlanish sanasidan keyingi "
+"hisoblarga qo'llanadi."
 
 msgid "Monthly fee"
 msgstr "Oylik to'lov"
@@ -231,9 +369,6 @@ msgstr "Bo'lib to'lanadigan kurslar"
 msgid "All courses"
 msgstr "Barcha kurslar"
 
-msgid "Discount type"
-msgstr "Chegirma turi"
-
 msgid "Percent in basis points (10% = 1000) or an amount in so'm."
 msgstr "Foiz bazis punktlarda (10% = 1000) yoki so'mdagi summa."
 
@@ -258,11 +393,152 @@ msgstr "Kassa hisobotida hisoblanadi"
 msgid "Order"
 msgstr "Tartib"
 
-msgid "Payment method"
-msgstr "To'lov usuli"
-
 msgid "Payment methods"
 msgstr "To'lov usullari"
+
+msgid "Discount"
+msgstr "Chegirma"
+
+msgid "Course price"
+msgstr "Kurs narxi"
+
+msgid "Installment plan"
+msgstr "Bo'lib to'lash rejasi"
+
+msgid "Installment plans"
+msgstr "Bo'lib to'lash rejalari"
+
+msgid "Installment part"
+msgstr "To'lov qismi"
+
+msgid "Additional charge"
+msgstr "Qo'shimcha hisob"
+
+msgid "Student"
+msgstr "O'quvchi"
+
+msgid "Type"
+msgstr "Turi"
+
+msgid "Month"
+msgstr "Oy"
+
+msgid "Part"
+msgstr "Qism"
+
+msgid "List price"
+msgstr "Narx"
+
+msgid "Suggested amount"
+msgstr "Taklif qilingan summa"
+
+msgid "Reason for a different amount"
+msgstr "Boshqa summa sababi"
+
+msgid "Description"
+msgstr "Tavsif"
+
+msgid "Charge"
+msgstr "Hisoblangan to'lov"
+
+msgid "Charges"
+msgstr "Hisoblanganlar"
+
+msgid "A different amount needs a reason."
+msgstr "Boshqa summa uchun sabab yozilishi kerak."
+
+msgid "Left the group"
+msgstr "Guruhdan chiqdi"
+
+msgid "Freeze"
+msgstr "Muzlatish"
+
+msgid "Back from freeze"
+msgstr "Muzlatishdan qaytdi"
+
+msgid "Moved to another group"
+msgstr "Boshqa guruhga o'tkazildi"
+
+msgid "Installment plan changed"
+msgstr "Bo'lib to'lash rejasi o'zgardi"
+
+msgid "Cancelled"
+msgstr "Bekor qilindi"
+
+msgid "Correction"
+msgstr "Tuzatish"
+
+msgid "Payment"
+msgstr "To'lov"
+
+msgid "Reversal"
+msgstr "Bekor qilish (storno)"
+
+msgid "Refund"
+msgstr "Pul qaytarish"
+
+msgid "Confirmed"
+msgstr "Tasdiqlangan"
+
+msgid "Pending"
+msgstr "Kutilmoqda"
+
+msgid "Status"
+msgstr "Holat"
+
+msgid "Received by"
+msgstr "Qabul qilgan"
+
+msgid "Receipt"
+msgstr "Chek"
+
+msgid "Closed by"
+msgstr "Yopgan"
+
+msgid "Closed at"
+msgstr "Yopilgan vaqt"
+
+msgid "Closed cash day"
+msgstr "Yopilgan kassa kuni"
+
+msgid "Closed cash days"
+msgstr "Yopilgan kassa kunlari"
+
+msgid "See finances"
+msgstr "Moliyani ko'rish"
+
+msgid "Take payments"
+msgstr "To'lov qabul qilish"
+
+msgid "Reverse payments, refund, correct charges"
+msgstr "To'lovni bekor qilish, pul qaytarish, hisobni tuzatish"
+
+msgid "Give discounts"
+msgstr "Chegirma berish"
+
+msgid "Enter a custom discount value"
+msgstr "Chegirmaning boshqa qiymatini kiritish"
+
+msgid "Change installment plans"
+msgstr "Bo'lib to'lash rejasini o'zgartirish"
+
+msgid "See the cash report"
+msgstr "Kassa hisobotini ko'rish"
+
+msgid "Close the cash day"
+msgstr "Kassa kunini yopish"
+
+msgid "See debtors"
+msgstr "Qarzdorlarni ko'rish"
+
+msgid "See whether a student has paid"
+msgstr "O'quvchi to'laganini ko'rish"
+
+msgid "Debtors"
+msgstr "Qarzdorlar"
+
+msgid "Cash desk"
+msgstr "Kassa"
 
 msgid "Rounding of computed amounts"
 msgstr "Hisoblangan summalarni yaxlitlash"
@@ -305,6 +581,48 @@ msgid "Days after the due date before a student appears in the debtors list."
 msgstr ""
 "Muddat o'tgach, o'quvchi qarzdorlar ro'yxatiga tushguncha o'tadigan kunlar."
 
+msgid "Reverses"
+msgstr "Bekor qiladi"
+
+msgid "Ended by"
+msgstr "Tugatgan"
+
+msgid "Ended at"
+msgstr "Tugatilgan vaqt"
+
+msgid "Parts"
+msgstr "Qismlar"
+
+msgid "Received"
+msgstr "Qabul qilindi"
+
+msgid "Paid out"
+msgstr "Qaytarildi"
+
+msgid "Net"
+msgstr "Sof"
+
+msgid "Count"
+msgstr "Soni"
+
+msgid "Charges created"
+msgstr "Yaratilgan hisoblar"
+
+msgid "Without a price"
+msgstr "Narxsiz"
+
+msgid "Totals"
+msgstr "Jami"
+
+msgid "Paid"
+msgstr "To'lagan"
+
+msgid "Owes"
+msgstr "Qarzi bor"
+
+msgid "Payment expected"
+msgstr "To'lov kutilmoqda"
+
 msgid "Courses and prices"
 msgstr "Kurslar va narxlar"
 
@@ -324,11 +642,226 @@ msgstr "Foizli yoki belgilangan chegirmalar, masalan aka-uka yoki promo."
 msgid "Cash, card terminal, bank transfer. Online methods come later."
 msgstr "Naqd, terminal, bank o'tkazmasi. Onlayn usullar keyinroq qo'shiladi."
 
+msgid "A future day can't be closed."
+msgstr "Kelajakdagi kunni yopib bo'lmaydi."
+
+msgid "This day is already closed."
+msgstr "Bu kun allaqachon yopilgan."
+
+msgid "Write the reason."
+msgstr "Sababini yozing."
+
+msgid "Write what the charge is for."
+msgstr "Hisob nima uchunligini yozing."
+
+msgid "This discount type is not active."
+msgstr "Bu chegirma turi faol emas."
+
+msgid "This discount doesn't apply to this course."
+msgstr "Bu chegirma bu kursga qo'llanmaydi."
+
+msgid "This discount has a fixed value."
+msgstr "Bu chegirmaning qiymati o'zgarmas."
+
+msgid "The end date must be after the start date."
+msgstr "Tugash sanasi boshlanish sanasidan keyin bo'lishi kerak."
+
+msgid "Unknown part."
+msgstr "Noma'lum qism."
+
+msgid "Rescheduled part"
+msgstr "Muddati o'zgartirilgan qism"
+
+msgid "The charge can't go below zero."
+msgstr "Hisob noldan kam bo'lishi mumkin emas."
+
+#, python-format
+msgid "The course %(course)s has no monthly price for %(day)s."
+msgstr "%(course)s kursining %(day)s uchun oylik narxi kiritilmagan."
+
+msgid "Prorated"
+msgstr "Darslar bo'yicha hisoblangan"
+
+#, python-format
+msgid "The cash day %(day)s is closed."
+msgstr "%(day)s kassa kuni yopilgan."
+
+msgid "The cash day is closed."
+msgstr "Kassa kuni yopilgan."
+
+msgid "This payment method can't be used here."
+msgstr "Bu to'lov usulini bu yerda ishlatib bo'lmaydi."
+
+msgid "The payment date can't be in the future."
+msgstr "To'lov sanasi kelajakda bo'lishi mumkin emas."
+
+#, python-format
+msgid "The payment date can be at most %(n)d days back."
+msgstr "To'lov sanasi ko'pi bilan %(n)d kun oldin bo'lishi mumkin."
+
+msgid "Only a confirmed payment can be reversed."
+msgstr "Faqat tasdiqlangan to'lovni bekor qilish mumkin."
+
+msgid "This payment is already reversed."
+msgstr "Bu to'lov allaqachon bekor qilingan."
+
+#, python-format
+msgid "Only the credit can be refunded: %(credit)s."
+msgstr "Faqat avansni qaytarish mumkin: %(credit)s."
+
 msgid "The group belongs to another course."
 msgstr "Guruh boshqa kursga tegishli."
 
 msgid "The group is in another branch."
 msgstr "Guruh boshqa filialda."
+
+msgid "Payment changes"
+msgstr "To'lovdagi o'zgarishlar"
+
+msgid ""
+"Check the suggested amounts. You can type another amount; then write the "
+"reason."
+msgstr ""
+"Taklif qilingan summalarni tekshiring. Boshqa summa yozishingiz mumkin, unda "
+"sababini ham yozing."
+
+msgid "No discount"
+msgstr "Chegirmasiz"
+
+msgid "After choosing a discount press Recalculate to see the new amounts."
+msgstr ""
+"Chegirmani tanlagach, yangi summalarni ko'rish uchun \"Qayta hisoblash\"ni "
+"bosing."
+
+msgid "new charge"
+msgstr "yangi hisob"
+
+msgid "change of an issued charge"
+msgstr "mavjud hisobni o'zgartirish"
+
+#, python-format
+msgid "%(b)s of %(t)s lessons"
+msgstr "%(t)s ta darsdan %(b)s tasi"
+
+#, python-format
+msgid "price %(p)s"
+msgstr "narx %(p)s"
+
+#, python-format
+msgid "now %(c)s"
+msgstr "hozir %(c)s"
+
+msgid "Suggested"
+msgstr "Taklif"
+
+msgid "after discounts"
+msgstr "chegirmadan keyin"
+
+msgid "before discounts"
+msgstr "chegirmadan oldin"
+
+msgid "month total after the change"
+msgstr "o'zgarishdan keyingi oy summasi"
+
+#, python-format
+msgid "Cancel part %(n)s due %(d)s"
+msgstr "%(d)s muddatli %(n)s-qismni bekor qilish"
+
+#, python-format
+msgid "Course price %(p)s"
+msgstr "Kurs narxi %(p)s"
+
+#, python-format
+msgid "Part %(n)s"
+msgstr "%(n)s-qism"
+
+msgid "Reason (if you changed an amount)"
+msgstr "Sabab (summani o'zgartirgan bo'lsangiz)"
+
+msgid "Nothing found."
+msgstr "Hech narsa topilmadi."
+
+msgid "Cash report"
+msgstr "Kassa hisoboti"
+
+msgid "Previous day"
+msgstr "Oldingi kun"
+
+msgid "Next day"
+msgstr "Keyingi kun"
+
+msgid "Days not closed yet:"
+msgstr "Hali yopilmagan kunlar:"
+
+msgid "Totals by payment method"
+msgstr "To'lov usullari bo'yicha jami"
+
+#, python-format
+msgid "Closed by %(who)s, %(at)s"
+msgstr "Yopgan: %(who)s, %(at)s"
+
+msgid "Open"
+msgstr "Ochiq"
+
+msgid "Total"
+msgstr "Jami"
+
+msgid "Close the day? Its payments will be locked."
+msgstr "Kun yopilsinmi? Uning to'lovlari qulflanadi."
+
+msgid "Close the day"
+msgstr "Kunni yopish"
+
+msgid "Transactions"
+msgstr "Operatsiyalar"
+
+msgid "No payments on this day."
+msgstr "Bu kuni to'lov yo'q."
+
+msgid "Teacher"
+msgstr "O'qituvchi"
+
+msgid "All teachers"
+msgstr "Barcha o'qituvchilar"
+
+msgid "At least N days overdue"
+msgstr "Kamida N kun kechikkan"
+
+msgid "Filter"
+msgstr "Saralash"
+
+#, python-format
+msgid "%(n)s debtor"
+msgid_plural "%(n)s debtors"
+msgstr[0] "%(n)s ta qarzdor"
+msgstr[1] "%(n)s ta qarzdor"
+
+#, python-format
+msgid "%(d)s day overdue"
+msgid_plural "%(d)s days overdue"
+msgstr[0] "%(d)s kun kechikkan"
+msgstr[1] "%(d)s kun kechikkan"
+
+msgid "No debtors."
+msgstr "Qarzdorlar yo'q."
+
+msgid "Parent's phone"
+msgstr "Ota-onasining telefoni"
+
+msgid "Groups"
+msgstr "Guruhlar"
+
+msgid "Overdue"
+msgstr "Muddati o'tgan"
+
+msgid "Unpaid total"
+msgstr "To'lanmagan jami"
+
+msgid "Days overdue"
+msgstr "Kechikish (kun)"
+
+msgid "Last payment"
+msgstr "Oxirgi to'lov"
 
 msgid "Example"
 msgstr "Namuna"
@@ -337,9 +870,115 @@ msgstr "Namuna"
 msgid "Course price %(t)s, start date %(d)s:"
 msgstr "Kurs narxi %(t)s, boshlanish sanasi %(d)s:"
 
+msgid "Balance"
+msgstr "Balans"
+
+msgid "debt"
+msgstr "qarz"
+
+msgid "credit (avans)"
+msgstr "avans"
+
+msgid "settled"
+msgstr "hisob-kitob yopiq"
+
 #, python-format
-msgid "Part %(n)s"
-msgstr "%(n)s-qism"
+msgid "overdue %(o)s"
+msgstr "muddati o'tgan %(o)s"
+
+msgid "Take payment"
+msgstr "To'lov qabul qilish"
+
+msgid "due"
+msgstr "muddat"
+
+#, python-format
+msgid "%(o)s unpaid"
+msgstr "%(o)s to'lanmagan"
+
+msgid "paid"
+msgstr "to'langan"
+
+#, python-format
+msgid "suggested %(s)s"
+msgstr "taklif %(s)s"
+
+msgid "Correct"
+msgstr "Tuzatish"
+
+msgid "No charges yet."
+msgstr "Hali hisob yo'q."
+
+msgid "No payments yet."
+msgstr "Hali to'lov yo'q."
+
+msgid "End"
+msgstr "Tugatish"
+
+msgid "No discounts."
+msgstr "Chegirma yo'q."
+
+#, python-format
+msgid "Installment plan: %(g)s"
+msgstr "Bo'lib to'lash rejasi: %(g)s"
+
+msgid "No charges yet"
+msgstr "Hali hisob yo'q"
+
+#, python-format
+msgid "Reversed on %(d)s (%(n)s)."
+msgstr "%(d)s da bekor qilingan (%(n)s)."
+
+msgid "Print receipt"
+msgstr "Chekni chop etish"
+
+msgid "Reverse"
+msgstr "Bekor qilish"
+
+msgid "Paid charges"
+msgstr "To'langan hisoblar"
+
+msgid "Find the student"
+msgstr "O'quvchini toping"
+
+msgid "Name or phone"
+msgstr "Ism yoki telefon"
+
+msgid ""
+"The money pays the oldest unpaid charges first. Anything extra stays as "
+"credit."
+msgstr ""
+"Pul avval eng eski to'lanmagan hisoblarga tushadi. Ortiqchasi avans bo'lib "
+"qoladi."
+
+msgid "Another student"
+msgstr "Boshqa o'quvchi"
+
+msgid "Save and print receipt"
+msgstr "Saqlash va chek chiqarish"
+
+msgid "All"
+msgstr "Hammasi"
+
+#, python-format
+msgid "Course price %(p)s · template %(t)s"
+msgstr "Kurs narxi %(p)s · shablon %(t)s"
+
+msgid ""
+"Change the amount or the due date of unpaid parts. Every change is kept in "
+"the history."
+msgstr ""
+"To'lanmagan qismlarning summasi yoki muddatini o'zgartiring. Har bir "
+"o'zgarish tarixda saqlanadi."
+
+msgid "All parts are paid or cancelled."
+msgstr "Barcha qismlar to'langan yoki bekor qilingan."
+
+msgid "Save"
+msgstr "Saqlash"
+
+msgid "History"
+msgstr "Tarix"
 
 msgid ""
 "If the effective date is in the past, charges already issued still keep "
@@ -375,11 +1014,114 @@ msgstr "%(d)s dan: %(a)s"
 msgid "Change price"
 msgstr "Narxni o'zgartirish"
 
-msgid "History"
-msgstr "Tarix"
-
 msgid "Add courses first."
 msgstr "Avval kurs qo'shing."
+
+msgid "Tax ID (STIR)"
+msgstr "STIR"
+
+msgid "Paid for"
+msgstr "To'langan hisoblar"
+
+msgid "Balance after payment"
+msgstr "To'lovdan keyingi balans"
+
+msgid "Print"
+msgstr "Chop etish"
+
+msgid "Back"
+msgstr "Orqaga"
+
+msgid "Cancel"
+msgstr "Bekor qilish"
+
+msgid "Overdue debt"
+msgstr "Muddati o'tgan qarz"
+
+msgid "Collected today"
+msgstr "Bugun yig'ilgan"
+
+#, python-format
+msgid "%(n)s day not closed"
+msgid_plural "%(n)s days not closed"
+msgstr[0] "%(n)s kun yopilmagan"
+msgstr[1] "%(n)s kun yopilmagan"
+
+#, python-format
+msgid "Payment saved. Receipt %(n)s."
+msgstr "To'lov saqlandi. Chek %(n)s."
+
+msgid "The payment was reversed."
+msgstr "To'lov bekor qilindi."
+
+#, python-format
+msgid "Reverse payment %(n)s"
+msgstr "%(n)s to'lovni bekor qilish"
+
+msgid ""
+"The whole payment is cancelled with today's date. Enter the correct payment "
+"again afterwards."
+msgstr ""
+"To'lov to'liq, bugungi sana bilan bekor qilinadi. Keyin to'g'ri to'lovni "
+"qaytadan kiriting."
+
+msgid "The refund was saved."
+msgstr "Pul qaytarish saqlandi."
+
+#, python-format
+msgid "Refund to %(name)s"
+msgstr "%(name)s ga pul qaytarish"
+
+#, python-format
+msgid "Credit available for refund: %(credit)s"
+msgstr "Qaytarish mumkin bo'lgan avans: %(credit)s"
+
+msgid "No access"
+msgstr "Ruxsat yo'q"
+
+msgid "Discount added. It applies to charges issued from now on."
+msgstr "Chegirma qo'shildi. U bundan keyingi hisoblarga qo'llanadi."
+
+#, python-format
+msgid "Add a discount: %(name)s"
+msgstr "Chegirma qo'shish: %(name)s"
+
+msgid ""
+"Charges already issued don't change. To change one, ask the director for a "
+"correction."
+msgstr ""
+"Avval hisoblanganlar o'zgarmaydi. Ularni o'zgartirish uchun direktordan "
+"tuzatish so'rang."
+
+msgid "Saved."
+msgstr "Saqlandi."
+
+#, python-format
+msgid "End the discount %(name)s"
+msgstr "%(name)s chegirmasini tugatish"
+
+msgid "The charge was corrected."
+msgstr "Hisob tuzatildi."
+
+msgid "Correct a charge"
+msgstr "Hisobni tuzatish"
+
+#, python-format
+msgid "Current amount: %(a)s. The original stays in the history."
+msgstr "Hozirgi summa: %(a)s. Asl summa tarixda qoladi."
+
+#, python-format
+msgid "Additional charge: %(name)s"
+msgstr "Qo'shimcha hisob: %(name)s"
+
+msgid "Check the amounts and dates."
+msgstr "Summalar va sanalarni tekshiring."
+
+msgid "The installment plan was changed."
+msgstr "Bo'lib to'lash rejasi o'zgartirildi."
+
+msgid "The day is closed. Its payments are locked."
+msgstr "Kun yopildi. Uning to'lovlari qulflandi."
 
 msgid "Core"
 msgstr "Asosiy"
@@ -411,8 +1153,65 @@ msgstr "Parolni o'zgartirdi"
 msgid "Password reset"
 msgstr "Parol tiklandi"
 
+msgid "Given"
+msgstr "Berildi"
+
+msgid "Ended"
+msgstr "Tugatildi"
+
+msgid "Amount changed"
+msgstr "Summa o'zgartirildi"
+
+msgid "Payment reversed"
+msgstr "To'lov bekor qilindi"
+
+msgid "Money refunded"
+msgstr "Pul qaytarildi"
+
+msgid "Closed"
+msgstr "Yopildi"
+
+msgid "Converted to a student"
+msgstr "O'quvchiga aylantirildi"
+
+msgid "Restored"
+msgstr "Tiklandi"
+
+msgid "Imported"
+msgstr "Import qilindi"
+
+msgid "Frozen"
+msgstr "Muzlatilgan"
+
+msgid "Unfrozen"
+msgstr "Muzlatish to'xtatildi"
+
+msgid "Done"
+msgstr "Bajarildi"
+
 msgid "System setting"
 msgstr "Tizim sozlamasi"
+
+msgid "Updated at"
+msgstr "O'zgartirilgan vaqt"
+
+msgid "Branches"
+msgstr "Filiallar"
+
+msgid "Lead"
+msgstr "Lid"
+
+msgid "Lesson"
+msgstr "Dars"
+
+msgid "Stage"
+msgstr "Bosqich"
+
+msgid "Before"
+msgstr "Oldin"
+
+msgid "After"
+msgstr "Keyin"
 
 msgid "Yes"
 msgstr "Ha"
@@ -463,9 +1262,6 @@ msgstr "Vaqtni SS:DD ko'rinishida kiriting, masalan 15:30."
 msgid "Enter the date as DD.MM.YYYY."
 msgstr "Sanani KK.OO.YYYY ko'rinishida kiriting."
 
-msgid "Enter a whole amount in so'm, for example 450 000."
-msgstr "Summani butun so'mda kiriting, masalan 450 000."
-
 #, python-format
 msgid "The amount must be at least %(limit)s."
 msgstr "Summa kamida %(limit)s bo'lishi kerak."
@@ -484,15 +1280,6 @@ msgstr "Obyekt turi"
 
 msgid "Object ID"
 msgstr "Obyekt raqami"
-
-msgid "Before"
-msgstr "Oldin"
-
-msgid "After"
-msgstr "Keyin"
-
-msgid "Reason"
-msgstr "Sabab"
 
 msgid "IP address"
 msgstr "IP manzil"
@@ -537,15 +1324,6 @@ msgstr "Filial administratori"
 msgid "Sales manager"
 msgstr "Sotuv menejeri"
 
-msgid "Teacher"
-msgstr "O'qituvchi"
-
-msgid "From"
-msgstr "Dan"
-
-msgid "To"
-msgstr "Gacha"
-
 msgid "All users"
 msgstr "Barcha foydalanuvchilar"
 
@@ -579,14 +1357,8 @@ msgstr "Menejer uchun vazifa yaratiladi."
 msgid "Save anyway"
 msgstr "Baribir saqlash"
 
-msgid "Stage"
-msgstr "Bosqich"
-
 msgid "Refusal reason"
 msgstr "Rad etish sababi"
-
-msgid "Type"
-msgstr "Turi"
 
 msgid "Call"
 msgstr "Qo'ng'iroq"
@@ -599,9 +1371,6 @@ msgstr "Vazifa"
 
 msgid "Call back"
 msgstr "Qayta qo'ng'iroq qilish"
-
-msgid "Date"
-msgstr "Sana"
 
 msgid "Assigned to"
 msgstr "Mas'ul"
@@ -629,9 +1398,6 @@ msgstr "O'quvchining telefoni"
 
 msgid "Parent's name"
 msgstr "Ota-onasining ismi"
-
-msgid "Parent's phone"
-msgstr "Ota-onasining telefoni"
 
 msgid "Enter the student's or the parent's phone."
 msgstr "O'quvchi yoki ota-onasining telefonini kiriting."
@@ -702,26 +1468,14 @@ msgstr "Rad etish sabablari"
 msgid "Refusal note"
 msgstr "Rad etish izohi"
 
-msgid "Student"
-msgstr "O'quvchi"
-
 msgid "Converted at"
 msgstr "O'quvchiga aylantirilgan vaqt"
-
-msgid "Updated at"
-msgstr "O'zgartirilgan vaqt"
-
-msgid "Lead"
-msgstr "Lid"
 
 msgid "Stage change"
 msgstr "Bosqich o'zgardi"
 
 msgid "Trial lesson"
 msgstr "Sinov darsi"
-
-msgid "Converted to a student"
-msgstr "O'quvchiga aylantirildi"
 
 msgid "Edited"
 msgstr "Tahrirlandi"
@@ -755,15 +1509,6 @@ msgstr "Keldi"
 
 msgid "Did not come"
 msgstr "Kelmadi"
-
-msgid "Cancelled"
-msgstr "Bekor qilindi"
-
-msgid "Lesson"
-msgstr "Dars"
-
-msgid "Status"
-msgstr "Holat"
 
 msgid "Trial lessons"
 msgstr "Sinov darslari"
@@ -860,29 +1605,17 @@ msgstr "Bu raqam boshqa filialda mavjud: %(name)s"
 msgid "My tasks"
 msgstr "Mening vazifalarim"
 
-msgid "Overdue"
-msgstr "Muddati o'tgan"
-
 msgid "Today"
 msgstr "Bugun"
 
 msgid "Upcoming"
 msgstr "Keyingi"
 
-msgid "Done"
-msgstr "Bajarildi"
-
 msgid "Came"
 msgstr "Keldi"
 
-msgid "Cancel"
-msgstr "Bekor qilish"
-
 msgid "Search"
 msgstr "Qidirish"
-
-msgid "Name or phone"
-msgstr "Ism yoki telefon"
 
 msgid "Filters"
 msgstr "Saralash"
@@ -941,9 +1674,6 @@ msgstr "Qayta ochish"
 msgid "Add"
 msgstr "Qo'shish"
 
-msgid "Save"
-msgstr "Saqlash"
-
 msgid "No open tasks."
 msgstr "Ochiq vazifa yo'q."
 
@@ -986,9 +1716,6 @@ msgstr "Lidlar bosqichlar bo'yicha"
 msgid "Lead created."
 msgstr "Lid yaratildi."
 
-msgid "Saved."
-msgstr "Saqlandi."
-
 msgid "The lead is marked as refused."
 msgstr "Lid \"Rad etdi\" deb belgilandi."
 
@@ -1011,9 +1738,6 @@ msgstr "Markaz ma'lumotlari ishlatilishi uchun bo'sh qoldiring."
 
 msgid "Used to log in."
 msgstr "Tizimga kirish uchun ishlatiladi."
-
-msgid "Branches"
-msgstr "Filiallar"
 
 msgid "The director works in all branches automatically."
 msgstr "Direktor avtomatik ravishda barcha filiallarda ishlaydi."
@@ -1069,9 +1793,6 @@ msgstr "To'lov modeli"
 msgid "Duration (months)"
 msgstr "Davomiyligi (oy)"
 
-msgid "Description"
-msgstr "Tavsif"
-
 msgid "Courses"
 msgstr "Kurslar"
 
@@ -1080,9 +1801,6 @@ msgstr "Markaz nomi"
 
 msgid "Legal name"
 msgstr "Yuridik nomi"
-
-msgid "Tax ID (STIR)"
-msgstr "STIR"
 
 msgid "The tax ID has 9 digits."
 msgstr "STIR 9 ta raqamdan iborat."
@@ -1196,9 +1914,6 @@ msgstr ".xlsx fayl yuklang."
 msgid "The file is larger than 5 MB."
 msgstr "Fayl 5 MB dan katta."
 
-msgid "Group name"
-msgstr "Guruh nomi"
-
 msgid "Teacher's phone"
 msgstr "O'qituvchi telefoni"
 
@@ -1252,9 +1967,6 @@ msgstr "boshlanish sanasi bo'sh"
 msgid "the end date is before the start date"
 msgstr "tugash sanasi boshlanish sanasidan oldin"
 
-msgid "a date is wrong (use DD.MM.YYYY)"
-msgstr "sana noto'g'ri (KK.OO.YYYY ko'rinishida yozing)"
-
 msgid "the capacity must be a positive whole number"
 msgstr "sig'im musbat butun son bo'lishi kerak"
 
@@ -1263,9 +1975,6 @@ msgstr "Guruhga qo'shilgan sana"
 
 msgid "the last name and first name are required"
 msgstr "familiya va ism majburiy"
-
-msgid "a phone number is wrong (use +998 90 123 45 67)"
-msgstr "telefon raqami noto'g'ri (+998 90 123 45 67 ko'rinishida yozing)"
 
 msgid "enter the student's or the parent's phone"
 msgstr "o'quvchi yoki ota-onasining telefonini kiriting"
@@ -1293,26 +2002,14 @@ msgstr "o'quvchi guruhga qo'shilgan sanani kiriting"
 msgid "the join date is before the group starts"
 msgstr "qo'shilgan sana guruh boshlanishidan oldin"
 
-msgid "Imported from Excel"
-msgstr "Excel'dan import qilindi"
-
-msgid "Groups"
-msgstr "Guruhlar"
-
 msgid "Courses, teachers and rooms must exist in Settings first."
 msgstr "Avval Sozlamalarda kurslar, o'qituvchilar va xonalar bo'lishi kerak."
 
 msgid "Import groups first. A student is matched by phone."
 msgstr "Avval guruhlarni import qiling. O'quvchi telefon bo'yicha topiladi."
 
-msgid "Opening balances"
-msgstr "Boshlang'ich qoldiqlar"
-
 msgid "Checked, ready to import"
 msgstr "Tekshirildi, import qilishga tayyor"
-
-msgid "Imported"
-msgstr "Import qilindi"
 
 msgid "Has errors"
 msgstr "Xatolar bor"
@@ -1340,9 +2037,6 @@ msgstr "Tugagan"
 
 msgid "This branch already has a group with this name."
 msgstr "Bu filialda shu nomli guruh allaqachon bor."
-
-msgid "The end date must be after the start date."
-msgstr "Tugash sanasi boshlanish sanasidan keyin bo'lishi kerak."
 
 msgid "Monday"
 msgstr "Dushanba"
@@ -1392,14 +2086,8 @@ msgstr "Darslar"
 msgid "Studying"
 msgstr "O'qiyapti"
 
-msgid "Frozen"
-msgstr "Muzlatilgan"
-
 msgid "Left"
 msgstr "Ketgan"
-
-msgid "Moved to another group"
-msgstr "Boshqa guruhga o'tkazildi"
 
 msgid "Completed"
 msgstr "Tugatgan"
@@ -1416,23 +2104,14 @@ msgstr "O'quvchi allaqachon shu guruhda."
 msgid "Enrolled into the group"
 msgstr "Guruhga qo'shildi"
 
-msgid "Unfrozen"
-msgstr "Muzlatish to'xtatildi"
-
 msgid "Moved from another group"
 msgstr "Boshqa guruhdan o'tkazildi"
-
-msgid "Left the group"
-msgstr "Guruhdan chiqdi"
 
 msgid "Enrollment event"
 msgstr "Guruhdagi o'zgarish"
 
 msgid "Enrollment history"
 msgstr "Guruhdagi o'zgarishlar tarixi"
-
-msgid "Freeze"
-msgstr "Muzlatish"
 
 msgid "Freezes"
 msgstr "Muzlatishlar"
@@ -1468,14 +2147,35 @@ msgid "How many days back a teacher may mark or change attendance."
 msgstr ""
 "O'qituvchi necha kun oldingi davomatni belgilashi yoki o'zgartirishi mumkin."
 
+msgid "Groups created"
+msgstr "Yaratilgan guruhlar"
+
+msgid "Students created"
+msgstr "Yaratilgan o'quvchilar"
+
+msgid "Students updated"
+msgstr "Yangilangan o'quvchilar"
+
+msgid "Enrolled into groups"
+msgstr "Guruhga qo'shilganlar"
+
+msgid "Balances created"
+msgstr "Kiritilgan qoldiqlar"
+
+msgid "Discounts created"
+msgstr "Kiritilgan chegirmalar"
+
+msgid "Marked by"
+msgstr "Belgilagan"
+
+msgid "Marked at"
+msgstr "Belgilangan vaqt"
+
 msgid "Attendance for this lesson can no longer be changed."
 msgstr "Bu dars davomatini endi o'zgartirib bo'lmaydi."
 
 msgid "The student is not in this group on this date."
 msgstr "O'quvchi bu sanada guruhda emas."
-
-msgid "Write the reason."
-msgstr "Sababini yozing."
 
 msgid "The group has finished."
 msgstr "Guruh tugagan."
@@ -1552,12 +2252,6 @@ msgstr "Guruhga qo'shilishi kutilmoqda"
 msgid "Today's lessons"
 msgstr "Bugungi darslar"
 
-msgid "Previous day"
-msgstr "Oldingi kun"
-
-msgid "Next day"
-msgstr "Keyingi kun"
-
 msgid "Marked"
 msgstr "Belgilangan"
 
@@ -1576,6 +2270,9 @@ msgstr "Bu sanada guruhda o'quvchi yo'q."
 
 msgid "Each tap is saved immediately."
 msgstr "Har bir bosish darhol saqlanadi."
+
+msgid "Recalculate"
+msgstr "Qayta hisoblash"
 
 msgid "Confirm"
 msgstr "Tasdiqlash"
@@ -1640,9 +2337,6 @@ msgstr "Mening guruhlarim"
 msgid "Current"
 msgstr "Joriy"
 
-msgid "All"
-msgstr "Hammasi"
-
 msgid "No groups yet."
 msgstr "Hali guruh yo'q."
 
@@ -1665,8 +2359,9 @@ msgstr "Namunalar"
 msgid "Download"
 msgstr "Yuklab olish"
 
-msgid "Order: groups first, then students."
-msgstr "Tartib: avval guruhlar, keyin o'quvchilar."
+msgid "Order: groups, students, then opening balances and discounts."
+msgstr ""
+"Tartib: guruhlar, o'quvchilar, keyin boshlang'ich qoldiqlar va chegirmalar."
 
 msgid "Recent imports"
 msgstr "So'nggi importlar"
@@ -1683,21 +2378,6 @@ msgstr "Xato topilmadi. Barcha qatorlarni saqlash uchun \"Import\"ni bosing."
 
 msgid "Import all rows now?"
 msgstr "Barcha qatorlar hozir import qilinsinmi?"
-
-msgid "Groups created"
-msgstr "Yaratilgan guruhlar"
-
-msgid "Students created"
-msgstr "Yaratilgan o'quvchilar"
-
-msgid "Students updated"
-msgstr "Yangilangan o'quvchilar"
-
-msgid "Enrolled into groups"
-msgstr "Guruhga qo'shilganlar"
-
-msgid "Balances created"
-msgstr "Kiritilgan qoldiqlar"
 
 #, python-format
 msgid "%(n)s error"
@@ -1738,9 +2418,6 @@ msgstr "Yangi o'quvchi"
 
 msgid "Edit student"
 msgstr "O'quvchini tahrirlash"
-
-msgid "Nothing found."
-msgstr "Hech narsa topilmadi."
 
 msgid "No lessons today."
 msgstr "Bugun dars yo'q."
@@ -1816,9 +2493,6 @@ msgstr "%(n)s / %(total)s sahifa"
 msgid "Next"
 msgstr "Keyingi"
 
-msgid "Filter"
-msgstr "Saralash"
-
 msgid "Reset"
 msgstr "Tozalash"
 
@@ -1840,9 +2514,6 @@ msgstr "Noto'g'ri so'rov"
 
 msgid "The request could not be understood."
 msgstr "So'rovni tushunib bo'lmadi."
-
-msgid "No access"
-msgstr "Ruxsat yo'q"
 
 msgid "Your role does not allow this action."
 msgstr "Sizning rolingiz bu amalga ruxsat bermaydi."
