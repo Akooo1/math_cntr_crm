@@ -39,8 +39,7 @@ about the personal-data localization law before you load real student data.
 1. In the project: **+ Create → GitHub Repo → `akooo1/math_cntr_crm`.**
 2. Open the new service → **Settings**:
    - **Service name:** `web`.
-   - **Source → Branch:** the branch with this code (`claude/sweet-keller-1by08z`, or
-     `main` once it is merged).
+   - **Source → Branch:** `main`.
    - **Networking → Generate Domain.** You get an address like
      `matematika-production.up.railway.app`. The app trusts it automatically.
 3. **Variables** (Raw Editor, paste and fill in):
