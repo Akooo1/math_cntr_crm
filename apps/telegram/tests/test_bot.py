@@ -33,6 +33,8 @@ class FakeTelegram:
     def call(self, method, **params):
         if method == "getMe":
             return {"username": "markaz_bot"}
+        if method == "getWebhookInfo":
+            return {"url": "", "pending_update_count": 0}
         if method == "getUpdates":
             out, self.updates = self.updates, []
             return out
@@ -226,3 +228,37 @@ class TestScreens:
         bot.updates = [update(100, "/start")]
         call_command("telegram_bot", "--once")
         assert bot.sent and bot.sent[-1]["chat_id"] == 100
+
+
+class TestDiagnostics:
+    def test_client_drops_null_params(self, monkeypatch):
+        import io
+        import json as jsonlib
+
+        sent = {}
+
+        class Resp(io.BytesIO):
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *a):
+                return False
+
+        def fake_urlopen(req, timeout):
+            sent["body"] = jsonlib.loads(req.data)
+            return Resp(b'{"ok": true, "result": []}')
+
+        monkeypatch.setattr(tg.urllib.request, "urlopen", fake_urlopen)
+        tg.TelegramClient("123:ABC").call("getUpdates", offset=None, timeout=25)
+        assert sent["body"] == {"timeout": 25}
+
+    def test_check_without_token(self, settings, capsys):
+        settings.TELEGRAM_BOT_TOKEN = ""
+        tg.set_client(None)
+        call_command("telegram_check")
+        assert "TELEGRAM_BOT_TOKEN is empty" in capsys.readouterr().out
+
+    def test_check_with_bot(self, bot, capsys):
+        call_command("telegram_check")
+        out = capsys.readouterr().out
+        assert "@markaz_bot" in out and "FAIL" not in out

@@ -31,7 +31,7 @@ class Command(BaseCommand):
         try:
             client.call("deleteWebhook", drop_pending_updates=False)
         except TelegramError as exc:
-            log.warning("deleteWebhook: %s", exc)
+            self.stderr.write(f"Telegram deleteWebhook failed: {exc}")
         offset = None
         self.stdout.write("Telegram bot is running.")
         while True:
@@ -40,11 +40,18 @@ class Command(BaseCommand):
                     "getUpdates", timeout=25, offset=offset, allowed_updates=["message"]
                 )
             except TelegramError as exc:
-                log.warning("getUpdates: %s", exc)
+                if exc.code == 409:
+                    self.stderr.write(
+                        "Telegram says another copy of this bot is already polling with the "
+                        "same token (Railway and your computer at once?). Stop one of them."
+                    )
+                else:
+                    self.stderr.write(f"Telegram getUpdates failed: {exc}")
                 time.sleep(5)
                 updates = []
             for update in updates:
                 offset = update["update_id"] + 1
+                self.stdout.write(f"update {update['update_id']} received")
                 if not once:  # long-running process: drop stale DB connections
                     close_old_connections()
                 try:

@@ -153,7 +153,17 @@ Needs Docker with Compose v2, a domain whose DNS A record points at the server, 
 6. Switch debt reminders on in Sozlamalar → Umumiy sozlamalar when you are ready.
 
 Locally the bot also works (it polls Telegram, no public address needed): put the token
-into a `.env` next to `docker-compose.yml` and run `docker compose up`.
+into a `.env` next to `docker-compose.yml` and run `docker compose up -d --build`.
+
+If the bot doesn't answer:
+
+```bash
+docker compose exec bot python manage.py telegram_check
+```
+
+It checks the token, the connection to Telegram and the webhook, and says what to fix.
+Only one copy of a bot can run per token: if the bot also runs on Railway, the local one
+gets "409 Conflict" (and the other way round).
 
 ### Backups
 

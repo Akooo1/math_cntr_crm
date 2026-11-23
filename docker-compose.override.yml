@@ -22,6 +22,9 @@ services:
   # Telegram bot for local testing: put TELEGRAM_BOT_TOKEN=... into .env first.
   bot:
     image: matematika-web:dev
+    build:
+      context: .
+      target: dev
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-matematika}
       POSTGRES_USER: ${POSTGRES_USER:-mm}

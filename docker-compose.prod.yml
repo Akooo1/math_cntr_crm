@@ -31,6 +31,9 @@ services:
 
   cron:
     image: matematika-web:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      target: prod
     environment:
       <<: *app-env
       SKIP_MIGRATE: "1"
@@ -43,6 +46,9 @@ services:
   # Telegram bot (long polling). Without TELEGRAM_BOT_TOKEN it just idles.
   bot:
     image: matematika-web:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      target: prod
     environment:
       <<: *app-env
       SKIP_MIGRATE: "1"

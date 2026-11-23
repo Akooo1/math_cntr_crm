@@ -31,6 +31,7 @@ class TelegramClient:
         self.timeout = timeout
 
     def call(self, method: str, **params):
+        params = {k: v for k, v in params.items() if v is not None}  # Telegram dislikes null
         req = urllib.request.Request(
             self.base + method,
             data=json.dumps(params).encode(),
