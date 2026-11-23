@@ -11,7 +11,7 @@ name = Module layers
 type = layers
 layers =
     apps.demo
-    apps.reports | apps.salaries
+    apps.reports | apps.salaries | apps.telegram
     apps.billing | apps.crm
     apps.students | apps.staff
     apps.settings

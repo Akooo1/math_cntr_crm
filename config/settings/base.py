@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "apps.staff",
     "apps.reports",
     "apps.salaries",
+    "apps.telegram",
     "apps.demo",
 ]
 
@@ -146,3 +147,6 @@ LOGGING = {
 
 # Center name shown before the director edits it in Sozlamalar.
 CENTER_NAME_DEFAULT = "Matematika Markazi"
+
+# Telegram bot (phase 8). Empty: the bot is off. Never commit the token.
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")

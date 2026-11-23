@@ -923,3 +923,58 @@ Decisions taken in phase 7:
 - Fix from phase 6: the "close month" confirmation put Uzbek text with apostrophes inside
   JavaScript; confirmations now use the shared `data-confirm` attribute.
 
+
+---
+
+## 15. Module 4: Telegram bot (phase 8)
+
+Owner's choices (defaults approved after phase 6):
+
+1. **Parents connect themselves.** They open the bot and tap "Share my phone number".
+   Telegram sends the number of the person's own account, and the bot matches it to the
+   student's parent phone (or the student's own or extra phone). A bot can't write to
+   anyone who hasn't opened it first, and it can't look people up by phone.
+2. **Debt reminders** go to the connected parents of every student whose oldest unpaid
+   charge is at least 3 days overdue, at 10:00, and again every 7 days until the debt is
+   paid. The message names the student, the overdue amount and the branch phone. Off until
+   the Direktor switches them on.
+3. **Morning summary** at 09:30 to the Direktor: who arrived on time, who was late (with
+   minutes), whose work has started but who hasn't arrived.
+4. The bot token comes from @BotFather and lives only in the server's `.env`
+   (`TELEGRAM_BOT_TOKEN`). Without it, everything else works and the bot stays off.
+
+Decisions taken in phase 8:
+- The bot uses long polling (`getUpdates`), so it works without a public address, also on
+  a laptop. It runs as its own container (`bot`).
+- The Direktor connects their own Telegram from Sozlamalar → Telegram with a one-day link.
+- If a parent blocks the bot, their connection is switched off on the next failed message.
+- Every message sent is logged (`telegram_message`); the log also prevents repeats.
+- "/stop" in the bot disconnects that chat.
+
+### 15.1 Tables (`apps/telegram`)
+
+| Table | Purpose |
+|---|---|
+| `telegram_chat` | Telegram chat id (unique), kind (`parent` / `staff`), phone (parents, E.164), user (staff), Telegram name, connected at, active, disconnected at. |
+| `telegram_message` | chat, kind (`debt_reminder`, `morning_summary`, `test`, `reply`), student (debt reminders), text, status (`sent` / `failed`), error, sent at. |
+
+### 15.2 Permissions, settings, jobs
+- `telegram.manage` (Direktor): Sozlamalar → Telegram (status, connections, log, "send now").
+- `telegram.view` (Direktor, Filial administratori): "Telegram connected" on the student
+  profile.
+- Settings: `telegram.debt_reminders` (off), `telegram.debt_min_days` (3),
+  `telegram.debt_repeat_days` (7).
+- Cron: `telegram_send summary` 09:30, `telegram_send debts` 10:00. Container `bot`:
+  `telegram_bot` (polling).
+- Module notes: [docs/modules/telegram.md](modules/telegram.md).
+
+### Phase 8 notes
+- Scheduled jobs read data with the first active Direktor's scope (every branch).
+- The repeat interval for debt reminders counts calendar days, so a reminder sent on the
+  16th repeats on the 23rd whatever minute the job ran.
+- The morning summary at 09:30 lists only people whose work has already started; teachers
+  who start at 14:00 are counted as "starts later today".
+- Not verified live: the sandbox can't reach api.telegram.org. The bot was tested against
+  a fake Telegram client; the first real test needs the owner's bot token on a server or
+  laptop.
+

@@ -14,6 +14,25 @@ services:
     volumes:
       - .:/app
 
+  # Telegram bot for local testing: put TELEGRAM_BOT_TOKEN=... into .env first.
+  bot:
+    image: matematika-web:dev
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-matematika}
+      POSTGRES_USER: ${POSTGRES_USER:-mm}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mm}
+      POSTGRES_HOST: db
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+      DJANGO_SECRET_KEY: dev-insecure-key-change-me
+      TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
+      SKIP_MIGRATE: "1"
+    command: ["python", "manage.py", "telegram_bot"]
+    volumes:
+      - .:/app
+    depends_on:
+      - web
+    restart: unless-stopped
+
   css:
     image: node:22-alpine
     working_dir: /app

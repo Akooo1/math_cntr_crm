@@ -10,6 +10,7 @@ x-app-env: &app-env
   DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?set DJANGO_SECRET_KEY in .env}
   DJANGO_ALLOWED_HOSTS: ${DOMAIN:?set DOMAIN in .env}
   DJANGO_CSRF_TRUSTED_ORIGINS: https://${DOMAIN}
+  TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
   TZ: Asia/Tashkent
 
 services:
@@ -34,6 +35,18 @@ services:
       <<: *app-env
       SKIP_MIGRATE: "1"
     command: ["/usr/local/bin/supercronic", "-passthrough-logs", "/app/deploy/crontab"]
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Telegram bot (long polling). Without TELEGRAM_BOT_TOKEN it just idles.
+  bot:
+    image: matematika-web:${IMAGE_TAG:-latest}
+    environment:
+      <<: *app-env
+      SKIP_MIGRATE: "1"
+    command: ["python", "manage.py", "telegram_bot"]
     depends_on:
       web:
         condition: service_healthy

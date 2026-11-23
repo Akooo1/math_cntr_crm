@@ -371,6 +371,7 @@ def objects(director, branch_a, branch_b, admin_a, teacher_a):
         "filial-joylashuvi": branch_a,
         "ish-vaqti": teacher_a,
         "bildirishnomalar": branch_a,
+        "telegram": branch_a,
     }
 
 

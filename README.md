@@ -104,6 +104,26 @@ Needs Docker with Compose v2, a domain whose DNS A record points at the server, 
    git pull && docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
    ```
 
+### Telegram bot
+
+1. In Telegram, open @BotFather, send `/newbot`, choose a name and a username ending in
+   `bot`. BotFather replies with a token like `123456789:AA...`.
+2. On the server, put it into `.env` (never into a chat or into git):
+
+   ```bash
+   TELEGRAM_BOT_TOKEN=123456789:AA...
+   ```
+
+3. Restart: `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d`.
+4. In the app: Sozlamalar → Telegram shows "Bot ishlayapti: @your_bot". Press
+   "Telegramimni ulash" on your phone to get the 09:30 morning summary.
+5. Give parents the link `t.me/your_bot`. They tap "Telefon raqamni yuborish"; the bot
+   matches the number with the student's parent phone.
+6. Switch debt reminders on in Sozlamalar → Umumiy sozlamalar when you are ready.
+
+Locally the bot also works (it polls Telegram, no public address needed): put the token
+into a `.env` next to `docker-compose.yml` and run `docker compose up`.
+
 ### Backups
 
 The `backup` container runs `scripts/backup.sh` every night at 02:30 (Tashkent). It writes

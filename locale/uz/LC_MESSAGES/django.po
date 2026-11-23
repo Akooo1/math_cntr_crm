@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 16:08+0500\n"
+"POT-Creation-Date: 2026-11-23 16:30+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -3179,6 +3179,260 @@ msgstr "Import tugadi."
 
 msgid "The data changed since the check. See the errors."
 msgstr "Tekshiruvdan keyin ma'lumotlar o'zgargan. Xatolarni ko'ring."
+
+msgid "Telegram bot"
+msgstr "Telegram bot"
+
+msgid "Telegram chat"
+msgstr "Telegram chat"
+
+msgid "Telegram name"
+msgstr "Telegramdagi ism"
+
+msgid "Connected at"
+msgstr "Ulangan vaqti"
+
+msgid "Disconnected at"
+msgstr "Uzilgan vaqti"
+
+msgid "Telegram connection"
+msgstr "Telegram ulanishi"
+
+msgid "Debt reminder"
+msgstr "Qarz eslatmasi"
+
+msgid "Morning summary"
+msgstr "Ertalabki hisobot"
+
+msgid "Test message"
+msgstr "Sinov xabari"
+
+msgid "Bot reply"
+msgstr "Bot javobi"
+
+msgid "Sent"
+msgstr "Yuborildi"
+
+msgid "Not sent"
+msgstr "Yuborilmadi"
+
+msgid "Recipient"
+msgstr "Qabul qiluvchi"
+
+msgid "Error"
+msgstr "Xato"
+
+msgid "Telegram message"
+msgstr "Telegram xabari"
+
+msgid "Manage the Telegram bot"
+msgstr "Telegram botni boshqarish"
+
+msgid "See Telegram connections"
+msgstr "Telegram ulanishlarini ko'rish"
+
+msgid "Debt reminders in Telegram"
+msgstr "Telegramda qarz eslatmalari"
+
+msgid "Every day at 10:00 to connected parents of students with overdue debt."
+msgstr ""
+"Har kuni soat 10:00 da qarzi muddati o'tgan o'quvchilarning ulangan ota-"
+"onalariga."
+
+msgid "Off"
+msgstr "O'chiq"
+
+msgid "On"
+msgstr "Yoqilgan"
+
+msgid "Remind after (days overdue)"
+msgstr "Necha kun kechikkandan keyin eslatish"
+
+msgid "Repeat the reminder every (days)"
+msgstr "Eslatmani necha kunda takrorlash"
+
+#, python-format
+msgid "Sent: %(s)s. Not sent: %(f)s."
+msgstr "Yuborildi: %(s)s. Yuborilmadi: %(f)s."
+
+msgid "Debt reminders to parents, the morning summary, connections and log."
+msgstr ""
+"Ota-onalarga qarz eslatmalari, ertalabki hisobot, ulanishlar va jurnal."
+
+msgid "Notifications"
+msgstr "Bildirishnomalar"
+
+#, python-format
+msgid ""
+"Hello! This is the bot of %(center)s. Parents: tap the button below to share "
+"your phone number. We will send you payment reminders for your child."
+msgstr ""
+"Assalomu alaykum! Bu %(center)s boti. Ota-onalar: telefon raqamingizni "
+"yuborish uchun pastdagi tugmani bosing. Farzandingizning to'lovlari haqida "
+"eslatmalar yuboramiz."
+
+msgid "Share phone number"
+msgstr "Telefon raqamni yuborish"
+
+msgid "Please share your own number with the button below."
+msgstr "Iltimos, pastdagi tugma orqali o'z raqamingizni yuboring."
+
+msgid ""
+"We couldn't find a student with this phone number. Please ask the center's "
+"administrator to add it."
+msgstr ""
+"Bu telefon raqami bilan o'quvchi topilmadi. Markaz administratoridan raqamni "
+"qo'shishni so'rang."
+
+#, python-format
+msgid ""
+"Connected. You will get reminders about: %(names)s. Send /stop to disconnect."
+msgstr ""
+"Ulandingiz. Eslatmalar quyidagilar haqida keladi: %(names)s. Uzish uchun /"
+"stop yuboring."
+
+msgid "This link has expired. Open a new one in Sozlamalar → Telegram."
+msgstr ""
+"Bu havolaning muddati o'tgan. Sozlamalar → Telegram bo'limidan yangisini "
+"oching."
+
+#, python-format
+msgid "Connected, %(name)s. Reports will come here. Send /stop to disconnect."
+msgstr ""
+"Ulandingiz, %(name)s. Hisobotlar shu yerga keladi. Uzish uchun /stop "
+"yuboring."
+
+msgid "Disconnected. Send /start to connect again."
+msgstr "Uzildi. Qayta ulanish uchun /start yuboring."
+
+#, python-format
+msgid ""
+"Hello! %(center)s.\n"
+"The payment for %(student)s is overdue by %(days)s days.\n"
+"Amount due: %(amount)s.\n"
+"Please pay at the center. Questions: %(phone)s"
+msgstr ""
+"Assalomu alaykum! %(center)s.\n"
+"%(student)s uchun to'lov muddati %(days)s kun o'tgan.\n"
+"Qarzdorlik: %(amount)s.\n"
+"Iltimos, markazda to'lovni amalga oshiring. Savollar uchun: %(phone)s"
+
+#, python-format
+msgid "• %(name)s — %(time)s (%(m)s min late)"
+msgstr "• %(name)s — %(time)s (%(m)s daqiqa kechikdi)"
+
+#, python-format
+msgid "• %(name)s (work starts %(time)s)"
+msgstr "• %(name)s (ish %(time)s da boshlanadi)"
+
+#, python-format
+msgid "Morning summary, %(date)s %(time)s"
+msgstr "Ertalabki hisobot, %(date)s %(time)s"
+
+#, python-format
+msgid "On time: %(n)s"
+msgstr "Vaqtida: %(n)s"
+
+#, python-format
+msgid "Late: %(n)s"
+msgstr "Kechikdi: %(n)s"
+
+#, python-format
+msgid "Work has started, not here yet: %(n)s"
+msgstr "Ish boshlangan, hali kelmagan: %(n)s"
+
+#, python-format
+msgid "Work starts later today: %(n)s"
+msgstr "Ishi bugun keyinroq boshlanadi: %(n)s"
+
+#, python-format
+msgid "Test message from %(name)s."
+msgstr "%(name)s dan sinov xabari."
+
+msgid "Telegram"
+msgstr "Telegram"
+
+msgid "Parent connected"
+msgstr "Ota-ona ulangan"
+
+msgid "Not connected"
+msgstr "Ulanmagan"
+
+msgid "The bot is off: no token on the server."
+msgstr "Bot o'chiq: serverda token yo'q."
+
+msgid ""
+"Create a bot with @BotFather in Telegram, then put its token into "
+"TELEGRAM_BOT_TOKEN in the server's .env file and restart. Never send the "
+"token in a chat."
+msgstr ""
+"Telegramda @BotFather orqali bot yarating, so'ng uning tokenini serverdagi ."
+"env faylidagi TELEGRAM_BOT_TOKEN ga yozing va qayta ishga tushiring. Tokenni "
+"hech qachon chatda yubormang."
+
+msgid ""
+"The bot token is set, but Telegram can't be reached from the server right "
+"now."
+msgstr ""
+"Bot tokeni kiritilgan, lekin hozir serverdan Telegramga ulanib bo'lmayapti."
+
+#, python-format
+msgid "The bot is on: @%(username)s"
+msgstr "Bot ishlayapti: @%(username)s"
+
+#, python-format
+msgid ""
+"Parents: open t.me/%(username)s and tap \"Share phone number\". Give this "
+"link to parents in your group chats or on the receipt."
+msgstr ""
+"Ota-onalar: t.me/%(username)s ni ochib, \"Telefon raqamni yuborish\" "
+"tugmasini bosadi. Bu havolani ota-onalarga guruh chatlarida yoki chekda "
+"bering."
+
+msgid "My Telegram"
+msgstr "Mening Telegramim"
+
+#, python-format
+msgid "Connected: %(n)s. The morning summary comes here at 09:30."
+msgstr "Ulangan: %(n)s. Ertalabki hisobot soat 09:30 da shu yerga keladi."
+
+msgid "Connect my Telegram"
+msgstr "Telegramimni ulash"
+
+msgid "The link works for a day. Open it on the phone where your Telegram is."
+msgstr "Havola bir kun ishlaydi. Uni Telegramingiz bor telefonda oching."
+
+msgid "Available when the bot is on."
+msgstr "Bot ishlaganda mavjud bo'ladi."
+
+msgid "Send me a test message"
+msgstr "Menga sinov xabarini yuborish"
+
+msgid "Send the morning summary now"
+msgstr "Ertalabki hisobotni hozir yuborish"
+
+msgid "Send debt reminders now? Parents reminded in the last days are skipped."
+msgstr ""
+"Qarz eslatmalarini hozir yuborasizmi? Yaqinda eslatma olgan ota-onalarga "
+"qayta yuborilmaydi."
+
+msgid "Send debt reminders now"
+msgstr "Qarz eslatmalarini hozir yuborish"
+
+msgid "Debt reminders: switch on and set the days in General settings."
+msgstr "Qarz eslatmalari: Umumiy sozlamalarda yoqing va kunlarni belgilang."
+
+#, python-format
+msgid "%(n)s parent connected"
+msgid_plural "%(n)s parents connected"
+msgstr[0] "%(n)s ota-ona ulangan"
+msgstr[1] "%(n)s ota-ona ulangan"
+
+msgid "None yet."
+msgstr "Hali yo'q."
+
+msgid "Recent messages"
+msgstr "So'nggi xabarlar"
 
 msgid "Uzbek"
 msgstr "O'zbekcha"

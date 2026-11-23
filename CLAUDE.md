@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **7 done** (staff arrival check-in with GPS, notification queue page). Next: phase 8 (Telegram bot: Direktor morning summary, debt reminders to parents), phase 9 (go-live). Update this line at the end of each phase.
+- Current phase: **8 done** (Telegram bot: debt reminders to parents, Direktor morning summary). Next: phase 9 (go-live on a server). Update this line at the end of each phase.
 
 ## Ask the owner before
 
@@ -36,7 +36,7 @@ npm run build:css                              # Tailwind -> static/dist/app.css
 ## Layout and module boundaries
 
 ```
-config/   apps/{core,accounts,settings,crm,students,staff,billing,reports,salaries,demo}/   templates/   static/   locale/   scripts/   docs/   tests/
+config/   apps/{core,accounts,settings,crm,students,staff,billing,reports,salaries,telegram,demo}/   templates/   static/   locale/   scripts/   docs/   tests/
 ```
 
 `apps/demo` holds the demo seed command only; it sits above every module and nothing imports it.
@@ -44,7 +44,7 @@ config/   apps/{core,accounts,settings,crm,students,staff,billing,reports,salari
 Dependency direction (enforced by `.importlinter`; CI fails on violations):
 
 ```
-core ← accounts ← settings ← crm, students, staff ;  students ← billing ← reports, salaries ;  crm → students
+core ← accounts ← settings ← crm, students, staff ;  students ← billing ← reports, salaries, telegram ;  staff ← telegram ;  crm → students
 ```
 
 - Import another module only through `services`, `selectors`, `events`, or `models` (models only for FK targets and types).
@@ -157,6 +157,9 @@ Inside a module:
 | Start time / workdays | Ish boshlanishi / Ish kunlari |
 | Branch location / radius | Filial joylashuvi / Radius |
 | Notification queue | Bildirishnomalar navbati |
+| Telegram bot / connected | Telegram bot / Ulangan |
+| Debt reminder / morning summary | Qarz eslatmasi / Ertalabki hisobot |
+| Share phone number | Telefon raqamni yuborish |
 
 Add new terms here before using them in the UI.
 

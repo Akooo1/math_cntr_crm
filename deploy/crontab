@@ -5,3 +5,6 @@
 20 0 * * * python manage.py generate_lessons
 # Drop expired login sessions.
 40 3 * * * python manage.py clearsessions
+# Telegram (phase 8): the Direktor's morning summary, then debt reminders to parents.
+30 9 * * * python manage.py telegram_send summary
+0 10 * * * python manage.py telegram_send debts

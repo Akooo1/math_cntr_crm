@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{{ section.title }}{% endblock %}
+{% block heading %}{% translate "Settings" %}{% endblock %}
+{% block content %}
+  <div class="mb-4"><a href="{% url 'settings:index' %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{% translate "Settings" %}</a></div>
+  <div class="mx-auto max-w-3xl space-y-4">
+    <h2 class="text-xl font-semibold">{{ section.title }}</h2>
+
+    <div class="card p-4">
+      {% if not configured %}
+        <p class="font-medium text-amber-800">{% translate "The bot is off: no token on the server." %}</p>
+        <p class="mt-1 text-sm text-slate-600">{% translate "Create a bot with @BotFather in Telegram, then put its token into TELEGRAM_BOT_TOKEN in the server's .env file and restart. Never send the token in a chat." %}</p>
+      {% elif not username %}
+        <p class="font-medium text-amber-800">{% translate "The bot token is set, but Telegram can't be reached from the server right now." %}</p>
+      {% else %}
+        <p class="font-medium text-emerald-800">{% blocktranslate %}The bot is on: @{{ username }}{% endblocktranslate %}</p>
+        <p class="mt-1 text-sm text-slate-600">{% blocktranslate %}Parents: open t.me/{{ username }} and tap "Share phone number". Give this link to parents in your group chats or on the receipt.{% endblocktranslate %}</p>
+      {% endif %}
+    </div>
+
+    <div class="card space-y-3 p-4">
+      <p class="font-medium">{% translate "My Telegram" %}</p>
+      {% if my_chat %}
+        <p class="text-sm text-emerald-800">{% blocktranslate with n=my_chat.tg_name|default:my_chat.chat_id %}Connected: {{ n }}. The morning summary comes here at 09:30.{% endblocktranslate %}</p>
+      {% elif my_link %}
+        <a class="btn-primary w-full sm:w-auto" href="{{ my_link }}" target="_blank" rel="noopener">{% icon "send" %}{% translate "Connect my Telegram" %}</a>
+        <p class="text-xs text-slate-500">{% translate "The link works for a day. Open it on the phone where your Telegram is." %}</p>
+      {% else %}
+        <p class="text-sm text-slate-500">{% translate "Available when the bot is on." %}</p>
+      {% endif %}
+      <div class="flex flex-wrap gap-2 pt-1">
+        <form method="post">{% csrf_token %}<input type="hidden" name="action" value="test"><button class="btn-secondary px-3 py-1.5">{% translate "Send me a test message" %}</button></form>
+        <form method="post">{% csrf_token %}<input type="hidden" name="action" value="summary"><button class="btn-secondary px-3 py-1.5">{% translate "Send the morning summary now" %}</button></form>
+        {% translate "Send debt reminders now? Parents reminded in the last days are skipped." as q %}
+        <form method="post" data-confirm="{{ q }}">{% csrf_token %}<input type="hidden" name="action" value="debts"><button class="btn-secondary px-3 py-1.5">{% translate "Send debt reminders now" %}</button></form>
+      </div>
+      <p class="text-xs text-slate-500">{% translate "Debt reminders: switch on and set the days in General settings." %} <a class="text-sky-700" href="{% url 'settings:section_list' 'umumiy' %}">{% translate "General settings" %}</a></p>
+    </div>
+
+    <div class="card p-4">
+      <p class="mb-2 font-medium">{% blocktranslate count n=parents|length %}{{ n }} parent connected{% plural %}{{ n }} parents connected{% endblocktranslate %}</p>
+      <ul class="divide-y divide-slate-100 text-sm">
+        {% for p in parents %}
+          <li class="flex flex-wrap justify-between gap-2 py-2"><span>{{ p.chat.phone|telefon }}{% if p.chat.tg_name %} · {{ p.chat.tg_name }}{% endif %}</span><span class="text-slate-500">{% for s in p.students %}{{ s.full_name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}</span></li>
+        {% empty %}<li class="py-2 text-slate-500">{% translate "None yet." %}</li>{% endfor %}
+      </ul>
+      {% if staff %}
+        <p class="mb-2 mt-4 font-medium">{% translate "Staff" %}</p>
+        <ul class="divide-y divide-slate-100 text-sm">{% for c in staff %}<li class="flex justify-between gap-2 py-2"><span>{{ c.user.full_name }}</span><span class="text-slate-500">{{ c.tg_name }}</span></li>{% endfor %}</ul>
+      {% endif %}
+    </div>
+
+    <div class="card p-4">
+      <p class="mb-2 font-medium">{% translate "Recent messages" %}</p>
+      <ul class="divide-y divide-slate-100 text-sm">
+        {% for m in log %}
+          <li class="py-2">
+            <div class="flex flex-wrap justify-between gap-2"><span class="font-medium">{{ m.get_kind_display }}{% if m.student %} · {{ m.student.full_name }}{% endif %}</span><span class="text-slate-500">{{ m.sent_at|sana_vaqt }}</span></div>
+            <p class="text-slate-600">{% if m.chat.phone %}{{ m.chat.phone|telefon }}{% else %}{{ m.chat.tg_name }}{% endif %} · {% if m.status == "sent" %}<span class="text-emerald-700">{{ m.get_status_display }}</span>{% else %}<span class="text-rose-700">{{ m.get_status_display }}</span>{% endif %}</p>
+          </li>
+        {% empty %}<li class="py-2 text-slate-500">{% translate "None yet." %}</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endblock %}
