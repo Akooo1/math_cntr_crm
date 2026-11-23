@@ -56,7 +56,8 @@
   </section>
 
   <section class="card mt-4 p-5">
-    <h2 class="font-semibold">{% translate "Transactions" %}</h2>
+    <div class="flex items-center justify-between gap-2"><h2 class="font-semibold">{% translate "Transactions" %}</h2>
+      <a class="btn-ghost px-3 py-1.5" href="?filial={{ branch.pk }}&sana={{ day|sana }}&excel=1">{% icon "download" "w-4 h-4" %}{% translate "Export to Excel" %}</a></div>
     <ul class="mt-2 divide-y divide-slate-100 text-sm">
       {% for p in report.rows %}
         <li><a href="{% url 'billing:payment' p.pk %}" class="flex items-center justify-between gap-3 py-2 hover:text-sky-700">

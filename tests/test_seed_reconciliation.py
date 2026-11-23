@@ -1,4 +1,5 @@
-"""Acceptance: the debtors list and the cash report match the seeded money (brief, 'Done when').
+"""Acceptance: the debtors list, the cash report and the reports match the seeded money
+(brief, 'Done when').
 
 The numbers are recomputed here from the raw rows (charges, discount lines, adjustments,
 payments) with plain Python, independently of the views and the allocation cache.
@@ -58,11 +59,12 @@ def raw_overdue_by_student() -> dict[int, int]:
 
 @pytest.mark.django_db(transaction=True, serialized_rollback=True)
 def test_seeded_money_reconciles():
-    """One seed (about 10 s), three independent checks."""
+    """One seed (about 10 s), four independent checks."""
     call_command("seed_demo")
     check_debtors()
     check_balances()
     check_cash()
+    check_reports()
 
 
 def check_debtors():
@@ -97,3 +99,33 @@ def check_cash():
             assert close.totals["total_net"] == total  # nothing changed after closing
     assert CashDayClose.objects.exists()
     assert not CashDayClose.objects.filter(date__gte=dates.today() - dt.timedelta(days=2)).exists()
+
+
+def check_reports():
+    from apps.core.reports import Params, get_report
+
+    director = get_user_model().objects.get(phone="+998900000001")
+    net = raw_net()
+    start = Charge.objects.order_by("due_date").first().due_date.replace(day=1)
+    end = dates.today()
+    params = Params(start, end, None)
+    charged_by_month, collected_by_month = defaultdict(int), defaultdict(int)
+    for c in Charge.objects.filter(due_date__gte=start, due_date__lte=end):
+        charged_by_month[c.due_date.replace(day=1)] += net[c.pk]
+    for p in Payment.objects.filter(status="confirmed", paid_on__gte=start, paid_on__lte=end):
+        collected_by_month[p.paid_on.replace(day=1)] += (
+            p.amount if p.kind == "payment" else -p.amount
+        )
+    monthly = get_report("oylar").build(director, params)
+    assert {r[0]: r[1] for r in monthly.rows if r[1]} == dict(charged_by_month)
+    assert {r[0]: r[2] for r in monthly.rows if r[2]} == {
+        m: v for m, v in collected_by_month.items() if v
+    }
+    # Branch and method reports add up to the same totals.
+    branches = get_report("filiallar").build(director, params)
+    methods = get_report("tolov-usullari").build(director, params)
+    assert branches.totals[1:3] == monthly.totals[1:3]
+    assert methods.totals[3] == monthly.totals[2]
+    # Overdue debt in the reports is the debtors list total.
+    debt = get_report("qarzdorlik").build(director, params)
+    assert debt.totals[2] == sum(raw_overdue_by_student().values()) == branches.totals[4]

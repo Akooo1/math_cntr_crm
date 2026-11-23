@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **4 done** (billing, payments, debtors, cash report). Next: phase 5 (reports, Excel export, production deployment, backups). Update this line at the end of each phase.
+- Current phase: **5 done** (reports, dashboard, Excel export, production deployment, backups). Module 1 is complete pending the owner's acceptance. Update this line at the end of each phase.
 
 ## Ask the owner before
 
@@ -141,6 +141,10 @@ Inside a module:
 | Roles | Direktor, Filial administratori, Sotuv menejeri, O'qituvchi |
 | Payment methods | Naqd, Terminal (karta), Bank o'tkazmasi |
 | Export to Excel | Excel'ga yuklash |
+| Collected (money in, net of reversals and refunds) | Tushum |
+| Difference | Farq |
+| Conversion (lead → student) | Konversiya |
+| Unpaid now / overdue now | Hozir to'lanmagan / Hozir muddati o'tgan |
 
 Add new terms here before using them in the UI.
 
@@ -173,6 +177,10 @@ Add new terms here before using them in the UI.
 - Template builtins (no `{% load %}` needed): `i18n`, `|som`, `|raqam`, `|sana`, `|sana_vaqt`,
   `|telefon`, `user|can:"perm.code"`, `{% icon "name" %}`, `{% field form.x %}`.
 - `billing.domain.rounding.round_amount` — the only money rounding function.
+- `core.reports.register_report(ReportDef(...))`: a report with period and branch filters,
+  phone cards, desktop table and Excel export for free. See `docs/modules/reports.md`.
+- `core.excel.workbook(title, headers, rows, kinds, totals)` / `core.excel.response(...)`:
+  every Excel export. Money stays numeric with a so'm number format.
 - URLs and slugs are Uzbek (`/sozlamalar/`, `/kirish/`); code identifiers stay English.
 
 ## Security and permissions

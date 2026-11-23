@@ -9,6 +9,7 @@
     <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-5">
       <button class="btn-primary">{% icon "search" %}{% translate "Filter" %}</button>
       <a href="?" class="btn-ghost">{% translate "Reset" %}</a>
+      <a href="?{{ query }}&excel=1" class="btn-ghost">{% icon "download" "w-4 h-4" %}{% translate "Export to Excel" %}</a>
     </div>
     </div>
   </form>

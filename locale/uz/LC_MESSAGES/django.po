@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 11:01+0500\n"
+"POT-Creation-Date: 2026-11-23 12:00+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -815,6 +815,9 @@ msgstr "Kunni yopish"
 msgid "Transactions"
 msgstr "Operatsiyalar"
 
+msgid "Export to Excel"
+msgstr "Excel'ga yuklash"
+
 msgid "No payments on this day."
 msgstr "Bu kuni to'lov yo'q."
 
@@ -1120,6 +1123,12 @@ msgstr "Summalar va sanalarni tekshiring."
 msgid "The installment plan was changed."
 msgstr "Bo'lib to'lash rejasi o'zgartirildi."
 
+msgid "Oldest due date"
+msgstr "Eng eski to'lov muddati"
+
+msgid "Time"
+msgstr "Vaqt"
+
 msgid "The day is closed. Its payments are locked."
 msgstr "Kun yopildi. Uning to'lovlari qulflandi."
 
@@ -1287,9 +1296,6 @@ msgstr "IP manzil"
 msgid "Browser"
 msgstr "Brauzer"
 
-msgid "Time"
-msgstr "Vaqt"
-
 msgid "Audit log entry"
 msgstr "Jurnal yozuvi"
 
@@ -1329,6 +1335,12 @@ msgstr "Barcha foydalanuvchilar"
 
 msgid "All objects"
 msgstr "Barcha obyektlar"
+
+msgid "System"
+msgstr "Tizim"
+
+msgid "Details"
+msgstr "Batafsil"
 
 msgid "Leads"
 msgstr "Lidlar"
@@ -1733,6 +1745,161 @@ msgid ""
 "administrator."
 msgstr "O'quvchi yaratildi. Guruhga qo'shishni filial administratori bajaradi."
 
+msgid "Reports"
+msgstr "Hisobotlar"
+
+#, python-format
+msgid "%(n)s M"
+msgstr "%(n)s mln"
+
+#, python-format
+msgid "%(n)s K"
+msgstr "%(n)s ming"
+
+msgid "Charged"
+msgstr "Hisoblangan"
+
+msgid "Collected"
+msgstr "Tushum"
+
+msgid "Difference"
+msgstr "Farq"
+
+msgid ""
+"Charged = charges due in the month, after discounts and corrections. "
+"Collected = payments minus reversals and refunds."
+msgstr ""
+"Hisoblangan — shu oyda muddati kelgan hisoblar, chegirma va tuzatishlardan "
+"keyin. Tushum — to'lovlar, bekor qilingan to'lovlar va qaytarilgan pullar "
+"ayirilgan holda."
+
+msgid "Unpaid now"
+msgstr "Hozir to'lanmagan"
+
+msgid "Overdue now"
+msgstr "Hozir muddati o'tgan"
+
+msgid "Not tied to a course"
+msgstr "Kursga bog'lanmagan"
+
+msgid ""
+"Collected by course counts the money from the period's payments that went to "
+"that course's charges. Credit not yet used is not tied to a course."
+msgstr ""
+"Kurs bo'yicha tushum — davrdagi to'lovlardan shu kurs hisoblariga "
+"yo'naltirilgan pul. Hali ishlatilmagan avans hech bir kursga bog'lanmagan."
+
+msgid "The state right now; the period filter doesn't apply."
+msgstr "Hozirgi holat; davr filtri qo'llanilmaydi."
+
+msgid "New leads"
+msgstr "Yangi lidlar"
+
+msgid "Became students"
+msgstr "O'quvchiga aylandi"
+
+msgid "Conversion"
+msgstr "Konversiya"
+
+msgid "Leads created in the period and what has happened to them so far."
+msgstr "Davrda yaratilgan lidlar va ularning hozirgacha holati."
+
+msgid "No manager"
+msgstr "Menejersiz"
+
+msgid "Charged and collected by month"
+msgstr "Oylar bo'yicha hisoblangan va tushum"
+
+msgid "Revenue and collections month by month."
+msgstr "Har oy uchun hisoblangan summa va tushum."
+
+msgid "By branch"
+msgstr "Filiallar bo'yicha"
+
+msgid "Charged, collected and debt per branch."
+msgstr "Har bir filial bo'yicha hisoblangan, tushum va qarzdorlik."
+
+msgid "By course"
+msgstr "Kurslar bo'yicha"
+
+msgid "Charged and collected per course."
+msgstr "Har bir kurs bo'yicha hisoblangan va tushum."
+
+msgid "By payment method"
+msgstr "To'lov usullari bo'yicha"
+
+msgid "Money in and out per payment method."
+msgstr "Har bir to'lov usuli bo'yicha kirim va chiqim."
+
+msgid "Debt by course"
+msgstr "Kurslar bo'yicha qarzdorlik"
+
+msgid "Total and overdue debt right now."
+msgstr "Hozirgi umumiy va muddati o'tgan qarzdorlik."
+
+msgid "Lead conversion by source"
+msgstr "Manbalar bo'yicha lid konversiyasi"
+
+msgid "Which sources bring students."
+msgstr "Qaysi manbalar o'quvchi olib keladi."
+
+msgid "Lead conversion by manager"
+msgstr "Menejerlar bo'yicha lid konversiyasi"
+
+msgid "How each manager converts leads."
+msgstr "Har bir menejer lidlarni qanday o'quvchiga aylantiradi."
+
+msgid "View reports"
+msgstr "Hisobotlarni ko'rish"
+
+msgid "one branch"
+msgstr "bitta filial"
+
+msgid "Show"
+msgstr "Ko'rsatish"
+
+msgid "Collected this month"
+msgstr "Shu oydagi tushum"
+
+#, python-format
+msgid "%(d)s vs the same days of last month"
+msgstr "o'tgan oyning shu kunlariga nisbatan %(d)s"
+
+msgid "Charged this month"
+msgstr "Shu oyda hisoblangan"
+
+msgid "Debt: overdue / total"
+msgstr "Qarzdorlik: muddati o'tgan / jami"
+
+#, python-format
+msgid "of %(t)s unpaid"
+msgstr "%(t)s to'lanmagan summadan"
+
+msgid "New leads this month"
+msgstr "Shu oydagi yangi lidlar"
+
+#, python-format
+msgid "%(c)s became students"
+msgstr "%(c)s tasi o'quvchiga aylandi"
+
+msgid "Last 6 months"
+msgstr "Oxirgi 6 oy"
+
+msgid "Charged and collected for the last 6 months"
+msgstr "Oxirgi 6 oyda hisoblangan va tushum"
+
+msgid "As a table"
+msgstr "Jadval ko'rinishida"
+
+msgid "This month"
+msgstr "Shu oy"
+
+msgid "Last 3 months"
+msgstr "Oxirgi 3 oy"
+
+msgid "This year"
+msgstr "Shu yil"
+
 msgid "Leave empty to use the center's details."
 msgstr "Markaz ma'lumotlari ishlatilishi uchun bo'sh qoldiring."
 
@@ -1822,9 +1989,6 @@ msgstr "Sozlamalarni boshqarish"
 
 msgid "Organization"
 msgstr "Tashkilot"
-
-msgid "System"
-msgstr "Tizim"
 
 msgid "Branch names, addresses and receipt number prefixes."
 msgstr "Filial nomlari, manzillari va chek raqami prefikslari."
@@ -2495,9 +2659,6 @@ msgstr "Keyingi"
 
 msgid "Reset"
 msgstr "Tozalash"
-
-msgid "Details"
-msgstr "Batafsil"
 
 msgid "Field"
 msgstr "Maydon"

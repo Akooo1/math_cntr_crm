@@ -49,10 +49,32 @@ def can(user, code):
 
 @register.filter
 def get_item(mapping, key):
+    """dict lookup, or index for lists/tuples."""
     try:
+        if isinstance(mapping, list | tuple):
+            return mapping[int(key)]
         return mapping.get(key)
-    except AttributeError:
+    except (AttributeError, IndexError, ValueError, TypeError):
         return None
+
+
+@register.filter
+def foiz(value):
+    """0.425 -> 42,5%"""
+    if value in (None, ""):
+        return ""
+    pct = round(float(value) * 100, 1)
+    text = f"{pct:.1f}".rstrip("0").rstrip(".").replace(".", ",")
+    return f"{text}%"
+
+
+@register.filter
+def change_pct(now, before):
+    """Relative change as a signed percent string, or '' when there is no base."""
+    if not before:
+        return ""
+    pct = round((now - before) * 100 / before)
+    return f"{'+' if pct > 0 else ''}{pct}%"
 
 
 @register.simple_tag

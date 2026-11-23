@@ -13,6 +13,7 @@ from django.utils import timezone
 
 from apps.billing.models import DiscountType, InstallmentTemplate, PaymentMethod
 from apps.core.dates import today
+from apps.core.reports import reports
 from apps.core.roles import Role
 from apps.core.settings_panel import sections
 from apps.crm.models import LeadSource, LeadStage, RefusalReason
@@ -245,6 +246,22 @@ def billing_cases(o) -> dict[str, list[Case]]:
     )
 
 
+def reports_cases() -> dict[str, list[Case]]:
+    """Reports: Direktor and Filial administratori (own branch data only, see
+    apps/reports/tests); Sotuv menejeri and O'qituvchi never."""
+    fin = expect({D: 200, A: 200})
+    missing = expect({D: 404, A: 404})
+    report_cases = [Case(f"/hisobotlar/{r.key}/", expect=fin) for r in reports()]
+    report_cases.append(Case("/hisobotlar/oylar/?dan=01.01.2026&gacha=31.03.2026", expect=fin))
+    report_cases.append(Case("/hisobotlar/yoq/", expect=missing))
+    return {
+        "reports:index": [Case("/hisobotlar/", expect=fin)],
+        "reports:report": report_cases,
+        "reports:excel": [Case(f"/hisobotlar/{r.key}/excel/", expect=fin) for r in reports()]
+        + [Case("/hisobotlar/yoq/excel/", expect=missing)],
+    }
+
+
 @pytest.fixture
 def objects(director, branch_a, branch_b, admin_a, teacher_a):
     from apps.billing import services
@@ -368,6 +385,7 @@ def cases(objects) -> dict[str, list[Case]]:
     c.update(crm_cases(objects))
     c.update(students_cases(objects))
     c.update(billing_cases(objects))
+    c.update(reports_cases())
     for s in sections():
         base = f"/sozlamalar/{s.slug}/"
         obj = objects[s.slug]

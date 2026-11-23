@@ -6,10 +6,11 @@ from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from apps.core import dates
+from apps.core import dates, excel, phone
 from apps.core.money import parse_amount
 from apps.core.permissions import (
     accessible_branch_ids,
@@ -69,6 +70,43 @@ def payment_list(request):
     qs = qs.filter(paid_on__gte=start, paid_on__lte=end)
     if request.GET.get("usul"):
         qs = qs.filter(method_id=request.GET["usul"])
+    if request.GET.get("excel"):
+        rows = [
+            [
+                p.paid_on,
+                p.receipt_number,
+                p.student.full_name,
+                p.get_kind_display(),
+                p.method.name,
+                p.signed_amount,
+                p.branch.name,
+                p.received_by.full_name,
+                p.comment or p.reason,
+            ]
+            for p in qs
+        ]
+        headers = [
+            _("Date"),
+            _("Receipt"),
+            _("Student"),
+            _("Type"),
+            _("Payment method"),
+            _("Amount"),
+            _("Branch"),
+            _("Received by"),
+            _("Comment"),
+        ]
+        kinds = ["date", "text", "text", "text", "text", "money", "text", "text", "text"]
+        return excel.response(
+            f"tolovlar-{start:%Y%m%d}-{end:%Y%m%d}",
+            excel.workbook(
+                _("Payments"),
+                headers,
+                rows,
+                kinds,
+                [_("Total"), "", "", "", "", sum(r[5] for r in rows), "", "", ""],
+            ),
+        )
     page = Paginator(qs, 50).get_page(request.GET.get("page"))
     query = request.GET.copy()
     query.pop("page", None)
@@ -443,6 +481,48 @@ def debtors(request):
         teacher=num("oqituvchi"),
         min_days=num("kun") or 0,
     )
+    if request.GET.get("excel"):
+        headers = [
+            _("Student"),
+            _("Phone"),
+            _("Parent's phone"),
+            _("Groups"),
+            _("Overdue"),
+            _("Unpaid total"),
+            _("Days overdue"),
+            _("Oldest due date"),
+            _("Last payment"),
+        ]
+        data = [
+            [
+                r["student"].full_name,
+                phone.format_phone(r["student"].phone),
+                phone.format_phone(r["student"].parent_phone),
+                ", ".join(r["groups"]),
+                r["overdue"],
+                r["open"],
+                r["days"],
+                r["oldest_due"],
+                r["last_payment"],
+            ]
+            for r in rows
+        ]
+        kinds = ["text", "text", "text", "text", "money", "money", "int", "date", "date"]
+        totals = [
+            _("Total"),
+            "",
+            "",
+            "",
+            sum(r["overdue"] for r in rows),
+            sum(r["open"] for r in rows),
+            "",
+            "",
+            "",
+        ]
+        return excel.response(
+            f"qarzdorlar-{dates.today():%Y%m%d}",
+            excel.workbook(_("Debtors"), headers, data, kinds, totals),
+        )
     groups = student_selectors.groups_for(request.user, request.branch_filter).exclude(
         status="finished"
     )
@@ -475,6 +555,34 @@ def cash_report(request):
         raise Http404
     day = _date(request.GET.get("sana")) or dates.today()
     report = services.cash.day_report(branch.pk, day)
+    if request.GET.get("excel"):
+        headers = [
+            _("Time"),
+            _("Receipt"),
+            _("Student"),
+            _("Type"),
+            _("Payment method"),
+            _("Amount"),
+            _("Received by"),
+        ]
+        data = [
+            [
+                timezone.localtime(p.created_at).strftime("%H:%M"),
+                p.receipt_number,
+                p.student.full_name,
+                p.get_kind_display(),
+                p.method.name,
+                p.signed_amount,
+                p.received_by.full_name,
+            ]
+            for p in report["rows"]
+        ]
+        kinds = ["text", "text", "text", "text", "text", "money", "text"]
+        totals = [_("Total"), "", "", "", "", report["total_net"], ""]
+        return excel.response(
+            f"kassa-{branch.receipt_prefix}-{day:%Y%m%d}",
+            excel.workbook(_("Cash report"), headers, data, kinds, totals),
+        )
     closed = (
         CashDayClose.objects.filter(branch=branch, date=day).select_related("closed_by").first()
     )

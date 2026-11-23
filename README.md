@@ -61,3 +61,82 @@ scripts/i18n.sh --check
 All text lives in `locale/uz/LC_MESSAGES/django.po`. After adding or changing UI strings,
 run `scripts/i18n.sh`, fill in every new `msgstr`, and commit the `.po` file. Tests fail if
 a string is untranslated or English reaches a page.
+
+## Production (one Linux VPS)
+
+Needs Docker with Compose v2, a domain whose DNS A record points at the server, and ports
+80 and 443 open. Caddy gets the Let's Encrypt certificate by itself.
+
+1. Copy the project to the server and create the settings file:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Fill in `DOMAIN`, a long random `POSTGRES_PASSWORD` and `DJANGO_SECRET_KEY`. For example:
+
+   ```bash
+   python3 -c "import secrets; print(secrets.token_urlsafe(50))"
+   ```
+
+2. Build and start:
+
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+   ```
+
+   Services: `db` (PostgreSQL 17), `web` (gunicorn; migrates on start), `cron` (monthly
+   charges 00:10, lesson calendars 00:20, session cleanup 03:40), `backup` (02:30), `caddy`
+   (HTTPS). No demo data is loaded in production. Django admin is not available.
+
+3. Create the first Direktor (asks for the password if `--password` is left out):
+
+   ```bash
+   docker compose -f docker-compose.yml -f docker-compose.prod.yml exec web python manage.py create_director --phone "90 123 45 67" --name "Familiya Ism"
+   ```
+
+   Log in at `https://<DOMAIN>/`, then set up branches, courses, prices and users in
+   Sozlamalar.
+
+4. Update to a new version:
+
+   ```bash
+   git pull && docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+   ```
+
+### Backups
+
+The `backup` container runs `scripts/backup.sh` every night at 02:30 (Tashkent). It writes
+to `BACKUP_DIR` (default `./backups` in the project folder):
+
+- `daily/db_YYYY-MM-DD_HHMM.dump`: the whole database (`pg_dump` custom format, checked
+  with `pg_restore --list` before it is kept),
+- `daily/media_...tar.gz`: uploaded import files,
+- `weekly/`: a copy of each Sunday's backup.
+
+The newest 14 daily and 8 weekly sets are kept. Run a backup by hand:
+
+```bash
+scripts/backup.sh
+```
+
+Restore (replaces all data; asks you to type `RESTORE`, and makes a fresh backup first):
+
+```bash
+scripts/restore.sh backups/daily/db_2026-11-23_0230.dump backups/daily/media_2026-11-23_0230.tar.gz
+```
+
+**Backups on the same server are lost with the server.** Copy `BACKUP_DIR` somewhere else
+regularly, for example to your own computer:
+
+```bash
+rsync -av user@server:/path/to/project/backups/ ./matematika-backups/
+```
+
+Automatic off-site copies need a storage service (possibly paid) and are not set up.
+
+### Logs
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml logs -f web cron backup
+```

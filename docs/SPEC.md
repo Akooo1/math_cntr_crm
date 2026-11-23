@@ -528,18 +528,19 @@ Layout:
 - Coverage target for `billing/`: ≥ 95% lines. CI runs on every push (GitHub Actions, free tier).
 
 ### 8.3 Deployment
-- **`docker-compose.yml` services:**
+- **Services** (`docker-compose.yml` + `docker-compose.prod.yml`):
   - `db` (postgres:17, named volume)
-  - `web` (gunicorn; the entrypoint runs migrations and `collectstatic`)
-  - `cron` (same image, supercronic): monthly charges 00:10, lesson generation 00:20, backup 02:30, outbox cleanup
-  - `caddy` (TLS, static files)
+  - `web` (gunicorn + whitenoise; the entrypoint waits for the database and migrates; static files and translations are built into the image)
+  - `cron` (same image, supercronic, `deploy/crontab`): monthly charges 00:10, lesson generation 00:20, expired sessions 03:40
+  - `backup` (postgres:17-alpine, crond): `scripts/backup.sh` at 02:30
+  - `caddy` (TLS via Let's Encrypt, HSTS, compression, reverse proxy to `web`)
 - **Local:** `docker compose up` with the dev override, which:
   - uses runserver with reload,
   - exposes port 8000,
   - seeds demo data automatically if the database is empty and `DEMO_SEED=1`.
   - Demo logins, one per role, are listed in the README.
 - **Production:** `docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d`, with secrets in a `.env` file that is not committed.
-- **Backups:** `scripts/backup.sh` runs `pg_dump -Fc`, compresses, and keeps 14 daily and 8 weekly copies in `/var/backups/matematika`. `scripts/restore.sh <file>` restores (it asks for confirmation). An off-site copy is strongly recommended. It would need a storage target, which may be paid, so I will ask before adding one.
+- **Backups:** `scripts/backup.sh` runs `pg_dump -Fc`, compresses, and keeps 14 daily and 8 weekly copies in `BACKUP_DIR` (default `./backups`). `scripts/restore.sh <dump> [media]` restores (it asks for confirmation and backs up first). An off-site copy is strongly recommended. It would need a storage target, which may be paid, so I will ask before adding one.
 - **Health:** a `/healthz` endpoint, and Docker restart policies.
 
 ### 8.4 Performance assumptions
@@ -738,3 +739,37 @@ in section 5.
 - **Freezing an installment course doesn't change its plan.** The price is for the course,
   not the month. To shift due dates, an admin edits the plan with a reason.
 - Module notes: [docs/modules/billing.md](modules/billing.md).
+
+### Phase 5 (reports, exports, production)
+
+- **Reports** (`apps/reports`, read-only): seven reports registered through
+  `core.reports.register_report`: charged and collected by month, by branch, by course and
+  by payment method; debt by course (current state); lead conversion by source and by
+  manager. Each has a period filter (presets plus DD.MM.YYYY dates), follows the top-bar
+  branch switcher and the user's branch scope, and exports to Excel. Permission
+  `reports.view`: Direktor and Filial administratori.
+- **Definitions** used everywhere: *Hisoblangan* (charged) = net of charges whose due date is
+  in the period (after discounts and corrections). *Tushum* (collected) = payments minus
+  reversals and refunds, by payment date. *Collected by course* = money from the period's
+  payments that FIFO allocation assigned to that course's charges; unused credit has no
+  course. *Debt* = open and overdue amounts now, with the grace days setting.
+- **Dashboard widget** (Bosh sahifa, Direktor and admin): collected this month against the
+  same days of last month, charged this month, overdue / open debt, new leads and
+  conversions this month, a 6-month charged-vs-collected bar chart with a table view, and a
+  per-branch table for the Direktor.
+- **Excel export** on debtors, the payments journal, the cash report and the audit log, plus
+  every report: `core.excel.workbook()` writes Uzbek headers, numeric money with a
+  `so'm` number format and DD.MM.YYYY dates.
+- **Production:** `docker-compose.prod.yml` adds `cron`, `backup` and `caddy`;
+  `create_director` creates the first user; `scripts/backup.sh` / `scripts/restore.sh`.
+  The Tailwind source moved from `static/src/` to `assets/` so `collectstatic` doesn't
+  try to process it.
+- **Not scheduled:** outbox cleanup. Module 1 has no outbox consumer yet, and deleting
+  rows is a data decision for the owner.
+- **Verified in a sandbox:** the production image builds, the stack starts, HTTPS through
+  Caddy (internal certificate for `localhost`), login, reports and Excel over HTTPS,
+  `create_director`, the nightly backup job and rotation, and restoring a dump with
+  `pg_restore --clean` (same row counts and append-only triggers afterwards).
+  **Not verified:** a real Let's Encrypt certificate (needs a public domain), and the full
+  `scripts/restore.sh` run on a server.
+- Module notes: [docs/modules/reports.md](modules/reports.md).

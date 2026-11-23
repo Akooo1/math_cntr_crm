@@ -10,6 +10,7 @@
     <button class="btn-secondary">{% translate "Filter" %}</button>
   </form>
   <div class="card mb-4 flex flex-wrap items-center justify-between gap-3 p-4">
+    <a class="btn-secondary px-3 py-1.5" href="?{{ request.GET.urlencode }}&excel=1">{% icon "download" "w-4 h-4" %}{% translate "Export to Excel" %}</a>
     <p>{% blocktranslate count n=rows|length %}{{ n }} debtor{% plural %}{{ n }} debtors{% endblocktranslate %}</p>
     <p class="text-lg font-semibold text-rose-700">{{ total_overdue|som }}</p>
   </div>

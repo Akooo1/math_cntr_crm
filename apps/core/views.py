@@ -3,11 +3,12 @@ from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
+from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 
-from . import audit_display
+from . import audit_display, excel
 from .forms import StyledForm, UzDateField
 from .middleware import BRANCH_FILTER_SESSION_KEY
 from .models import AuditLog
@@ -77,6 +78,10 @@ class AuditFilterForm(StyledForm):
         )
 
 
+def _blank(value) -> str:
+    return "" if value is None else str(value)
+
+
 @perm_required("audit.view")
 def audit_log(request):
     form = AuditFilterForm(request.GET or None)
@@ -93,9 +98,41 @@ def audit_log(request):
             qs = qs.filter(created_at__date__gte=data["date_from"])
         if data["date_to"]:
             qs = qs.filter(created_at__date__lte=data["date_to"])
-    page = Paginator(qs, 50).get_page(request.GET.get("page"))
     branches = registry.branch_options_provider(None) if registry.branch_options_provider else []
     branch_names = {b.id: b.name for b in branches}
+    if request.GET.get("excel"):
+        rows = []
+        for e in qs[:20000]:
+            details = "; ".join(
+                f"{c['label']}: {_blank(c['before'])} → {_blank(c['after'])}"
+                for c in audit_display.changes(e)
+            )
+            rows.append(
+                [
+                    timezone.localtime(e.created_at).strftime("%d.%m.%Y %H:%M"),
+                    e.actor.full_name if e.actor else str(_("System")),
+                    str(audit_display.verb_label(e.action)),
+                    str(audit_display.entity_label(e.entity_type)),
+                    e.entity_id,
+                    branch_names.get(e.branch_id, ""),
+                    e.reason,
+                    details,
+                ]
+            )
+        headers = [
+            _("Time"),
+            _("User"),
+            _("Action"),
+            _("Object type"),
+            _("Object ID"),
+            _("Branch"),
+            _("Reason"),
+            _("Details"),
+        ]
+        return excel.response(
+            "harakatlar-jurnali", excel.workbook(_("Audit log"), headers, rows, ["text"] * 8)
+        )
+    page = Paginator(qs, 50).get_page(request.GET.get("page"))
     entries = [
         {
             "obj": e,

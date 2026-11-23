@@ -1,0 +1,1 @@
+{% if kind == "money" %}{{ v|som }}{% elif kind == "percent" %}{{ v|foiz }}{% elif kind == "month" %}{% if v.year %}{{ v|date:"F Y" }}{% else %}{{ v }}{% endif %}{% elif kind == "int" %}{{ v|raqam }}{% else %}{{ v }}{% endif %}

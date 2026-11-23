@@ -3,8 +3,8 @@
   "private": true,
   "description": "Build-time only: Tailwind CSS. The runtime image has no Node.js.",
   "scripts": {
-    "build:css": "tailwindcss -i static/src/app.css -o static/dist/app.css --minify",
-    "watch:css": "tailwindcss -i static/src/app.css -o static/dist/app.css --watch=always"
+    "build:css": "tailwindcss -i assets/app.css -o static/dist/app.css --minify",
+    "watch:css": "tailwindcss -i assets/app.css -o static/dist/app.css --watch=always"
   },
   "devDependencies": {
     "@tailwindcss/cli": "4.1.14",

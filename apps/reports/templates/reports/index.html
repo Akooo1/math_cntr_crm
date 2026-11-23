@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{% translate "Reports" %}{% endblock %}
+{% block heading %}{% translate "Reports" %}{% endblock %}
+{% block content %}
+  {% for group, items in groups %}
+    <h2 class="mb-3 mt-6 first:mt-0 text-sm font-semibold uppercase tracking-wide text-slate-500">{{ group }}</h2>
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {% for r in items %}
+        <a href="{% url 'reports:report' r.key %}" class="card block p-4 hover:border-sky-300">
+          <p class="font-semibold">{{ r.title }}</p><p class="mt-1 text-sm text-slate-500">{{ r.description }}</p>
+        </a>
+      {% endfor %}
+    </div>
+  {% endfor %}
+{% endblock %}

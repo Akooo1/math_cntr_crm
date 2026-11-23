@@ -1,0 +1,7 @@
+# Scheduled jobs (supercronic, container TZ=Asia/Tashkent). All jobs are idempotent.
+# Monthly charges: runs daily so a missed night is caught up the next day.
+10 0 * * * python manage.py generate_monthly_charges
+# Roll lesson calendars of open-ended groups forward.
+20 0 * * * python manage.py generate_lessons
+# Drop expired login sessions.
+40 3 * * * python manage.py clearsessions

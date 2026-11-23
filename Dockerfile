@@ -5,10 +5,10 @@ FROM node:22-alpine AS assets
 WORKDIR /build
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
-COPY static/src static/src
+COPY assets assets
 COPY templates templates
 COPY apps apps
-RUN npx tailwindcss -i static/src/app.css -o static/dist/app.css --minify
+RUN npx tailwindcss -i assets/app.css -o static/dist/app.css --minify
 
 # --- Python base -----------------------------------------------------------------------
 FROM python:3.12-slim AS base
@@ -21,6 +21,19 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends gettext \
     && apt-get clean \
     && pip install --no-cache-dir uv==0.11.32
+# supercronic runs the scheduled jobs (deploy/crontab) in the cron container.
+ARG TARGETARCH=amd64
+ARG SUPERCRONIC_VERSION=v0.2.33
+RUN set -eu; \
+    case "$TARGETARCH" in \
+      amd64) sum=71b0d58cc53f6bd72cf2f293e09e294b79c666d8 ;; \
+      arm64) sum=e0f0c06ebc5627e43b25475711e694450489ab00 ;; \
+      *) echo "unsupported arch $TARGETARCH"; exit 1 ;; \
+    esac; \
+    python -c "import sys, urllib.request; urllib.request.urlretrieve(sys.argv[1], '/usr/local/bin/supercronic')" \
+      "https://github.com/aptible/supercronic/releases/download/${SUPERCRONIC_VERSION}/supercronic-linux-${TARGETARCH}"; \
+    echo "$sum  /usr/local/bin/supercronic" | sha1sum -c -; \
+    chmod +x /usr/local/bin/supercronic
 WORKDIR /app
 COPY pyproject.toml uv.lock ./
 

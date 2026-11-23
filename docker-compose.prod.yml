@@ -1,0 +1,81 @@
+# Production on one Linux VPS:
+#   cp .env.example .env   # then fill in the values
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+x-app-env: &app-env
+  POSTGRES_DB: ${POSTGRES_DB:-matematika}
+  POSTGRES_USER: ${POSTGRES_USER:-mm}
+  POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+  POSTGRES_HOST: db
+  DJANGO_SETTINGS_MODULE: config.settings.prod
+  DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?set DJANGO_SECRET_KEY in .env}
+  DJANGO_ALLOWED_HOSTS: ${DOMAIN:?set DOMAIN in .env}
+  DJANGO_CSRF_TRUSTED_ORIGINS: https://${DOMAIN}
+  TZ: Asia/Tashkent
+
+services:
+  db:
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+
+  web:
+    environment:
+      <<: *app-env
+      DEMO_SEED: "0"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  cron:
+    image: matematika-web:${IMAGE_TAG:-latest}
+    environment:
+      <<: *app-env
+      SKIP_MIGRATE: "1"
+    command: ["/usr/local/bin/supercronic", "-passthrough-logs", "/app/deploy/crontab"]
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
+
+  backup:
+    image: postgres:17-alpine
+    environment:
+      PGHOST: db
+      PGDATABASE: ${POSTGRES_DB:-matematika}
+      PGUSER: ${POSTGRES_USER:-mm}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      BACKUP_DIR: /backups
+      MEDIA_DIR: /media
+      TZ: Asia/Tashkent
+    # Daily at 02:30 Tashkent time. Logs go to `docker compose logs backup`.
+    command: ["sh", "-c", "echo '30 2 * * * /scripts/backup.sh > /proc/1/fd/1 2>&1' | crontab - && exec crond -f -l 8"]
+    volumes:
+      - ./scripts:/scripts:ro
+      - ${BACKUP_DIR:-./backups}:/backups
+      - media:/media:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2.8.4-alpine
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      web:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:
