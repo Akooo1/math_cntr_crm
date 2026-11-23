@@ -735,7 +735,7 @@ in section 5.
 - **Daily jobs:** `generate_monthly_charges` and `generate_lessons`. Both are idempotent;
   phase 5's cron runs them.
 
-**Decision taken without the owner (please confirm):**
+**Decision taken without the owner (confirmed by the owner after phase 5):**
 - **Freezing an installment course doesn't change its plan.** The price is for the course,
   not the month. To shift due dates, an admin edits the plan with a reason.
 - Module notes: [docs/modules/billing.md](modules/billing.md).
@@ -773,3 +773,12 @@ in section 5.
   **Not verified:** a real Let's Encrypt certificate (needs a public domain), and the full
   `scripts/restore.sh` run on a server.
 - Module notes: [docs/modules/reports.md](modules/reports.md).
+
+### Owner decisions after phase 5
+- Confirmed: freezing an installment course doesn't change its plan; leave, freeze and move
+  adjustments use the charge's list price; the phase 4 column additions
+  (`billing_payment.import_batch_id`, nullable `billing_charge.created_by`, adjustment kinds
+  `proration_join` and `move`).
+- Outbox (`core_outbox`): rows are kept with no automatic cleanup. The Direktor may delete
+  old rows by hand (to be built with the next phase).
+- Next: teacher salaries and staff arrival check-in (Module 2), then going live.
