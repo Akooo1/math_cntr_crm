@@ -1020,3 +1020,10 @@ Railway itself (no Railway access from here).
 - Fix: every radio/checkbox list (workdays, bonus/deduction, note/call, user branches)
   rendered squeezed into 20 px on all screens; the size class now styles only the inputs.
 
+### Brand (owner's logo)
+The UI follows the center's logo: navy `#19199a` and blue `#4968d7` (Tailwind `sky` scale
+redefined in `assets/app.css`), Montserrat headings, the logo mark in the sidebar, the
+phone top bar, the receipt and as favicon, the full logo on the login page. The dashboard
+chart's "charged" series uses the brand blue (palette re-validated with orange: all checks
+pass). Files in `static/brand/`.
+

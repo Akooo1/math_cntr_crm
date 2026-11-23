@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Matematika Markazi">
+  <circle cx="25" cy="25" r="25" fill="#19199a"/>
+  <path d="M50 0H89a11 11 0 0 1 11 11V39a11 11 0 0 1-11 11H50Z" fill="#4968d7"/>
+  <path d="M50 50V100H11a11 11 0 0 1-11-11V61a11 11 0 0 1 11-11Z" fill="#4968d7"/>
+  <circle cx="75" cy="75" r="25" fill="#19199a"/>
+  <g fill="#fff">
+    <rect x="16.3" y="22.9" width="17.3" height="4.1"/>
+    <circle cx="24.9" cy="18.2" r="3"/>
+    <circle cx="24.9" cy="32.2" r="3"/>
+    <rect x="16.3" y="72.4" width="17.3" height="4.1"/>
+    <rect x="66.1" y="73" width="17.3" height="4"/>
+    <rect x="72.8" y="66.4" width="4.1" height="17.2"/>
+  </g>
+  <path d="M63.4 16.4H69.1L73.4 22.7L77.6 16.4H83.2L76.5 25L83.6 33.6H77.9L73.3 27.1L68.7 33.6H62.9L70.1 25Z" fill="#fff"/>
+</svg>

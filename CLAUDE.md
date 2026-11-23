@@ -203,6 +203,13 @@ Add new terms here before using them in the UI.
 - `static/js/app.js`: `<form data-confirm="...">` asks before submitting; `[data-geolocate]`
   reads the phone's GPS. Never put translated text inside inline JavaScript: Uzbek
   apostrophes break the quotes. Pass it in a `data-` attribute instead.
+- **Brand** (from the center's logo): navy `#19199a` (= `sky-800`, primary buttons) and blue
+  `#4968d7` (= `sky-500`). `assets/app.css` redefines Tailwind's whole `sky` scale, so use
+  `sky-*` classes for brand color; never hard-code other blues. Headings (`h1`–`h3`) and the
+  center name use Montserrat (`font-display`, self-hosted in `static/vendor/fonts`). Logo
+  files: `static/brand/mark.svg` (the symbol), `logo.png` (symbol + name),
+  `favicon-32.png`, `apple-touch-icon.png`, `icon-512.png` (e.g. the Telegram bot photo).
+  The center name in the header: `templates/components/brand_name.html`.
 - URLs and slugs are Uzbek (`/sozlamalar/`, `/kirish/`); code identifiers stay English.
 
 ## Security and permissions

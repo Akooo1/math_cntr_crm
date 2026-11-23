@@ -1,5 +1,44 @@
 @import "tailwindcss";
 
+/* Brand (from the Matematika Markazi logo): navy #19199a = sky-800, blue #4968d7 = sky-500.
+   The whole `sky` scale is redefined, so every existing sky-* class follows the brand.
+   Lead stage "sky" (Yangi) follows it too. */
+@theme {
+  --color-sky-50: #eef1fc;
+  --color-sky-100: #dfe5fa;
+  --color-sky-200: #c2cff5;
+  --color-sky-300: #9db1ee;
+  --color-sky-400: #728de4;
+  --color-sky-500: #4968d7;
+  --color-sky-600: #3550c6;
+  --color-sky-700: #2737b0;
+  --color-sky-800: #19199a;
+  --color-sky-900: #141479;
+  --color-sky-950: #0c0c4a;
+  --font-display: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Montserrat (SIL OFL, static/vendor/fonts/montserrat/OFL.txt): the closest free match to
+   the logo's lettering. Headings and the center name only; body text stays system-ui. */
+@font-face {
+  font-family: "Montserrat";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("../vendor/fonts/montserrat/montserrat-latin-600-normal.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Montserrat";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../vendor/fonts/montserrat/montserrat-latin-700-normal.woff2") format("woff2");
+}
+
+@layer base {
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.01em; }
+}
+
 @source "../templates";
 @source "../apps";
 
@@ -7,7 +46,7 @@
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-600/30 disabled:opacity-50;
   }
-  .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-600/30 disabled:opacity-50 bg-sky-700 text-white hover:bg-sky-800; }
+  .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-600/30 disabled:opacity-50 bg-sky-800 text-white hover:bg-sky-900; }
   .btn-secondary { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-600/30 disabled:opacity-50 border border-slate-300 bg-white text-slate-800 hover:bg-slate-50; }
   .btn-danger { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-600/30 disabled:opacity-50 bg-rose-600 text-white hover:bg-rose-700; }
   .btn-ghost { @apply inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-sky-600/30 disabled:opacity-50 text-slate-700 hover:bg-slate-100; }

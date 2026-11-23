@@ -6,6 +6,10 @@
   <meta name="csrf-token" content="{{ csrf_token }}">
   <title>{% block title %}{{ center_name }}{% endblock %} — {{ center_name }}</title>
   <link rel="stylesheet" href="{% static 'dist/app.css' %}">
+  <link rel="icon" href="{% static 'brand/mark.svg' %}" type="image/svg+xml">
+  <link rel="icon" href="{% static 'brand/favicon-32.png' %}" sizes="32x32" type="image/png">
+  <link rel="apple-touch-icon" href="{% static 'brand/apple-touch-icon.png' %}">
+  <meta name="theme-color" content="#19199a">
   <script src="{% static 'vendor/htmx-2.0.4.min.js' %}" defer></script>
   <script src="{% static 'vendor/alpine-3.14.8.min.js' %}" defer></script>
   <script src="{% static 'js/app.js' %}" defer></script>
@@ -17,8 +21,8 @@
   {# Desktop sidebar #}
   <aside class="hidden md:flex md:w-64 md:flex-col md:fixed md:inset-y-0 border-r border-slate-200 bg-white">
     <div class="flex h-16 items-center gap-2 px-5 border-b border-slate-200">
-      <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-sky-700 text-white font-bold">M</span>
-      <span class="font-semibold text-slate-900 leading-tight">{{ center_name }}</span>
+      <img src="{% static 'brand/mark.svg' %}" alt="" class="h-9 w-9 shrink-0">
+      {% include "components/brand_name.html" %}
     </div>
     <nav class="flex-1 overflow-y-auto p-3 space-y-1">
       {% for n in nav %}
@@ -41,7 +45,7 @@
   <div class="flex-1 md:pl-64">
     {# Top bar #}
     <header class="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-slate-200 bg-white/95 px-4 backdrop-blur md:h-16 md:px-8">
-      <span class="md:hidden flex h-8 w-8 items-center justify-center rounded-lg bg-sky-700 text-white text-sm font-bold">M</span>
+      <img src="{% static 'brand/mark.svg' %}" alt="" class="md:hidden h-8 w-8 shrink-0">
       <h1 class="min-w-0 flex-1 truncate text-base font-semibold md:text-lg">{% block heading %}{{ center_name }}{% endblock %}</h1>
       {% if branch_options %}
         <form method="post" action="{% url 'core:switch_branch' %}" class="shrink-0">{% csrf_token %}

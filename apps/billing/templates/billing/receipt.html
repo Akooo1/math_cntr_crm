@@ -12,12 +12,14 @@
   hr { border: 0; border-top: 1px dashed #94a3b8; margin: 8px 0; }
   .big { font-size: 18px; font-weight: 700; }
   .actions { text-align: center; margin: 12px; }
-  button { font-size: 15px; padding: 10px 18px; border-radius: 8px; border: 0; background: #0369a1; color: #fff; }
+  button { font-size: 15px; padding: 10px 18px; border-radius: 8px; border: 0; background: #19199a; color: #fff; }
+  .mark { display: block; width: 40px; height: 40px; margin: 0 auto 6px; }
   @media print { body { background: #fff; } .paper { margin: 0; width: auto; } .actions { display: none; } }
 </style>
 </head>
 <body>
 <div class="paper">
+  <img class="mark" src="{% static 'brand/mark.svg' %}" alt="">
   <h1>{{ info.center_name }}</h1>
   <p class="c muted">{{ info.branch_name }}{% if info.address %}<br>{{ info.address }}{% endif %}{% if info.phone %}<br>{{ info.phone|telefon }}{% endif %}</p>
   {% if info.legal_name or info.inn %}<p class="c muted">{{ info.legal_name }}{% if info.inn %} · {% translate "Tax ID (STIR)" %} {{ info.inn }}{% endif %}</p>{% endif %}
