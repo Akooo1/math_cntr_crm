@@ -52,7 +52,8 @@ RUN uv sync --frozen --no-dev
 COPY . .
 COPY --from=assets /build/static/dist static/dist
 ENV DJANGO_SETTINGS_MODULE=config.settings.prod
-RUN DJANGO_SECRET_KEY=build-only python manage.py collectstatic --noinput \
+RUN export DJANGO_SECRET_KEY=build-only \
+    && python manage.py collectstatic --noinput \
     && python manage.py compilemessages -l uz --ignore=node_modules \
     && useradd --system --uid 1000 app \
     && mkdir -p /app/media \
