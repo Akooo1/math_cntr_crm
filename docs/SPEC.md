@@ -782,3 +782,87 @@ in section 5.
 - Outbox (`core_outbox`): rows are kept with no automatic cleanup. The Direktor may delete
   old rows by hand (to be built with the next phase).
 - Next: teacher salaries and staff arrival check-in (Module 2), then going live.
+
+---
+
+## 13. Module 2: teacher salaries (phase 6)
+
+Owner's rules (answers after phase 5):
+
+1. A teacher earns **a share of the money students actually paid** for the teacher's groups.
+   Unpaid charges earn nothing until they are paid.
+2. Money counts in the **month it was paid**. An October fee paid in December goes into
+   December's salary.
+3. Refunds are only given for classes not attended. They lower the money applied to the
+   group's charges, so the teacher's share goes down in the **next open month**.
+   Reversals of wrong payments work the same way.
+4. The share goes to the **group's teacher**. If the teacher changes, months not yet closed
+   go to the new teacher; closed months stay with whoever was paid.
+5. The share is **50% by default**. The Direktor sets another rate per teacher (owners: 65%)
+   from a chosen month. A new rate never changes earlier months.
+6. The Direktor can add **bonuses and deductions** with a reason.
+7. The Direktor closes the month and pays every teacher **in cash at the end of the month**,
+   from the money collected daily. Salary payouts are **not** part of Kassa or the cash day
+   close.
+8. The Direktor sees all salaries. A teacher sees **only their own sheet**, per student
+   (student, group, money paid, share). Branch admins and sales managers see nothing.
+   This is the one exception to "teachers see no money".
+9. Only teachers (role O'qituvchi) get a salary in this module. Owners who teach need a
+   teacher account.
+10. Salaries start from a month set in Sozlamalar (default December 2026; it can be moved
+    earlier).
+
+### 13.1 How the amount is computed
+
+- **Basis**: `billing_allocation` (FIFO, which payment paid which charge). For every
+  allocation whose charge has a group: key = (student, group, payment month), where payment
+  month = month of the payment's `paid_on`. Charges without a group (extra charges, opening
+  balances) have no teacher and are not counted. Money still sitting as credit (avans) is not
+  counted until it pays a charge.
+- **Accounted** = what closed months already paid for that key.
+- **Draft of the open month M** (the first month from the start month that is not closed):
+  for every key with payment month ≤ M, `delta = live − accounted`. Payment month = M is a
+  *share* line; earlier payment months are *correction* lines (late allocation of prepaid
+  money, refunds, reversals). The line goes to the group's current teacher at the rate in
+  force for that teacher in the payment month.
+- **Line amount** = `percent_of(delta, rate_bp)` rounded half-up to whole so'm
+  (`billing.services.percent_of`, the same rounding function as billing).
+- **Sheet total** = lines + bonuses − deductions + carry-over. A negative total (more
+  deductions than earnings) is carried into the next month as a deduction; nothing is paid.
+- **Closing a month** freezes the lines (append-only). Months close in order. Anything that
+  changes after closing appears as a correction in the next open month, never by editing a
+  closed month.
+
+### 13.2 Tables (`apps/salaries`)
+
+| Table | Purpose |
+|---|---|
+| `salaries_rate` | teacher, `rate_bp` (0–10 000), `effective_from` (1st of a month), reason, created by/at. Append-only. |
+| `salaries_month` | one row per closed month: month, closed by/at, totals snapshot. Append-only. |
+| `salaries_line` | month, teacher, student, group, payment month, kind (`share`, `correction`), basis (so'm, signed, ≠ 0), `rate_bp`, amount (signed). Written when the month closes. Append-only. |
+| `salaries_adjustment` | month, teacher, kind (`bonus`, `deduction`, `carry`), signed amount (bonus > 0, deduction and carry < 0), reason, created by/at. Can be deleted only while its month is open (service and trigger). |
+| `salaries_payout` | month, teacher, kind (`payout`, `cancel`), amount > 0, paid on, note, cancels, created by/at. Append-only; a cancellation is a new row with a reason. |
+
+### 13.3 Permissions, settings, screens
+
+- `salaries.manage` (Direktor): month screen, sheets, bonuses and deductions, close month,
+  payouts, rates. `salaries.view_own` (O'qituvchi): "Maoshim", own sheets only.
+- Settings: `salaries.default_rate_bp` (default 5 000 = 50%), `salaries.start_month`
+  (YYYYMM, default 202612). Rates: Sozlamalar → O'qituvchi stavkalari.
+- Screens: Maosh (month list of teachers, Excel), a teacher's sheet, Maoshim (teacher).
+- Audit: `salaries.rate.create`, `salaries.month.close`, `salaries.adjustment.create` /
+  `.delete`, `salaries.payout.create` / `.cancel`.
+- Billing exposes `percent_of` through `billing.services` so salaries rounds money with the
+  one rounding function (a one-line public re-export; no billing behaviour changes).
+- Module notes: [docs/modules/salaries.md](modules/salaries.md).
+
+### Phase 6 notes
+- A month can only be calculated after the previous one is closed (the open month is the
+  first unclosed month from the start month). Later months show "close the earlier months
+  first".
+- Closing is allowed from the first day of the month, so the Direktor can pay at month end;
+  money paid after closing goes into the next month as a correction.
+- Demo data: salaries start at the first month with payments, one teacher has 65%, past
+  months are closed.
+- Core fix: the audit log viewer no longer crashes when an audit key matches a reverse
+  relation name, and "System setting" is shown in Uzbek.

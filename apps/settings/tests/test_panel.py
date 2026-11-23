@@ -158,6 +158,8 @@ def test_system_settings_saved_and_audited(login, director):
             "billing__grace_days": "0",
             "core__session_timeout_hours": "12",
             "students__attendance_edit_days": "7",
+            "salaries__default_rate_bp": "5000",
+            "salaries__start_month": "202612",
         },
     )
     assert resp.status_code == 302

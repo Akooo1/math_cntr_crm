@@ -1,0 +1,3 @@
+{% if state == "closed" %}<span class="badge bg-emerald-100 text-emerald-900">{% translate "Closed" %}</span>
+{% elif state == "open" %}<span class="badge bg-amber-100 text-amber-900">{% translate "Being calculated" %}</span>
+{% else %}<span class="badge bg-slate-100 text-slate-700">{% translate "Close the earlier months first" %}</span>{% endif %}

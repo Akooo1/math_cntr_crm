@@ -83,6 +83,9 @@ def register_labels(labels: dict) -> None:
 
 
 def _is_default_label(field) -> bool:
+    # Reverse relations (e.g. Month.lines) have no verbose_name: fall back to LABELS.
+    if not hasattr(field, "verbose_name"):
+        return True
     return str(field.verbose_name) == field.name.replace("_", " ")
 
 
@@ -98,9 +101,11 @@ def _model(entity_type: str):
 
 
 def entity_label(entity_type: str):
+    if entity_type in ENTITY_FALLBACK:
+        return ENTITY_FALLBACK[entity_type]
     model = _model(entity_type)
     if model is None:
-        return ENTITY_FALLBACK.get(entity_type, entity_type)
+        return entity_type
     return model._meta.verbose_name
 
 

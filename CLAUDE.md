@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **5 done** (reports, dashboard, Excel export, production deployment, backups). Module 1 is complete pending the owner's acceptance. Update this line at the end of each phase.
+- Current phase: **6 done** (teacher salaries, Module 2). Next: phase 7 (staff arrival check-in with GPS, manual deletion of old notification records), phase 8 (Telegram bot: Direktor notifications, debt reminders to parents), phase 9 (go-live). Update this line at the end of each phase.
 
 ## Ask the owner before
 
@@ -36,7 +36,7 @@ npm run build:css                              # Tailwind -> static/dist/app.css
 ## Layout and module boundaries
 
 ```
-config/   apps/{core,accounts,settings,crm,students,billing,reports,demo}/   templates/   static/   locale/   scripts/   docs/   tests/
+config/   apps/{core,accounts,settings,crm,students,billing,reports,salaries,demo}/   templates/   static/   locale/   scripts/   docs/   tests/
 ```
 
 `apps/demo` holds the demo seed command only; it sits above every module and nothing imports it.
@@ -44,7 +44,7 @@ config/   apps/{core,accounts,settings,crm,students,billing,reports,demo}/   tem
 Dependency direction (enforced by `.importlinter`; CI fails on violations):
 
 ```
-core ← accounts ← settings ← crm, students ;  students ← billing ← reports ;  crm → students
+core ← accounts ← settings ← crm, students ;  students ← billing ← reports, salaries ;  crm → students
 ```
 
 - Import another module only through `services`, `selectors`, `events`, or `models` (models only for FK targets and types).
@@ -145,6 +145,13 @@ Inside a module:
 | Difference | Farq |
 | Conversion (lead → student) | Konversiya |
 | Unpaid now / overdue now | Hozir to'lanmagan / Hozir muddati o'tgan |
+| Salary / my salary | Maosh / Maoshim |
+| Salary sheet | Maosh varaqasi |
+| Teacher rate / share | Stavka / O'qituvchi ulushi |
+| Bonus / deduction / carry-over | Mukofot / Ushlab qolish / O'tgan oydan qoldiq |
+| Correction (salary) | Tuzatish |
+| Close the month (salaries) | Oyni yopish |
+| Pay out / paid out | Maoshni berish / Berildi |
 
 Add new terms here before using them in the UI.
 
@@ -179,6 +186,8 @@ Add new terms here before using them in the UI.
 - `billing.domain.rounding.round_amount` — the only money rounding function.
 - `core.reports.register_report(ReportDef(...))`: a report with period and branch filters,
   phone cards, desktop table and Excel export for free. See `docs/modules/reports.md`.
+- `billing.services.percent_of(amount, basis_points)`: a share of an amount, rounded with the
+  one money rounding function. Salaries use it.
 - `core.excel.workbook(title, headers, rows, kinds, totals)` / `core.excel.response(...)`:
   every Excel export. Money stays numeric with a so'm number format.
 - URLs and slugs are Uzbek (`/sozlamalar/`, `/kirish/`); code identifiers stay English.
@@ -187,7 +196,7 @@ Add new terms here before using them in the UI.
 
 - Enforce role and branch scope on the server, in services and selectors. Hiding a button is never the protection.
 - An object outside the user's scope returns 404.
-- Financial fields never reach Sotuv menejeri (only the derived `payment_status`) or O'qituvchi (nothing).
+- Financial fields never reach Sotuv menejeri (only the derived `payment_status`) or O'qituvchi (nothing), with one owner-approved exception: a teacher sees their own salary sheet (students' payments to their groups and their share). See SPEC §13.
 - Every new URL must be added to `tests/test_permission_matrix.py` with the expected result for all four roles, in and out of branch. CI fails on unlisted URLs.
 - Django admin is dev-only. Never expose it in production.
 - Never commit secrets. `.env` is git-ignored, and `.env.example` documents the variables.

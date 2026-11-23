@@ -8,6 +8,7 @@ urlpatterns = [
     path("", include("apps.students.urls")),
     path("", include("apps.billing.urls")),
     path("", include("apps.reports.urls")),
+    path("", include("apps.salaries.urls")),
 ]
 
 handler400 = "apps.core.views.bad_request"

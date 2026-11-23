@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 12:00+0500\n"
+"POT-Creation-Date: 2026-11-23 15:13+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -1899,6 +1899,293 @@ msgstr "Oxirgi 3 oy"
 
 msgid "This year"
 msgstr "Shu yil"
+
+msgid "Salaries"
+msgstr "Maoshlar"
+
+msgid "Rate (%)"
+msgstr "Stavka (%)"
+
+msgid "Share of the money students paid, e.g. 50 or 65."
+msgstr "O'quvchilar to'lagan puldan ulush, masalan 50 yoki 65."
+
+msgid "From month"
+msgstr "Qaysi oydan"
+
+msgid "Enter a percent, for example 50 or 62,5."
+msgstr "Foizni kiriting, masalan 50 yoki 62,5."
+
+msgid "A percent must be between 0 and 100."
+msgstr "Foiz 0 dan 100 gacha bo'lishi kerak."
+
+msgid "Bonus"
+msgstr "Mukofot"
+
+msgid "Deduction"
+msgstr "Ushlab qolish"
+
+msgid "Rate"
+msgstr "Stavka"
+
+msgid "Teacher rate"
+msgstr "O'qituvchi stavkasi"
+
+msgid "Salary month"
+msgstr "Maosh oyi"
+
+msgid "Share"
+msgstr "Ulush"
+
+msgid "Payment month"
+msgstr "To'lov oyi"
+
+msgid "Money paid"
+msgstr "To'langan pul"
+
+msgid "Salary line"
+msgstr "Maosh qatori"
+
+msgid "Carried over from last month"
+msgstr "O'tgan oydan qoldiq"
+
+msgid "Bonus or deduction"
+msgstr "Mukofot yoki ushlab qolish"
+
+msgid "Salary given"
+msgstr "Berildi"
+
+msgid "Cancels"
+msgstr "Bekor qiladi"
+
+msgid "Salary payout"
+msgstr "Maosh berish"
+
+msgid "Manage teacher salaries"
+msgstr "O'qituvchilar maoshini boshqarish"
+
+msgid "See own salary"
+msgstr "O'z maoshini ko'rish"
+
+msgid "My salary"
+msgstr "Maoshim"
+
+msgid "Default teacher share"
+msgstr "O'qituvchining standart ulushi"
+
+msgid "Share of the money students paid. A teacher's own rate overrides it."
+msgstr ""
+"O'quvchilar to'lagan puldan ulush. O'qituvchining shaxsiy stavkasi bundan "
+"ustun."
+
+msgid "Salaries are calculated from"
+msgstr "Maosh hisoblash boshlanadigan oy"
+
+msgid "Payments made before this month don't count toward salaries."
+msgstr "Bu oydan oldingi to'lovlar maoshga hisoblanmaydi."
+
+msgid "Teachers"
+msgstr "O'qituvchilar"
+
+msgid "Lines"
+msgstr "Qatorlar"
+
+msgid "Teacher rates"
+msgstr "O'qituvchi stavkalari"
+
+msgid "Each teacher's share of the money students paid, with history."
+msgstr "Har bir o'qituvchining o'quvchilar to'lagan puldan ulushi va tarixi."
+
+msgid "Only teachers have a salary rate."
+msgstr "Stavka faqat o'qituvchilar uchun."
+
+msgid "That month is already closed. Choose a later month."
+msgstr "Bu oy allaqachon yopilgan. Keyingi oyni tanlang."
+
+msgid "Close the earlier months first."
+msgstr "Avval oldingi oylarni yoping."
+
+msgid "This month hasn't started yet."
+msgstr "Bu oy hali boshlanmagan."
+
+#, python-format
+msgid "Carried over from %(month)s"
+msgstr "%(month)s oyidan o'tkazildi"
+
+msgid "Choose a bonus or a deduction."
+msgstr "Mukofot yoki ushlab qolishni tanlang."
+
+msgid "This month is closed."
+msgstr "Bu oy yopilgan."
+
+msgid "A carry-over can't be deleted."
+msgstr "O'tgan oydan qoldiqni o'chirib bo'lmaydi."
+
+msgid "The date can't be in the future."
+msgstr "Sana kelajakda bo'lishi mumkin emas."
+
+msgid "Close the month first."
+msgstr "Avval oyni yoping."
+
+msgid "This salary is already paid out."
+msgstr "Bu maosh allaqachon berilgan."
+
+msgid "There is nothing to pay for this month."
+msgstr "Bu oy uchun beriladigan summa yo'q."
+
+msgid "This payout is already cancelled."
+msgstr "Bu to'lov allaqachon bekor qilingan."
+
+msgid "Being calculated"
+msgstr "Hisoblanmoqda"
+
+msgid "Close the earlier months first"
+msgstr "Avval oldingi oylarni yoping"
+
+msgid "Teachers' share"
+msgstr "O'qituvchilar ulushi"
+
+msgid "Corrections, bonuses, deductions"
+msgstr "Tuzatishlar, mukofotlar, ushlab qolishlar"
+
+msgid "To pay"
+msgstr "Beriladigan summa"
+
+#, python-format
+msgid "paid out %(p)s"
+msgstr "berildi: %(p)s"
+
+msgid ""
+"The numbers change as students pay. Close the month when you pay the "
+"teachers: the salaries are frozen, and later payments, refunds or reversals "
+"go into the next month as corrections."
+msgstr ""
+"O'quvchilar to'lagan sari raqamlar o'zgaradi. O'qituvchilarga maosh "
+"berayotganda oyni yoping: maoshlar qotiriladi, keyingi to'lovlar, pul "
+"qaytarishlar va bekor qilishlar keyingi oyga tuzatish sifatida o'tadi."
+
+msgid "Close the month? Its salaries can't be changed afterwards."
+msgstr "Oyni yopasizmi? Keyin uning maoshlarini o'zgartirib bo'lmaydi."
+
+#, python-format
+msgid "Close %(m)s"
+msgstr "%(m)s oyini yopish"
+
+#, python-format
+msgid "%(m)s is not closed yet. This month is calculated after it."
+msgstr "%(m)s hali yopilmagan. Bu oy undan keyin hisoblanadi."
+
+#, python-format
+msgid "Paid by students: %(p)s"
+msgstr "O'quvchilar to'lagan: %(p)s"
+
+#, python-format
+msgid "Paid out %(d)s"
+msgstr "Berildi: %(d)s"
+
+msgid "No teachers yet."
+msgstr "Hali o'qituvchilar yo'q."
+
+msgid "Corrections"
+msgstr "Tuzatishlar"
+
+msgid "Bonuses"
+msgstr "Mukofotlar"
+
+msgid "Deductions"
+msgstr "Ushlab qolishlar"
+
+msgid "Not yet"
+msgstr "Hali berilmagan"
+
+msgid "No salary months yet."
+msgstr "Hali maosh oylari yo'q."
+
+msgid ""
+"A teacher gets this share of the money students paid for the teacher's "
+"groups. Teachers without their own rate get the default rate from General "
+"settings. A new rate applies from the month you choose; closed months never "
+"change."
+msgstr ""
+"O'qituvchi o'z guruhlari uchun o'quvchilar to'lagan pulning shu ulushini "
+"oladi. Shaxsiy stavkasi yo'q o'qituvchilarga Umumiy sozlamalardagi standart "
+"stavka qo'llanadi. Yangi stavka siz tanlagan oydan boshlab amal qiladi; "
+"yopilgan oylar o'zgarmaydi."
+
+msgid "New rate"
+msgstr "Yangi stavka"
+
+msgid "Own rate"
+msgstr "Shaxsiy stavka"
+
+msgid "Default rate"
+msgstr "Standart stavka"
+
+msgid "Change rate"
+msgstr "Stavkani o'zgartirish"
+
+msgid "Add teachers first."
+msgstr "Avval o'qituvchilarni qo'shing."
+
+msgid "Salary sheet"
+msgstr "Maosh varaqasi"
+
+#, python-format
+msgid "Rate: %(r)s%%"
+msgstr "Stavka: %(r)s%%"
+
+#, python-format
+msgid "Paid out %(a)s on %(d)s"
+msgstr "%(d)s kuni %(a)s berildi"
+
+msgid "Preliminary: the month is not closed yet."
+msgstr "Taxminiy: oy hali yopilmagan."
+
+#, python-format
+msgid "Pay out %(a)s"
+msgstr "%(a)s maoshni berish"
+
+msgid "Cancel the payout"
+msgstr "Berilgan maoshni bekor qilish"
+
+msgid "Students' payments"
+msgstr "O'quvchilar to'lovlari"
+
+#, python-format
+msgid "%(p)s × %(r)s%%"
+msgstr "%(p)s × %(r)s%%"
+
+#, python-format
+msgid "Correction for %(m)s"
+msgstr "%(m)s uchun tuzatish"
+
+msgid "Bonuses and deductions"
+msgstr "Mukofotlar va ushlab qolishlar"
+
+msgid "Delete"
+msgstr "O'chirish"
+
+msgid "None."
+msgstr "Yo'q."
+
+#, python-format
+msgid "My salary, %(m)s"
+msgstr "Maoshim, %(m)s"
+
+#, python-format
+msgid "Students paid %(p)s so far"
+msgstr "Hozircha o'quvchilar %(p)s to'ladi"
+
+msgid "The month is closed. Its salaries are frozen."
+msgstr "Oy yopildi. Maoshlar qotirildi."
+
+msgid "Deleted."
+msgstr "O'chirildi."
+
+msgid "The salary is marked as paid out."
+msgstr "Maosh berilgan deb belgilandi."
+
+msgid "The payout is cancelled."
+msgstr "Berilgan maosh bekor qilindi."
 
 msgid "Leave empty to use the center's details."
 msgstr "Markaz ma'lumotlari ishlatilishi uchun bo'sh qoldiring."

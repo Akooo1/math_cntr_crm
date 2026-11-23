@@ -342,6 +342,7 @@ def objects(director, branch_a, branch_b, admin_a, teacher_a):
             group=group,
             scheduled_date=leads[f"future_lesson_{key}"].date,
         )
+    leads.update(_salary_objects(director, teacher_a, leads["group_b"].teacher))
     return {
         **leads,
         "stage": LeadStage.objects.get(kind="contacted"),
@@ -359,6 +360,81 @@ def objects(director, branch_a, branch_b, admin_a, teacher_a):
         "rad-sabablari": RefusalReason.objects.first(),
         "chek": branch_a,
         "umumiy": branch_a,
+        "stavkalar": leads["rate"],
+    }
+
+
+def _salary_objects(director, teacher_a, teacher_b):
+    """This month closed (teacher_a paid out), next month open with a bonus."""
+    from apps.core.datemath import add_months, month_start
+    from apps.core.system_settings import set_settings
+    from apps.salaries import services as salaries
+
+    month = month_start(today())
+    set_settings({"salaries.start_month": month.year * 100 + month.month}, actor=director)
+    rate = salaries.add_rate(actor=director, teacher=teacher_b, rate_bp=6500, effective_from=month)
+    salaries.close_month(actor=director, month=month)
+    payout = salaries.pay_out(actor=director, teacher=teacher_a, month=month, paid_on=today())
+    nxt = add_months(month, 1)
+    bonus = salaries.add_adjustment(
+        actor=director, teacher=teacher_a, month=nxt, kind="bonus", amount=1000, reason="x"
+    )
+    return {
+        "rate": rate,
+        "salary_month": month,
+        "salary_next": nxt,
+        "salary_payout": payout,
+        "salary_bonus": bonus,
+        "teacher_a": teacher_a,
+        "teacher_b": teacher_b,
+    }
+
+
+def salaries_cases(o) -> dict[str, list[Case]]:
+    """Salaries: Direktor only; a teacher sees only "Maoshim" (own sheet, no teacher id in
+    the URL). Salaries are not branch-scoped: the Direktor reaches every teacher."""
+    director, director_post = expect({D: 200}), expect({D: 302})
+    teacher = expect({T: 200})
+    month, nxt = f"{o['salary_month']:%m.%Y}", f"{o['salary_next']:%m.%Y}"
+    ta, tb = o["teacher_a"].pk, o["teacher_b"].pk
+    return {
+        "salaries:index": [
+            Case("/maosh/", expect=director),
+            Case(f"/maosh/?oy={month}", expect=director),
+            Case(f"/maosh/?oy={month}&excel=1", expect=director),
+        ],
+        "salaries:sheet": [
+            Case(f"/maosh/oqituvchi/{ta}/?oy={month}", expect=director),
+            Case(f"/maosh/oqituvchi/{tb}/?oy={nxt}", expect=director),
+            Case(f"/maosh/oqituvchi/{o['student_a'].pk + 10**6}/", expect=expect({D: 404})),
+        ],
+        "salaries:mine": [
+            Case("/maoshim/", expect=teacher),
+            Case(f"/maoshim/?oy={month}", expect=teacher),
+        ],
+        "salaries:close": [Case("/maosh/yopish/", "post", director_post, {"oy": nxt})],
+        "salaries:adjustment_add": [
+            Case(
+                f"/maosh/oqituvchi/{tb}/qoshish/",
+                "post",
+                director_post,
+                {"oy": nxt, "kind": "bonus", "amount": "1000", "reason": "x"},
+            )
+        ],
+        "salaries:payout": [
+            Case(f"/maosh/oqituvchi/{ta}/berish/", "post", director_post, {"oy": month})
+        ],
+        "salaries:adjustment_delete": [
+            Case(f"/maosh/qoshimcha/{o['salary_bonus'].pk}/ochirish/", "post", director_post)
+        ],
+        "salaries:payout_cancel": [
+            Case(
+                f"/maosh/berilgan/{o['salary_payout'].pk}/bekor-qilish/",
+                "post",
+                director_post,
+                {"reason": "x"},
+            )
+        ],
     }
 
 
@@ -386,6 +462,7 @@ def cases(objects) -> dict[str, list[Case]]:
     c.update(students_cases(objects))
     c.update(billing_cases(objects))
     c.update(reports_cases())
+    c.update(salaries_cases(objects))
     for s in sections():
         base = f"/sozlamalar/{s.slug}/"
         obj = objects[s.slug]

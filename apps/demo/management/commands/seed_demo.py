@@ -8,6 +8,7 @@ import datetime as dt
 import random
 
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -136,12 +137,62 @@ class Command(BaseCommand):
             with transaction.atomic():
                 self._seed_money(User)
             created = True
+        from apps.salaries.models import Rate
+
+        if not Rate.objects.exists():
+            with transaction.atomic():
+                self._seed_salaries(User)
+            created = True
         if not created:
             self.stdout.write("Demo data already present.")
             return
         self.stdout.write(self.style.SUCCESS("Demo data created."))
         for phone, name, role, _b in USERS:
             self.stdout.write(f"  {phone}  {DEMO_PASSWORD}  {role}  {name}")
+
+    def _seed_salaries(self, User):
+        """Salaries from the first month with payments: one owner-teacher at 65%, past
+        months closed, all but the last one paid out, a bonus in the current month."""
+        from apps.core.datemath import add_months, month_start
+        from apps.salaries import services as salaries
+        from apps.salaries.selectors import open_month
+
+        director = User.objects.get(phone=USERS[0][0])
+        first = Payment.objects.order_by("paid_on").first()
+        today = dates.today()
+        start = month_start(first.paid_on if first else today)
+        set_settings({"salaries.start_month": start.year * 100 + start.month}, actor=director)
+        teachers = list(User.objects.filter(role="teacher").order_by("phone"))
+        if not teachers:
+            return
+        salaries.add_rate(
+            actor=director,
+            teacher=teachers[0],
+            rate_bp=6500,
+            effective_from=start,
+            reason="Ta'sischi",
+        )
+        current = month_start(today)
+        closed = []
+        while open_month() < current:
+            m = open_month()
+            salaries.close_month(actor=director, month=m)
+            closed.append(m)
+        for m in closed[:-1]:
+            pay_day = min(add_months(m, 1) - dt.timedelta(days=1), today)
+            for t in teachers:
+                try:
+                    salaries.pay_out(actor=director, teacher=t, month=m, paid_on=pay_day)
+                except ValidationError:
+                    pass  # nothing to pay that month
+        salaries.add_adjustment(
+            actor=director,
+            teacher=teachers[-1],
+            month=current,
+            kind="bonus",
+            amount=200_000,
+            reason="Olimpiada g'oliblari uchun",
+        )
 
     def _seed_crm(self, User):
         """About 45 leads per the brief: every stage, tasks, trials, a few conversions."""

@@ -1,0 +1,6 @@
+<section class="card p-5">
+  <p class="text-sm text-slate-500">{% blocktranslate with m=ctx.month|date:"F Y" %}My salary, {{ m }}{% endblocktranslate %}</p>
+  <p class="mt-1 text-2xl font-semibold tabular-nums">{{ ctx.totals.total|som }}</p>
+  <p class="text-xs text-slate-500">{% blocktranslate with p=ctx.totals.paid|som %}Students paid {{ p }} so far{% endblocktranslate %}</p>
+  <a href="{% url 'salaries:mine' %}?oy={{ ctx.month|date:'m.Y' }}" class="mt-3 inline-block text-sm font-medium text-sky-700">{% translate "Details" %}</a>
+</section>
