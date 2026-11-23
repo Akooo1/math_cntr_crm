@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **6 done** (teacher salaries, Module 2). Next: phase 7 (staff arrival check-in with GPS, manual deletion of old notification records), phase 8 (Telegram bot: Direktor notifications, debt reminders to parents), phase 9 (go-live). Update this line at the end of each phase.
+- Current phase: **7 done** (staff arrival check-in with GPS, notification queue page). Next: phase 8 (Telegram bot: Direktor morning summary, debt reminders to parents), phase 9 (go-live). Update this line at the end of each phase.
 
 ## Ask the owner before
 
@@ -36,7 +36,7 @@ npm run build:css                              # Tailwind -> static/dist/app.css
 ## Layout and module boundaries
 
 ```
-config/   apps/{core,accounts,settings,crm,students,billing,reports,salaries,demo}/   templates/   static/   locale/   scripts/   docs/   tests/
+config/   apps/{core,accounts,settings,crm,students,staff,billing,reports,salaries,demo}/   templates/   static/   locale/   scripts/   docs/   tests/
 ```
 
 `apps/demo` holds the demo seed command only; it sits above every module and nothing imports it.
@@ -44,7 +44,7 @@ config/   apps/{core,accounts,settings,crm,students,billing,reports,salaries,dem
 Dependency direction (enforced by `.importlinter`; CI fails on violations):
 
 ```
-core ← accounts ← settings ← crm, students ;  students ← billing ← reports, salaries ;  crm → students
+core ← accounts ← settings ← crm, students, staff ;  students ← billing ← reports, salaries ;  crm → students
 ```
 
 - Import another module only through `services`, `selectors`, `events`, or `models` (models only for FK targets and types).
@@ -152,6 +152,11 @@ Inside a module:
 | Correction (salary) | Tuzatish |
 | Close the month (salaries) | Oyni yopish |
 | Pay out / paid out | Maoshni berish / Berildi |
+| Staff attendance / I'm here | Xodimlar davomati / Keldim |
+| On time / late / not yet / day off | Vaqtida / Kechikdi / Hali kelmadi / Dam olish kuni |
+| Start time / workdays | Ish boshlanishi / Ish kunlari |
+| Branch location / radius | Filial joylashuvi / Radius |
+| Notification queue | Bildirishnomalar navbati |
 
 Add new terms here before using them in the UI.
 
@@ -190,6 +195,9 @@ Add new terms here before using them in the UI.
   one money rounding function. Salaries use it.
 - `core.excel.workbook(title, headers, rows, kinds, totals)` / `core.excel.response(...)`:
   every Excel export. Money stays numeric with a so'm number format.
+- `static/js/app.js`: `<form data-confirm="...">` asks before submitting; `[data-geolocate]`
+  reads the phone's GPS. Never put translated text inside inline JavaScript: Uzbek
+  apostrophes break the quotes. Pass it in a `data-` attribute instead.
 - URLs and slugs are Uzbek (`/sozlamalar/`, `/kirish/`); code identifiers stay English.
 
 ## Security and permissions

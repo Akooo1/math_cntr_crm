@@ -13,7 +13,7 @@ layers =
     apps.demo
     apps.reports | apps.salaries
     apps.billing | apps.crm
-    apps.students
+    apps.students | apps.staff
     apps.settings
     apps.accounts
     apps.core
@@ -28,9 +28,12 @@ type = forbidden
 source_modules =
     apps.billing.domain
     apps.salaries.domain
+    apps.staff.domain
 forbidden_modules =
     django
     apps.billing.models
     apps.billing.services
     apps.salaries.models
     apps.salaries.services
+    apps.staff.models
+    apps.staff.services

@@ -1,0 +1,16 @@
+<section class="card min-w-0 p-5">
+  <div class="flex items-center justify-between gap-2">
+    <p class="text-sm text-slate-500">{% translate "Staff today" %}</p>
+    <a href="{% url 'staff:board' %}" class="text-sm font-medium text-sky-700">{% translate "Details" %}</a>
+  </div>
+  <dl class="mt-3 grid grid-cols-3 gap-2 text-center">
+    <div class="rounded-lg bg-emerald-50 p-2"><dt class="text-xs text-emerald-800">{% translate "On time" %}</dt><dd class="text-xl font-semibold text-emerald-900">{{ ctx.counts.on_time }}</dd></div>
+    <div class="rounded-lg bg-amber-50 p-2"><dt class="text-xs text-amber-800">{% translate "Late" %}</dt><dd class="text-xl font-semibold text-amber-900">{{ ctx.counts.late }}</dd></div>
+    <div class="rounded-lg bg-slate-100 p-2"><dt class="text-xs text-slate-600">{% translate "Not arrived yet" %}</dt><dd class="text-xl font-semibold text-slate-800">{{ ctx.counts.not_yet }}</dd></div>
+  </dl>
+  <ul class="mt-3 space-y-1 text-sm">
+    {% for r in ctx.rows %}{% if r.status == "late" or r.status == "not_yet" %}{% if forloop.counter <= 6 %}
+      <li class="flex min-w-0 items-center justify-between gap-2"><span class="min-w-0 truncate">{{ r.user.full_name }}</span>{% include "staff/_status.html" %}</li>
+    {% endif %}{% endif %}{% endfor %}
+  </ul>
+</section>

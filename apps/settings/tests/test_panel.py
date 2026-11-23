@@ -149,19 +149,12 @@ class TestUsers:
 @pytest.mark.django_db
 def test_system_settings_saved_and_audited(login, director):
     c = login(director)
-    resp = c.post(
-        "/sozlamalar/umumiy/",
-        {
-            "billing__rounding_step": "100",
-            "billing__monthly_due_day": "5",
-            "billing__backdate_days": "3",
-            "billing__grace_days": "0",
-            "core__session_timeout_hours": "12",
-            "students__attendance_edit_days": "7",
-            "salaries__default_rate_bp": "5000",
-            "salaries__start_month": "202612",
-        },
-    )
+    from apps.core.system_settings import all_values
+
+    # Every registered setting is on the form; post the current values plus two changes.
+    data = {key.replace(".", "__"): str(v) for key, v in all_values().items()}
+    data.update({"billing__rounding_step": "100", "billing__monthly_due_day": "5"})
+    resp = c.post("/sozlamalar/umumiy/", data)
     assert resp.status_code == 302
     assert get_setting("billing.rounding_step") == 100
     assert get_setting("billing.monthly_due_day") == 5

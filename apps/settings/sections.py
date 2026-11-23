@@ -235,6 +235,39 @@ def _system_view(request, section):
     )
 
 
+def _outbox_view(request, section):
+    from apps.core import outbox
+
+    if request.method == "POST":
+        try:
+            days = int(request.POST.get("days", ""))
+            deleted = outbox.purge(actor=request.user, older_than_days=days)
+        except ValueError:
+            messages.error(request, gettext("Choose how old the records must be."))
+        else:
+            messages.success(request, gettext("Deleted: %(n)s.") % {"n": deleted})
+        return redirect("settings:section_list", slug=section.slug)
+    return render(
+        request,
+        "settings/outbox.html",
+        {"section": section, "stats": outbox.stats(), "ages": outbox.AGE_CHOICES},
+    )
+
+
+class OutboxSection(SettingsSection):
+    slug = "bildirishnomalar"
+    title = _("Notification queue")
+    description = _("Records for Telegram notifications. Delete old ones by hand.")
+    icon = "list"
+    order = 95
+    group = GROUP_SYSTEM
+    model = Branch
+    custom_view = staticmethod(_outbox_view)
+    allow_create = False
+    allow_edit = False
+    allow_toggle_active = False
+
+
 class SystemSection(SettingsSection):
     slug = "umumiy"
     title = _("General settings")
@@ -256,5 +289,6 @@ for section in (
     CourseSection(),
     ReceiptSection(),
     SystemSection(),
+    OutboxSection(),
 ):
     register_section(section)

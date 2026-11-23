@@ -1,0 +1,12 @@
+{% extends "settings/section_form.html" %}
+{% block fields %}
+  {% translate "This browser can't share its location." as no_geo %}{% translate "Allow location access for this site and try again." as denied %}
+  <div data-geo-box data-no-geo="{{ no_geo }}" data-denied="{{ denied }}" class="space-y-4">
+    {% field form.coordinates %}
+    <button type="button" data-geolocate="fill" class="btn-secondary w-full sm:w-auto">
+      {% icon "map-pin" "w-4 h-4" %}<span data-idle>{% translate "Use my location" %}</span><span data-busy hidden>{% translate "Finding your location…" %}</span>
+    </button>
+    <p data-geo-error hidden class="text-sm text-rose-700"></p>
+    {% field form.radius_m %}
+  </div>
+{% endblock %}

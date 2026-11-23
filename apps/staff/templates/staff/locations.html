@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}{{ section.title }}{% endblock %}
+{% block heading %}{% translate "Settings" %}{% endblock %}
+{% block content %}
+  {% include "settings/_header.html" %}
+  <div class="mb-4 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+    {% translate 'Employees can press "Keldim" only within this distance of their branch. Easiest: open this page on your phone while standing in the branch and press "Use my location".' %}
+  </div>
+  <div class="space-y-3">
+    {% for r in rows %}
+      <a href="{% url 'settings:section_edit' section.slug r.branch.pk %}" class="card flex items-center justify-between gap-3 p-4 hover:bg-slate-50">
+        <div class="min-w-0">
+          <p class="font-semibold">{{ r.branch.name }}</p>
+          {% if r.location %}<p class="text-sm text-slate-500">{{ r.coords }} · {% blocktranslate with m=r.location.radius_m %}{{ m }} m{% endblocktranslate %}</p>
+          {% else %}<p class="text-sm text-amber-700">{% translate "Not set: employees of this branch can't mark arrival." %}</p>{% endif %}
+        </div>
+        {% icon "chevron-right" "w-5 h-5 text-slate-400" %}
+      </a>
+    {% empty %}<div class="card p-8 text-center text-sm text-slate-500">{% translate "Add branches first." %}</div>{% endfor %}
+  </div>
+{% endblock %}

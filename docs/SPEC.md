@@ -866,3 +866,60 @@ Owner's rules (answers after phase 5):
   months are closed.
 - Core fix: the audit log viewer no longer crashes when an audit key matches a reverse
   relation name, and "System setting" is shown in Uzbek.
+
+---
+
+## 14. Module 3: staff arrival check-in (phase 7)
+
+Owner's rules (answers after phase 5):
+
+1. Every employee except the Direktor marks arrival each morning with a **"Keldim"** button.
+   The time is the server's, not the phone's.
+2. The phone's GPS must place the employee within the branch radius (default 200 m) of one
+   of their branches. The Direktor sets each branch's location and radius in Sozlamalar.
+   GPS can be faked with special apps; this stops casual cheating, not a determined one.
+3. Each employee has a start time and workdays, set and edited by the Direktor. Arriving more
+   than the grace period (default 10 min) after the start time counts as late. An employee
+   without a start time is recorded but never marked late.
+4. Only arrival is recorded, not departure.
+5. The Direktor sees a live "today" board and a monthly report with Excel export. Telegram
+   notifications come in phase 8 (each check-in is published as an outbox event).
+6. Lateness is only recorded; it doesn't change pay.
+
+Decisions taken in phase 7:
+- One check-in per person per day. Check-ins are append-only.
+- If GPS fails (phone dead, signal), the Direktor records the arrival by hand with a reason.
+- A GPS reading less precise than 200 m is refused ("go near a window and try again").
+- Old notification records (`core_outbox_event`) are kept; the Direktor may delete those
+  older than 30, 90, 180 or 365 days in Sozlamalar → Bildirishnomalar navbati (audited).
+
+### 14.1 Tables (`apps/staff`)
+
+| Table | Purpose |
+|---|---|
+| `staff_branch_location` | branch (one-to-one), latitude, longitude, radius in metres (30–2 000), updated by/at. |
+| `staff_schedule` | user (one-to-one), start time, workdays (ISO weekdays 1–7), updated by/at. |
+| `staff_checkin` | user, branch, date, checked-in at, source (`gps` / `manual`), latitude, longitude, accuracy and distance in metres (GPS only), expected start, late minutes (≥ 0), reason (manual), created by, IP, browser. Unique per user and date. Append-only. |
+
+### 14.2 Permissions and screens
+- `staff.checkin` (Filial administratori, Sotuv menejeri, O'qituvchi): the "Keldim" card on
+  Bosh sahifa.
+- `staff.attendance.view` (Direktor): `/xodimlar-davomati/` (board for any day, manual
+  entry), the monthly report in Hisobotlar, the Bosh sahifa summary.
+- Sozlamalar (Direktor): Filial joylashuvi, Ish vaqti, Bildirishnomalar navbati.
+- Setting: `staff.grace_minutes` (default 10).
+- Event: `staff.checked_in` (outbox) with user, branch, date, time and late minutes.
+- Audit: `staff.checkin.create`, `staff.location.update`, `staff.schedule.update`,
+  `core.outbox.purge`.
+- Module notes: [docs/modules/staff.md](modules/staff.md).
+
+### Phase 7 notes
+- Employees without a start time are recorded but never late (otherwise a teacher who
+  starts at 14:00 would be "late" against a 09:00 default).
+- The board shows "Didn't come" only for past days; today it is "Not arrived yet".
+- Notification queue page: Sozlamalar → Bildirishnomalar navbati (`core.outbox`).
+- Fix from phase 5: the dashboard overview card made the Direktor's phone home page 21 px
+  wider than a 360 px screen.
+- Fix from phase 6: the "close month" confirmation put Uzbek text with apostrophes inside
+  JavaScript; confirmations now use the shared `data-confirm` attribute.
+

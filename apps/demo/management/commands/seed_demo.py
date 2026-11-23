@@ -143,12 +143,78 @@ class Command(BaseCommand):
             with transaction.atomic():
                 self._seed_salaries(User)
             created = True
+        from apps.staff.models import BranchLocation
+
+        if not BranchLocation.objects.exists():
+            with transaction.atomic():
+                self._seed_staff(User)
+            created = True
         if not created:
             self.stdout.write("Demo data already present.")
             return
         self.stdout.write(self.style.SUCCESS("Demo data created."))
         for phone, name, role, _b in USERS:
             self.stdout.write(f"  {phone}  {DEMO_PASSWORD}  {role}  {name}")
+
+    def _seed_staff(self, User):
+        """Branch locations, work hours, and arrivals for the past two weeks (made-up
+        coordinates near the real districts). Today stays open so "Keldim" can be tried."""
+        from django.utils import timezone
+
+        from apps.staff import services as staff
+        from apps.staff.domain import rules
+        from apps.staff.models import CheckIn
+
+        director = User.objects.get(phone=USERS[0][0])
+        spots = {
+            "Chilonzor filiali": (41.275600, 69.203400),
+            "Yunusobod filiali": (41.365000, 69.287000),
+        }
+        locs = {}
+        for branch in Branch.objects.filter(name__in=spots):
+            lat, lon = spots[branch.name]
+            staff.save_location(
+                actor=director, branch=branch, latitude=lat, longitude=lon, radius_m=200
+            )
+            locs[branch.pk] = (lat, lon)
+        starts = {
+            Role.BRANCH_ADMIN: dt.time(9, 0),
+            Role.SALES_MANAGER: dt.time(9, 30),
+            Role.TEACHER: dt.time(14, 0),
+        }
+        rnd = random.Random(7)
+        today = dates.today()
+        grace = get_setting("staff.grace_minutes")
+        for user in User.objects.exclude(role=Role.DIRECTOR).filter(is_active=True):
+            start = starts[user.role]
+            staff.save_schedule(
+                actor=director, user=user, start_time=start, workdays=[1, 2, 3, 4, 5, 6]
+            )
+            branch_id = user.branch_ids[0]
+            lat, lon = locs[branch_id]
+            for back in range(14, 0, -1):
+                day = today - dt.timedelta(days=back)
+                if day.isoweekday() == 7 or rnd.random() < 0.08:
+                    continue  # Sunday, or a missed day
+                minutes = (
+                    start.hour * 60 + start.minute + rnd.choice([-20, -12, -8, -5, 0, 4, 18, 35])
+                )
+                arrived = dt.time(minutes // 60, minutes % 60)
+                dlat = rnd.uniform(-0.0008, 0.0008)
+                CheckIn.objects.create(
+                    user=user,
+                    branch_id=branch_id,
+                    date=day,
+                    checked_in_at=timezone.make_aware(dt.datetime.combine(day, arrived)),
+                    source=CheckIn.Source.GPS,
+                    latitude=lat + dlat,
+                    longitude=lon,
+                    accuracy_m=rnd.randint(8, 40),
+                    distance_m=rules.distance_m(lat, lon, lat + dlat, lon),
+                    expected_start=start,
+                    late_minutes=rules.late_minutes(start, arrived, grace),
+                    created_by=user,
+                )
 
     def _seed_salaries(self, User):
         """Salaries from the first month with payments: one owner-teacher at 65%, past

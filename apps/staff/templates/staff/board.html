@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{% translate "Staff attendance" %}{% endblock %}
+{% block heading %}{% translate "Staff attendance" %}{% endblock %}
+{% block content %}
+  <form method="get" class="mb-4 flex flex-wrap items-end gap-2">
+    <label class="block"><span class="mb-1 block text-sm text-slate-600">{% translate "Date" %}</span>
+      <input name="sana" value="{{ day|sana }}" inputmode="numeric" class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base"></label>
+    <button class="btn-secondary">{% translate "Show" %}</button>
+    <a class="btn-ghost px-3" href="{% url 'reports:report' 'xodimlar-davomati' %}">{% icon "chart" "w-4 h-4" %}{% translate "Monthly report" %}</a>
+  </form>
+  <div class="mb-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
+    <div class="card p-3"><p class="text-xs text-slate-500">{% translate "On time" %}</p><p class="text-xl font-semibold">{{ counts.on_time }}</p></div>
+    <div class="card p-3"><p class="text-xs text-slate-500">{% translate "Late" %}</p><p class="text-xl font-semibold text-amber-700">{{ counts.late }}</p></div>
+    <div class="card p-3"><p class="text-xs text-slate-500">{% translate "Not arrived yet" %}</p><p class="text-xl font-semibold">{{ counts.not_yet|add:counts.absent }}</p></div>
+    <div class="card p-3"><p class="text-xs text-slate-500">{% translate "Day off" %}</p><p class="text-xl font-semibold">{{ counts.day_off|add:counts.no_schedule }}</p></div>
+  </div>
+
+  <div class="space-y-2 md:hidden">
+    {% for r in rows %}
+      <div class="card p-4">
+        <div class="flex items-start justify-between gap-2"><div class="min-w-0"><p class="font-medium">{{ r.user.full_name }}</p><p class="text-sm text-slate-500">{{ r.user.get_role_display }}{% if r.schedule %} · {{ r.schedule.start_time|time:"H:i" }}{% endif %}</p></div>{% include "staff/_status.html" %}</div>
+        {% if r.checkin %}<p class="mt-1 text-sm">{{ r.checkin.checked_in_at|time:"H:i" }} · {{ r.checkin.branch.name }}{% if r.checkin.source == "manual" %} · {% translate "entered by hand" %}{% endif %}</p>{% endif %}
+      </div>
+    {% empty %}<p class="card p-6 text-center text-sm text-slate-500">{% translate "No employees yet." %}</p>{% endfor %}
+  </div>
+  <div class="card hidden overflow-x-auto md:block">
+    <table class="min-w-full divide-y divide-slate-200">
+      <thead class="bg-slate-50"><tr>
+        <th class="table-head">{% translate "Employee" %}</th><th class="table-head">{% translate "Role" %}</th><th class="table-head">{% translate "Start time" %}</th>
+        <th class="table-head">{% translate "Arrived at" %}</th><th class="table-head">{% translate "Branch" %}</th><th class="table-head">{% translate "Status" %}</th><th class="table-head text-right">{% translate "Distance (m)" %}</th>
+      </tr></thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for r in rows %}
+          <tr>
+            <td class="table-cell font-medium">{{ r.user.full_name }}</td>
+            <td class="table-cell">{{ r.user.get_role_display }}</td>
+            <td class="table-cell">{% if r.schedule %}{{ r.schedule.start_time|time:"H:i" }}{% else %}—{% endif %}</td>
+            <td class="table-cell">{% if r.checkin %}{{ r.checkin.checked_in_at|time:"H:i" }}{% if r.checkin.source == "manual" %} <span class="text-xs text-slate-500">({% translate "entered by hand" %})</span>{% endif %}{% else %}—{% endif %}</td>
+            <td class="table-cell">{{ r.checkin.branch.name|default:"—" }}</td>
+            <td class="table-cell">{% include "staff/_status.html" %}</td>
+            <td class="table-cell text-right tabular-nums">{{ r.checkin.distance_m|default:"—" }}</td>
+          </tr>
+        {% empty %}<tr><td colspan="7" class="table-cell text-center text-slate-500">{% translate "No employees yet." %}</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <details class="card mt-4 p-4">
+    <summary class="cursor-pointer font-medium">{% translate "Record an arrival by hand" %}</summary>
+    <p class="mt-2 text-sm text-slate-500">{% translate "When the phone couldn't share its location. The reason is saved in the audit log." %}</p>
+    <form method="post" action="{% url 'staff:manual' %}" class="mt-3 grid gap-3 sm:grid-cols-2">{% csrf_token %}
+      {% field form.user %}{% field form.branch %}{% field form.day %}{% field form.time %}
+      <div class="sm:col-span-2">{% field form.reason %}</div>
+      <div class="sm:col-span-2"><button class="btn-primary w-full sm:w-auto">{% translate "Save" %}</button></div>
+    </form>
+  </details>
+{% endblock %}

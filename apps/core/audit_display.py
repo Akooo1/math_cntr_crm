@@ -37,7 +37,10 @@ VERBS = {
     "run": _("Done"),
 }
 
-ENTITY_FALLBACK = {"core.systemsetting": _("System setting")}
+ENTITY_FALLBACK = {
+    "core.systemsetting": _("System setting"),
+    "core.outboxevent": _("Notification queue"),
+}
 
 # Labels for audit keys that are not model fields, or whose field has no Uzbek label.
 # Modules add their own with register_labels().

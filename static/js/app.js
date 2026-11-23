@@ -36,6 +36,47 @@
     if (msg && !window.confirm(msg)) e.preventDefault();
   });
 
+  // <button data-geolocate="submit|fill"> inside a [data-geo-box]: ask the phone for its GPS
+  // position. "submit" fills the form's lat/lng/accuracy and submits it ("Keldim");
+  // "fill" writes "lat, lng" into the box's [data-geo-coords] input (branch location).
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest && e.target.closest("[data-geolocate]");
+    if (!btn) return;
+    var box = btn.closest("[data-geo-box]");
+    var err = box.querySelector("[data-geo-error]");
+    function busy(on) {
+      btn.disabled = on;
+      box.querySelectorAll("[data-idle]").forEach(function (el) { el.hidden = on; });
+      box.querySelectorAll("[data-busy]").forEach(function (el) { el.hidden = !on; });
+    }
+    function fail(msg) {
+      busy(false);
+      err.textContent = msg;
+      err.hidden = false;
+    }
+    if (!navigator.geolocation) return fail(box.getAttribute("data-no-geo"));
+    err.hidden = true;
+    busy(true);
+    navigator.geolocation.getCurrentPosition(
+      function (p) {
+        var lat = p.coords.latitude.toFixed(6);
+        var lng = p.coords.longitude.toFixed(6);
+        if (btn.getAttribute("data-geolocate") === "fill") {
+          box.querySelector("[data-geo-coords]").value = lat + ", " + lng;
+          busy(false);
+          return;
+        }
+        var form = btn.form;
+        form.elements.lat.value = lat;
+        form.elements.lng.value = lng;
+        form.elements.accuracy.value = Math.round(p.coords.accuracy);
+        form.submit();
+      },
+      function () { fail(box.getAttribute("data-denied")); },
+      { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+    );
+  });
+
   // Keep CSRF on htmx requests.
   document.addEventListener("htmx:configRequest", function (e) {
     var token = document.querySelector("meta[name=csrf-token]");

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}{{ section.title }}{% endblock %}
+{% block heading %}{% translate "Settings" %}{% endblock %}
+{% block content %}
+  <div class="mb-4"><a href="{% url 'settings:index' %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{% translate "Settings" %}</a></div>
+  <div class="mx-auto max-w-xl space-y-4">
+    <h2 class="text-xl font-semibold">{{ section.title }}</h2>
+    <div class="rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+      {% translate "Every payment, check-in and similar event leaves a record here for Telegram notifications. Records are kept until you delete them. Deleting old records doesn't touch payments or any other data." %}
+    </div>
+    <dl class="card grid grid-cols-2 gap-3 p-4">
+      <div><dt class="text-sm text-slate-500">{% translate "Records" %}</dt><dd class="text-lg font-semibold">{{ stats.total|raqam }}</dd></div>
+      <div><dt class="text-sm text-slate-500">{% translate "Not sent yet" %}</dt><dd class="text-lg font-semibold">{{ stats.pending|raqam }}</dd></div>
+      <div class="col-span-2"><dt class="text-sm text-slate-500">{% translate "Oldest record" %}</dt><dd>{{ stats.oldest|sana_vaqt|default:"—" }}</dd></div>
+    </dl>
+    {% translate "Delete the selected records? This can't be undone." as question %}
+    <form method="post" class="card space-y-3 p-4" data-confirm="{{ question }}">{% csrf_token %}
+      <p class="font-medium">{% translate "Delete records older than" %}</p>
+      {% for d in ages %}
+        <label class="flex items-center justify-between gap-3 rounded-lg border border-slate-200 p-3">
+          <span class="flex items-center gap-2"><input type="radio" name="days" value="{{ d }}" {% if forloop.last %}checked{% endif %}>{% blocktranslate count n=d %}{{ n }} day{% plural %}{{ n }} days{% endblocktranslate %}</span>
+          <span class="text-sm text-slate-500">{% for k, v in stats.by_age.items %}{% if k == d %}{{ v|raqam }}{% endif %}{% endfor %}</span>
+        </label>
+      {% endfor %}
+      <button class="btn-danger w-full sm:w-auto">{% translate "Delete" %}</button>
+    </form>
+  </div>
+{% endblock %}

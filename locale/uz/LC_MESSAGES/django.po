@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 15:13+0500\n"
+"POT-Creation-Date: 2026-11-23 16:08+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -1201,6 +1201,9 @@ msgstr "Bajarildi"
 msgid "System setting"
 msgstr "Tizim sozlamasi"
 
+msgid "Notification queue"
+msgstr "Bildirishnomalar navbati"
+
 msgid "Updated at"
 msgstr "O'zgartirilgan vaqt"
 
@@ -2306,6 +2309,17 @@ msgstr ""
 msgid "Branch details"
 msgstr "Filial ma'lumotlari"
 
+msgid "Choose how old the records must be."
+msgstr "Yozuvlar qanchalik eski bo'lishi kerakligini tanlang."
+
+#, python-format
+msgid "Deleted: %(n)s."
+msgstr "O'chirildi: %(n)s."
+
+msgid "Records for Telegram notifications. Delete old ones by hand."
+msgstr ""
+"Telegram bildirishnomalari uchun yozuvlar. Eskilarini qo'lda o'chiring."
+
 msgid "General settings"
 msgstr "Umumiy sozlamalar"
 
@@ -2318,6 +2332,268 @@ msgstr "O'z rolingizni o'zgartira olmaysiz."
 
 msgid "You can't deactivate yourself."
 msgstr "O'zingizni faolsizlantira olmaysiz."
+
+msgid "Staff attendance"
+msgstr "Xodimlar davomati"
+
+msgid "Coordinates"
+msgstr "Koordinatalar"
+
+msgid ""
+"Stand in the branch and press \"Use my location\", or paste the coordinates "
+"from Google or Yandex Maps, e.g. 41.311081, 69.240562."
+msgstr ""
+"Filialda turib \"Joylashuvimni olish\" tugmasini bosing yoki Google yoki "
+"Yandex xaritadan koordinatalarni qo'ying, masalan 41.311081, 69.240562."
+
+msgid "Radius (m)"
+msgstr "Radius (m)"
+
+msgid "How far from this point an employee may press \"Keldim\"."
+msgstr ""
+"Xodim bu nuqtadan qancha uzoqlikda \"Keldim\" tugmasini bosishi mumkin."
+
+msgid "Enter the coordinates as two numbers, e.g. 41.311081, 69.240562."
+msgstr "Koordinatalarni ikki son bilan kiriting, masalan 41.311081, 69.240562."
+
+msgid "Start time"
+msgstr "Ish boshlanishi"
+
+msgid "Leave empty: arrival is recorded but never counted as late."
+msgstr ""
+"Bo'sh qoldirilsa: kelish vaqti yoziladi, lekin kechikish hisoblanmaydi."
+
+msgid "Workdays"
+msgstr "Ish kunlari"
+
+msgid "Employee"
+msgstr "Xodim"
+
+msgid "Arrived at"
+msgstr "Kelgan vaqti"
+
+msgid "Latitude"
+msgstr "Kenglik"
+
+msgid "Longitude"
+msgstr "Uzunlik"
+
+msgid "Branch location"
+msgstr "Filial joylashuvi"
+
+msgid "Work schedule"
+msgstr "Ish vaqti"
+
+msgid "Phone (GPS)"
+msgstr "Telefon (GPS)"
+
+msgid "Entered by the Direktor"
+msgstr "Direktor kiritgan"
+
+msgid "GPS accuracy (m)"
+msgstr "GPS aniqligi (m)"
+
+msgid "Distance (m)"
+msgstr "Masofa (m)"
+
+msgid "Minutes late"
+msgstr "Kechikish (daqiqa)"
+
+msgid "Arrival"
+msgstr "Kelish"
+
+msgid "Mark own arrival"
+msgstr "O'z kelishini belgilash"
+
+msgid "See staff attendance"
+msgstr "Xodimlar davomatini ko'rish"
+
+msgid "Late after (minutes)"
+msgstr "Kechikish chegarasi (daqiqa)"
+
+msgid ""
+"Arriving this many minutes after the start time still counts as on time."
+msgstr ""
+"Ish boshlanishidan shuncha daqiqa keyin kelish hali vaqtida hisoblanadi."
+
+msgid "Updated by"
+msgstr "O'zgartirgan"
+
+msgid "Arrivals, late arrivals and missed workdays per employee."
+msgstr "Har bir xodimning kelishlari, kechikishlari va qolgan ish kunlari."
+
+msgid "Staff"
+msgstr "Xodimlar"
+
+msgid "Where each branch is, for the morning \"Keldim\" check."
+msgstr ""
+"Ertalabki \"Keldim\" tekshiruvi uchun har bir filial qayerda joylashgani."
+
+msgid "Work hours"
+msgstr "Ish vaqti"
+
+msgid "Each employee's start time and workdays."
+msgstr "Har bir xodimning ish boshlanish vaqti va ish kunlari."
+
+msgid "Arrived"
+msgstr "Kelgan"
+
+msgid "Late"
+msgstr "Kechikkan"
+
+msgid "Missed"
+msgstr "Kelmagan"
+
+msgid ""
+"Workdays follow each employee's current schedule. Missed days are counted up "
+"to yesterday."
+msgstr ""
+"Ish kunlari har bir xodimning hozirgi ish vaqtiga ko'ra hisoblanadi. "
+"Kelmagan kunlar kechagi kungacha sanaladi."
+
+msgid "The arrival for this day is already recorded."
+msgstr "Bu kun uchun kelish allaqachon yozilgan."
+
+msgid ""
+"The location is not precise enough. Go near a window or outside and try "
+"again."
+msgstr ""
+"Joylashuv yetarlicha aniq emas. Deraza yoniga yoki tashqariga chiqib qayta "
+"urinib ko'ring."
+
+msgid "Your branch's location is not set yet. Tell the Direktor."
+msgstr "Filialingiz joylashuvi hali kiritilmagan. Direktorga ayting."
+
+#, python-format
+msgid "You are %(d)s m from %(branch)s. Mark your arrival within %(r)s m."
+msgstr ""
+"Filialgacha masofa %(d)s m (%(branch)s). Kelishni %(r)s m ichida belgilang."
+
+msgid "The Direktor doesn't mark arrival."
+msgstr "Direktor kelishni belgilamaydi."
+
+msgid "The employee doesn't work in this branch."
+msgstr "Xodim bu filialda ishlamaydi."
+
+msgid "The time can't be in the future."
+msgstr "Vaqt kelajakda bo'lishi mumkin emas."
+
+msgid "Choose at least one workday."
+msgstr "Kamida bitta ish kunini tanlang."
+
+msgid "On time"
+msgstr "Vaqtida"
+
+#, python-format
+msgid "Late %(m)s min"
+msgid_plural "Late %(m)s min"
+msgstr[0] "%(m)s daqiqa kechikdi"
+msgstr[1] "%(m)s daqiqa kechikdi"
+
+msgid "Not arrived yet"
+msgstr "Hali kelmadi"
+
+msgid "Didn't come"
+msgstr "Kelmadi"
+
+msgid "Day off"
+msgstr "Dam olish kuni"
+
+msgid "No work hours"
+msgstr "Ish vaqti belgilanmagan"
+
+msgid "Monthly report"
+msgstr "Oylik hisobot"
+
+msgid "entered by hand"
+msgstr "qo'lda kiritilgan"
+
+msgid "No employees yet."
+msgstr "Hali xodimlar yo'q."
+
+msgid "Record an arrival by hand"
+msgstr "Kelishni qo'lda kiritish"
+
+msgid ""
+"When the phone couldn't share its location. The reason is saved in the audit "
+"log."
+msgstr ""
+"Telefon joylashuvni yubora olmaganda. Sabab harakatlar jurnalida saqlanadi."
+
+msgid "This browser can't share its location."
+msgstr "Bu brauzer joylashuvni yubora olmaydi."
+
+msgid "Allow location access for this site and try again."
+msgstr ""
+"Bu saytga joylashuvdan foydalanishga ruxsat bering va qayta urinib ko'ring."
+
+msgid "Use my location"
+msgstr "Joylashuvimni olish"
+
+msgid "Finding your location…"
+msgstr "Joylashuv aniqlanmoqda…"
+
+msgid ""
+"Employees can press \"Keldim\" only within this distance of their branch. "
+"Easiest: open this page on your phone while standing in the branch and press "
+"\"Use my location\"."
+msgstr ""
+"Xodimlar \"Keldim\" tugmasini faqat filialdan shu masofa ichida bosa oladi. "
+"Eng osoni: filialda turib bu sahifani telefonda oching va \"Joylashuvimni "
+"olish\" tugmasini bosing."
+
+#, python-format
+msgid "%(m)s m"
+msgstr "%(m)s m"
+
+msgid "Not set: employees of this branch can't mark arrival."
+msgstr "Kiritilmagan: bu filial xodimlari kelishni belgilay olmaydi."
+
+msgid "Add branches first."
+msgstr "Avval filiallarni qo'shing."
+
+#, python-format
+msgid ""
+"Arriving more than %(g)s minutes after the start time counts as late "
+"(General settings). Employees without a start time are recorded but never "
+"late."
+msgstr ""
+"Ish boshlanishidan %(g)s daqiqadan ko'p kechikib kelish kechikish "
+"hisoblanadi (Umumiy sozlamalar). Ish vaqti belgilanmagan xodimlarning "
+"kelishi yoziladi, lekin kechikish hisoblanmaydi."
+
+#, python-format
+msgid "Arrived at %(t)s"
+msgstr "%(t)s da keldingiz"
+
+#, python-format
+msgid "%(m)s minute late"
+msgid_plural "%(m)s minutes late"
+msgstr[0] "%(m)s daqiqa kechikish"
+msgstr[1] "%(m)s daqiqa kechikish"
+
+#, python-format
+msgid "Work starts at %(t)s"
+msgstr "Ish %(t)s da boshlanadi"
+
+msgid "I'm here"
+msgstr "Keldim"
+
+msgid "Staff today"
+msgstr "Bugun xodimlar"
+
+msgid "The phone didn't share its location. Allow it and try again."
+msgstr "Telefon joylashuvni yubormadi. Ruxsat bering va qayta urinib ko'ring."
+
+#, python-format
+msgid "Arrival recorded. You are %(m)s minutes late."
+msgstr "Kelish yozildi. Siz %(m)s daqiqa kechikdingiz."
+
+msgid "Arrival recorded. Have a good day!"
+msgstr "Kelish yozildi. Kuningiz xayrli o'tsin!"
+
+msgid "Arrival recorded."
+msgstr "Kelish yozildi."
 
 msgid "Students"
 msgstr "O'quvchilar"
@@ -2995,6 +3271,36 @@ msgstr "Faolsizlantirish"
 
 msgid "Activate"
 msgstr "Faollashtirish"
+
+msgid ""
+"Every payment, check-in and similar event leaves a record here for Telegram "
+"notifications. Records are kept until you delete them. Deleting old records "
+"doesn't touch payments or any other data."
+msgstr ""
+"Har bir to'lov, kelish va shu kabi hodisa Telegram bildirishnomalari uchun "
+"bu yerda yozuv qoldiradi. Yozuvlar siz o'chirmaguningizcha saqlanadi. Eski "
+"yozuvlarni o'chirish to'lovlar va boshqa ma'lumotlarga ta'sir qilmaydi."
+
+msgid "Records"
+msgstr "Yozuvlar"
+
+msgid "Not sent yet"
+msgstr "Hali yuborilmagan"
+
+msgid "Oldest record"
+msgstr "Eng eski yozuv"
+
+msgid "Delete the selected records? This can't be undone."
+msgstr "Tanlangan yozuvlarni o'chirasizmi? Buni qaytarib bo'lmaydi."
+
+msgid "Delete records older than"
+msgstr "Shundan eski yozuvlarni o'chirish"
+
+#, python-format
+msgid "%(n)s day"
+msgid_plural "%(n)s days"
+msgstr[0] "%(n)s kun"
+msgstr[1] "%(n)s kun"
 
 msgid "Branch overrides"
 msgstr "Filiallar uchun alohida ma'lumotlar"

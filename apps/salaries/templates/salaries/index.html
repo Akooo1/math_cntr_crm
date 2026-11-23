@@ -22,7 +22,8 @@
       {% translate "The numbers change as students pay. Close the month when you pay the teachers: the salaries are frozen, and later payments, refunds or reversals go into the next month as corrections." %}
     </div>
     {% if can_close %}
-      <form method="post" action="{% url 'salaries:close' %}" class="mb-4" x-data @submit="if (!confirm('{% translate "Close the month? Its salaries can't be changed afterwards." %}')) $event.preventDefault()">{% csrf_token %}
+      {% translate "Close the month? Its salaries can't be changed afterwards." as close_question %}
+      <form method="post" action="{% url 'salaries:close' %}" class="mb-4" data-confirm="{{ close_question }}">{% csrf_token %}
         <input type="hidden" name="oy" value="{{ month|date:'m.Y' }}">
         <button class="btn-primary w-full sm:w-auto">{% icon "check" %}{% blocktranslate with m=month|date:"F Y" %}Close {{ m }}{% endblocktranslate %}</button>
       </form>

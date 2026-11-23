@@ -247,17 +247,24 @@ def billing_cases(o) -> dict[str, list[Case]]:
 
 
 def reports_cases() -> dict[str, list[Case]]:
-    """Reports: Direktor and Filial administratori (own branch data only, see
-    apps/reports/tests); Sotuv menejeri and O'qituvchi never."""
-    fin = expect({D: 200, A: 200})
+    """Reports: each report's own permission (finance reports: Direktor and Filial
+    administratori, own branch data only, see apps/reports/tests; staff attendance:
+    Direktor). Sotuv menejeri and O'qituvchi never."""
+    from apps.core.permissions import get_permission
+
+    def allowed(report):
+        return expect({r: 200 for r in get_permission(report.permission).roles})
+
     missing = expect({D: 404, A: 404})
-    report_cases = [Case(f"/hisobotlar/{r.key}/", expect=fin) for r in reports()]
-    report_cases.append(Case("/hisobotlar/oylar/?dan=01.01.2026&gacha=31.03.2026", expect=fin))
+    report_cases = [Case(f"/hisobotlar/{r.key}/", expect=allowed(r)) for r in reports()]
+    report_cases.append(
+        Case("/hisobotlar/oylar/?dan=01.01.2026&gacha=31.03.2026", expect=expect({D: 200, A: 200}))
+    )
     report_cases.append(Case("/hisobotlar/yoq/", expect=missing))
     return {
-        "reports:index": [Case("/hisobotlar/", expect=fin)],
+        "reports:index": [Case("/hisobotlar/", expect=expect({D: 200, A: 200}))],
         "reports:report": report_cases,
-        "reports:excel": [Case(f"/hisobotlar/{r.key}/excel/", expect=fin) for r in reports()]
+        "reports:excel": [Case(f"/hisobotlar/{r.key}/excel/", expect=allowed(r)) for r in reports()]
         + [Case("/hisobotlar/yoq/excel/", expect=missing)],
     }
 
@@ -361,6 +368,9 @@ def objects(director, branch_a, branch_b, admin_a, teacher_a):
         "chek": branch_a,
         "umumiy": branch_a,
         "stavkalar": leads["rate"],
+        "filial-joylashuvi": branch_a,
+        "ish-vaqti": teacher_a,
+        "bildirishnomalar": branch_a,
     }
 
 
@@ -387,6 +397,29 @@ def _salary_objects(director, teacher_a, teacher_b):
         "salary_bonus": bonus,
         "teacher_a": teacher_a,
         "teacher_b": teacher_b,
+    }
+
+
+def staff_cases(o) -> dict[str, list[Case]]:
+    """Staff check-in: everyone but the Direktor marks their own arrival; only the
+    Direktor sees the board and records arrivals by hand."""
+    near = {"lat": "41.2756", "lng": "69.2034", "accuracy": "20"}
+    return {
+        "staff:check_in": [
+            Case("/keldim/", "post", {**only({A: 302, M: 302, T: 302}, 403), "anon": 302}, near)
+        ],
+        "staff:board": [
+            Case("/xodimlar-davomati/", expect=expect({D: 200})),
+            Case("/xodimlar-davomati/?sana=01.11.2026", expect=expect({D: 200})),
+        ],
+        "staff:manual": [
+            Case(
+                "/xodimlar-davomati/qolda/",
+                "post",
+                expect({D: 302}),
+                {"user": o["teacher_a"].pk, "reason": "x"},
+            )
+        ],
     }
 
 
@@ -463,6 +496,7 @@ def cases(objects) -> dict[str, list[Case]]:
     c.update(billing_cases(objects))
     c.update(reports_cases())
     c.update(salaries_cases(objects))
+    c.update(staff_cases(objects))
     for s in sections():
         base = f"/sozlamalar/{s.slug}/"
         obj = objects[s.slug]
