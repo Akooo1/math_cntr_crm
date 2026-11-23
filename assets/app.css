@@ -21,3 +21,5 @@
 /* Django's CheckboxSelectMultiple renders a <div> of <div><label><input> text</label></div> */
 .checkbox-list > div { @apply flex flex-wrap gap-2; }
 .checkbox-list label { @apply flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm; }
+.checkbox-list input { @apply h-5 w-5 shrink-0 border-slate-300 text-sky-700 focus:ring-sky-600; }
+.checkbox-list input[type="checkbox"] { @apply rounded; }

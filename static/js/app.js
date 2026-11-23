@@ -77,6 +77,16 @@
     );
   });
 
+  // <select data-fill-target="id"> whose options carry data-text: choosing one copies
+  // the text into the target field (message templates).
+  document.addEventListener("change", function (e) {
+    var sel = e.target;
+    if (!sel.matches || !sel.matches("select[data-fill-target]")) return;
+    var opt = sel.options[sel.selectedIndex];
+    var target = document.getElementById(sel.getAttribute("data-fill-target"));
+    if (target && opt && opt.getAttribute("data-text")) target.value = opt.getAttribute("data-text");
+  });
+
   // Keep CSRF on htmx requests.
   document.addEventListener("htmx:configRequest", function (e) {
     var token = document.querySelector("meta[name=csrf-token]");

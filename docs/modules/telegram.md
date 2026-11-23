@@ -23,11 +23,18 @@ Without `TELEGRAM_BOT_TOKEN` the bot container idles and nothing is sent.
 - Direktor: Sozlamalar → Telegram → "Telegramimni ulash": `t.me/<bot>?start=<user>_<hmac>`,
   valid today and tomorrow (`services.linking.link_token`).
 
+## Messages to parents
+`telegram_template` holds ready messages; `/ota-onalarga-xabar/` sends one to the
+connected parents of students absent from a group's lesson on a date, of a whole group, or
+of one student (link on the student profile). `services.parents.render()` fills
+`{oquvchi} {guruh} {sana} {filial} {telefon} {markaz}` and leaves other braces untouched.
+
 ## Permissions
 | Code | Roles |
 |---|---|
 | `telegram.manage` | Direktor |
 | `telegram.view` | Direktor, Filial administratori (student profile badge) |
+| `telegram.send` | Direktor (messages to parents from templates) |
 
 ## Settings
 `telegram.debt_reminders` (0 = off), `telegram.debt_min_days` (3),

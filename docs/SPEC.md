@@ -1004,3 +1004,19 @@ the Direktor once, answers Railway's health check, logs in over HTTPS proxy head
 secure cookies, refuses unknown hosts; worker and bot start. **Not verified:** a deploy on
 Railway itself (no Railway access from here).
 
+### Messages to parents (after phase 9, owner's request)
+- **Xabar shablonlari** (Sozlamalar): ready messages with placeholders `{oquvchi}`,
+  `{guruh}`, `{sana}`, `{filial}`, `{telefon}`, `{markaz}`. Four start templates ("Darsga
+  kelmadi", "Darsga kechikdi", "Uyga vazifa bajarilmagan", "Ota-onalar yig'ilishi"); the
+  Direktor edits, adds or switches them off. Table `telegram_template`.
+- **Ota-onalarga xabar** (`/ota-onalarga-xabar/`, Direktor, `telegram.send`): pick a
+  template (or write), choose who: students marked "Kelmadi" in a group on a date, the whole
+  group, or one student (from the student's profile). "Ko'rib chiqish" lists the students
+  and whether their parent is connected and shows the first message; "Yuborish" sends to
+  connected parents only and lists those who couldn't be reached. Every message is logged
+  (`telegram_message`, kind `custom`) and the send is audited (`telegram.message.send`).
+- "Qarz eslatmalarini hozir yuborish" now says why nobody got a message (no debtors,
+  overdue fewer days than the setting, parent not connected, already reminded).
+- Fix: every radio/checkbox list (workdays, bonus/deduction, note/call, user branches)
+  rendered squeezed into 20 px on all screens; the size class now styles only the inputs.
+

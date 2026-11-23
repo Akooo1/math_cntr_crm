@@ -142,7 +142,8 @@ class TestDebtReminders:
         assert services.send_debt_reminders()["sent"] == 1
         text = bot.texts(100)[-1]
         assert debtor.full_name in text and money.format_som(900_000) in text
-        assert services.send_debt_reminders() == {"sent": 0, "failed": 0, "skipped": 1}
+        again = services.send_debt_reminders()
+        assert (again["sent"], again["skipped"], again["debtors"]) == (0, 1, 1)
         clock.move_to(dt.datetime(2026, 11, 23, 5, 0, tzinfo=dt.UTC))  # 7 days later
         assert services.send_debt_reminders()["sent"] == 1
 
@@ -273,3 +274,93 @@ def test_check_explains_misnamed_env_file(settings, tmp_path, capsys):
     out = capsys.readouterr().out
     assert ".env.txt: has the token" in out and "named exactly .env" in out
     assert "123:ABC" not in out
+
+
+class TestParentMessages:
+    """Templates ("Farzandingiz kelmadi") sent by the Direktor to connected parents."""
+
+    @pytest.fixture
+    def lesson_day(self, bot, clock, admin_a, branch_a, monthly, director):
+        from apps.students.models import Lesson
+
+        group = make_group(admin_a, branch_a, course=monthly, start=D(2026, 9, 1), days=MWF)
+        absent = make_student(admin_a, branch_a, parent_phone=PARENT_PHONE, first_name="Ali")
+        present = make_student(admin_a, branch_a, first_name="Vali")
+        for s in (absent, present):
+            st.enroll(actor=admin_a, student=s, group=group, start_date=D(2026, 11, 2))
+        lesson = Lesson.objects.get(group=group, date=D(2026, 11, 16))
+        st.mark_attendance(actor=admin_a, lesson=lesson, student_id=absent.pk, status="absent")
+        st.mark_attendance(actor=admin_a, lesson=lesson, student_id=present.pk, status="present")
+        share(100, "998951112233")
+        return {"group": group, "absent": absent, "present": present}
+
+    def test_default_templates_exist(self, db):
+        from apps.telegram.models import Template
+
+        assert Template.objects.filter(title="Darsga kelmadi").exists()
+
+    def test_render_placeholders(self, lesson_day):
+        from apps.telegram.services.parents import render
+
+        text = render("{oquvchi} | {guruh} | {sana} | {markaz} | {x}", lesson_day["absent"], "7-A")
+        assert (
+            text
+            == f"{lesson_day['absent'].full_name} | 7-A | 16.11.2026 | Matematika Markazi | {{x}}"
+        )
+
+    def test_absent_mode_reaches_only_absent_students_parents(self, lesson_day, director, bot):
+        targets = selectors.recipients(
+            director, "absent", group=lesson_day["group"], day=D(2026, 11, 16)
+        )
+        assert [s for s, _g in targets] == [lesson_day["absent"]]
+        result = services.parents.send_to_parents(
+            actor=director,
+            targets=targets,
+            text="Farzandingiz {oquvchi} kelmadi",
+            day=D(2026, 11, 16),
+        )
+        assert (result["sent"], result["failed"], result["no_parent"]) == (1, 0, [])
+        assert bot.texts(100)[-1] == f"Farzandingiz {lesson_day['absent'].full_name} kelmadi"
+        assert Message.objects.filter(kind="custom", student=lesson_day["absent"]).exists()
+        assert AuditLog.objects.filter(action="telegram.message.send").exists()
+
+    def test_group_mode_reports_unconnected_parents(self, lesson_day, director):
+        targets = selectors.recipients(director, "group", group=lesson_day["group"])
+        result = services.parents.send_to_parents(actor=director, targets=targets, text="Salom")
+        assert result["sent"] == 1 and result["no_parent"] == [lesson_day["present"]]
+
+    def test_only_direktor_sends(self, lesson_day, admin_a):
+        with pytest.raises(PermissionDenied):
+            services.parents.send_to_parents(actor=admin_a, targets=[], text="x")
+
+    def test_page_preview_then_send(self, lesson_day, login, director, bot):
+        client = login(director)
+        data = {
+            "text": "Farzandingiz {oquvchi} bugun kelmadi",
+            "mode": "absent",
+            "group": lesson_day["group"].pk,
+            "day": "16.11.2026",
+        }
+        text = page_text(client.post("/ota-onalarga-xabar/", {**data, "action": "preview"}))
+        assert lesson_day["absent"].full_name in text and "Ota-ona ulangan" in text
+        assert bot.sent[-1]["chat_id"] == 100 and "kelmadi" not in bot.sent[-1]["text"]
+        before = len(bot.sent)
+        client.post("/ota-onalarga-xabar/", {**data, "action": "send"})
+        assert len(bot.sent) == before + 1
+
+    def test_from_student_profile(self, lesson_day, login, director, bot):
+        client = login(director)
+        page = page_text(client.get(f"/oquvchilar/{lesson_day['absent'].pk}/"))
+        assert "Xabar yuborish" in page
+        resp = client.get(f"/ota-onalarga-xabar/?oquvchi={lesson_day['absent'].pk}")
+        assert lesson_day["absent"].full_name in page_text(resp)
+        client.post(
+            "/ota-onalarga-xabar/",
+            {
+                "text": "Salom",
+                "mode": "student",
+                "student": lesson_day["absent"].pk,
+                "action": "send",
+            },
+        )
+        assert bot.texts(100)[-1] == "Salom"

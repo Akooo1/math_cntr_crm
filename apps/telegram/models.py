@@ -48,6 +48,7 @@ class Message(models.Model):
         DEBT = "debt_reminder", _("Debt reminder")
         SUMMARY = "morning_summary", _("Morning summary")
         TEST = "test", _("Test message")
+        CUSTOM = "custom", _("Message to parents")
         REPLY = "reply", _("Bot reply")
 
     class Status(models.TextChoices):
@@ -79,3 +80,27 @@ class Message(models.Model):
 
     def __str__(self):
         return f"{self.kind} -> {self.chat_id} ({self.status})"
+
+
+class Template(models.Model):
+    """A ready-made message the Direktor sends to parents ("Farzandingiz kelmadi")."""
+
+    title = models.CharField(_("Name"), max_length=100)
+    text = models.TextField(
+        _("Text"),
+        max_length=1000,
+        help_text=_(
+            "You can use: {oquvchi} student, {guruh} group, {sana} date, {filial} branch, "
+            "{telefon} branch phone, {markaz} center name."
+        ),
+    )
+    is_active = models.BooleanField(_("Active"), default=True)
+    sort_order = models.PositiveIntegerField(_("Order"), default=100)
+
+    class Meta:
+        db_table = "telegram_template"
+        verbose_name = _("Message template")
+        ordering = ["sort_order", "title"]
+
+    def __str__(self):
+        return self.title

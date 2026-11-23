@@ -86,21 +86,24 @@ def send_debt_reminders(*, force_actor=None) -> dict:
     elif not get_setting("telegram.debt_reminders"):
         return {"sent": 0, "failed": 0, "skipped": 0, "off": True}
     reader = force_actor or _director()
+    result = {"sent": 0, "failed": 0, "skipped": 0, "debtors": 0, "too_early": 0, "no_parent": 0}
     if reader is None:
-        return {"sent": 0, "failed": 0, "skipped": 0}
+        return result
     min_days = get_setting("telegram.debt_min_days")
     # By calendar day: a reminder sent on the 16th repeats on the 23rd whatever the seconds.
     last_allowed = dates.today() - dt.timedelta(days=get_setting("telegram.debt_repeat_days"))
     chats_by_phone = {}
     for chat in Chat.objects.filter(kind=Chat.Kind.PARENT, is_active=True):
         chats_by_phone.setdefault(chat.phone, []).append(chat)
-    result = {"sent": 0, "failed": 0, "skipped": 0}
     for row in billing_selectors.debtors(reader):
+        result["debtors"] += 1
         if row["days"] < min_days:
+            result["too_early"] += 1
             continue
         student = row["student"]
         chats = {c.pk: c for p in _student_phones(student) for c in chats_by_phone.get(p, [])}
         if not chats:
+            result["no_parent"] += 1
             continue
         recent = Message.objects.filter(
             student=student,

@@ -160,6 +160,8 @@ Inside a module:
 | Telegram bot / connected | Telegram bot / Ulangan |
 | Debt reminder / morning summary | Qarz eslatmasi / Ertalabki hisobot |
 | Share phone number | Telefon raqamni yuborish |
+| Message to parents / message templates | Ota-onalarga xabar / Xabar shablonlari |
+| Preview / send | Ko'rib chiqish / Yuborish |
 
 Add new terms here before using them in the UI.
 

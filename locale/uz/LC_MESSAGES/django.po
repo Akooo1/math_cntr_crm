@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 16:30+0500\n"
+"POT-Creation-Date: 2026-11-23 18:16+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -3183,6 +3183,27 @@ msgstr "Tekshiruvdan keyin ma'lumotlar o'zgargan. Xatolarni ko'ring."
 msgid "Telegram bot"
 msgstr "Telegram bot"
 
+msgid "Absent from the lesson on a date"
+msgstr "Shu kungi darsga kelmaganlar"
+
+msgid "The whole group"
+msgstr "Butun guruh"
+
+msgid "One student"
+msgstr "Bitta o'quvchi"
+
+msgid "Template"
+msgstr "Shablon"
+
+msgid "To whom"
+msgstr "Kimga"
+
+msgid "Choose the group."
+msgstr "Guruhni tanlang."
+
+msgid "Open the student's profile and send from there."
+msgstr "O'quvchi sahifasini oching va o'sha yerdan yuboring."
+
 msgid "Telegram chat"
 msgstr "Telegram chat"
 
@@ -3207,6 +3228,9 @@ msgstr "Ertalabki hisobot"
 msgid "Test message"
 msgstr "Sinov xabari"
 
+msgid "Message to parents"
+msgstr "Ota-onalarga xabar"
+
 msgid "Bot reply"
 msgstr "Bot javobi"
 
@@ -3225,11 +3249,25 @@ msgstr "Xato"
 msgid "Telegram message"
 msgstr "Telegram xabari"
 
+#, python-brace-format
+msgid ""
+"You can use: {oquvchi} student, {guruh} group, {sana} date, {filial} branch, "
+"{telefon} branch phone, {markaz} center name."
+msgstr ""
+"Ishlatish mumkin: {oquvchi} o'quvchi, {guruh} guruh, {sana} sana, {filial} "
+"filial, {telefon} filial telefoni, {markaz} markaz nomi."
+
+msgid "Message template"
+msgstr "Xabar shabloni"
+
 msgid "Manage the Telegram bot"
 msgstr "Telegram botni boshqarish"
 
 msgid "See Telegram connections"
 msgstr "Telegram ulanishlarini ko'rish"
+
+msgid "Send messages to parents"
+msgstr "Ota-onalarga xabar yuborish"
 
 msgid "Debt reminders in Telegram"
 msgstr "Telegramda qarz eslatmalari"
@@ -3252,6 +3290,16 @@ msgid "Repeat the reminder every (days)"
 msgstr "Eslatmani necha kunda takrorlash"
 
 #, python-format
+msgid ""
+"Sent: %(s)s. Not sent: %(f)s. Debtors: %(d)s, of them overdue less than "
+"%(min)s days: %(e)s, parent not connected: %(n)s, already reminded recently: "
+"%(k)s."
+msgstr ""
+"Yuborildi: %(s)s. Yuborilmadi: %(f)s. Qarzdorlar: %(d)s, ulardan muddati "
+"%(min)s kundan kam o'tgani: %(e)s, ota-onasi ulanmagani: %(n)s, yaqinda "
+"eslatma olgani: %(k)s."
+
+#, python-format
 msgid "Sent: %(s)s. Not sent: %(f)s."
 msgstr "Yuborildi: %(s)s. Yuborilmadi: %(f)s."
 
@@ -3261,6 +3309,12 @@ msgstr ""
 
 msgid "Notifications"
 msgstr "Bildirishnomalar"
+
+msgid "Message templates"
+msgstr "Xabar shablonlari"
+
+msgid "Ready messages to parents, e.g. \"Farzandingiz darsga kelmadi\"."
+msgstr "Ota-onalarga tayyor xabarlar, masalan \"Farzandingiz darsga kelmadi\"."
 
 #, python-format
 msgid ""
@@ -3357,6 +3411,53 @@ msgstr "Ota-ona ulangan"
 
 msgid "Not connected"
 msgstr "Ulanmagan"
+
+msgid "Send a message"
+msgstr "Xabar yuborish"
+
+msgid "These parents haven't connected the bot, so they got nothing:"
+msgstr ""
+"Bu o'quvchilarning ota-onalari botga ulanmagan, shuning uchun xabar bormadi:"
+
+msgid ""
+"Why a message failed is shown in Sozlamalar → Telegram, Recent messages."
+msgstr ""
+"Xabar nega yuborilmagani Sozlamalar → Telegram, \"So'nggi xabarlar\" "
+"bo'limida ko'rsatilgan."
+
+#, python-format
+msgid "To the parents of %(n)s"
+msgstr "%(n)s ning ota-onasiga"
+
+#, python-brace-format
+msgid ""
+"Filled in for each student: {oquvchi} student, {guruh} group, {sana} date, "
+"{filial} branch, {telefon} branch phone, {markaz} center name."
+msgstr ""
+"Har bir o'quvchi uchun to'ldiriladi: {oquvchi} o'quvchi, {guruh} guruh, "
+"{sana} sana, {filial} filial, {telefon} filial telefoni, {markaz} markaz "
+"nomi."
+
+msgid "Preview"
+msgstr "Ko'rib chiqish"
+
+msgid "Send"
+msgstr "Yuborish"
+
+#, python-format
+msgid "%(n)s student"
+msgid_plural "%(n)s students"
+msgstr[0] "%(n)s o'quvchi"
+msgstr[1] "%(n)s o'quvchi"
+
+msgid "The first message will look like this:"
+msgstr "Birinchi xabar shunday ko'rinadi:"
+
+msgid ""
+"Nobody matches: no students absent on that date in this group, or the group "
+"is empty."
+msgstr ""
+"Hech kim topilmadi: bu guruhda shu kuni kelmaganlar yo'q yoki guruh bo'sh."
 
 msgid "The bot is off: no token on the server."
 msgstr "Bot o'chiq: serverda token yo'q."

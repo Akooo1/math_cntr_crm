@@ -45,3 +45,40 @@ def overview(user) -> dict:
 def parent_connected(student) -> bool:
     phones = [p for p in (student.parent_phone, student.phone, student.extra_phone) if p]
     return Chat.objects.filter(kind=Chat.Kind.PARENT, is_active=True, phone__in=phones).exists()
+
+
+def recipients(user, mode: str, group=None, day=None, student=None) -> list[tuple]:
+    """[(student, group name)] for a message: absent on a day, a whole group, one student.
+    Groups and students come through the students module, so branch scope applies."""
+    from apps.students.models import Attendance, Enrollment
+
+    if mode == "student" and student is not None:
+        s = student_selectors.get_student(user, student)
+        names = ", ".join(
+            Enrollment.objects.filter(student=s, status="active").values_list(
+                "group__name", flat=True
+            )
+        )
+        return [(s, names)]
+    if group is None:
+        return []
+    group = student_selectors.get_group(user, group.pk)
+    if mode == "absent":
+        rows = (
+            Attendance.objects.filter(lesson__group=group, lesson__date=day, status="absent")
+            .select_related("student", "student__branch")
+            .order_by("student__last_name", "student__first_name")
+        )
+        return [(a.student, group.name) for a in rows]
+    enrollments = (
+        Enrollment.objects.filter(group=group, status="active")
+        .select_related("student", "student__branch")
+        .order_by("student__last_name", "student__first_name")
+    )
+    return [(e.student, group.name) for e in enrollments]
+
+
+def templates():
+    from .models import Template
+
+    return Template.objects.filter(is_active=True)

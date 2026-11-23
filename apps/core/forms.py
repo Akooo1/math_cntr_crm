@@ -134,7 +134,10 @@ class StyledFormMixin:
             if isinstance(w, (forms.CheckboxInput,)):
                 w.attrs.setdefault("class", CHECK_CSS)
             elif isinstance(w, (forms.CheckboxSelectMultiple, forms.RadioSelect)):
-                w.attrs.setdefault("class", CHECK_CSS)
+                # Django puts widget attrs on the list's wrapper <div> too, so a size class
+                # here squeezed the whole list into 20 px. The inputs are styled by
+                # `.checkbox-list input` in assets/app.css instead.
+                pass
             else:
                 w.attrs.setdefault("class", INPUT_CSS)
             if isinstance(w, forms.Textarea):

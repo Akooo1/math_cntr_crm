@@ -372,7 +372,14 @@ def objects(director, branch_a, branch_b, admin_a, teacher_a):
         "ish-vaqti": teacher_a,
         "bildirishnomalar": branch_a,
         "telegram": branch_a,
+        "xabar-shablonlari": _first_template(),
     }
+
+
+def _first_template():
+    from apps.telegram.models import Template
+
+    return Template.objects.order_by("pk").first()
 
 
 def _salary_objects(director, teacher_a, teacher_b):
@@ -421,6 +428,18 @@ def staff_cases(o) -> dict[str, list[Case]]:
                 {"user": o["teacher_a"].pk, "reason": "x"},
             )
         ],
+    }
+
+
+def telegram_cases(o) -> dict[str, list[Case]]:
+    """Messages to parents: Direktor only."""
+    data = {"text": "x", "mode": "group", "group": o["group_a"].pk, "action": "preview"}
+    return {
+        "telegram:send": [
+            Case("/ota-onalarga-xabar/", expect=expect({D: 200})),
+            Case(f"/ota-onalarga-xabar/?oquvchi={o['student_a'].pk}", expect=expect({D: 200})),
+            Case("/ota-onalarga-xabar/", "post", expect({D: 200}), data),
+        ]
     }
 
 
@@ -498,6 +517,7 @@ def cases(objects) -> dict[str, list[Case]]:
     c.update(reports_cases())
     c.update(salaries_cases(objects))
     c.update(staff_cases(objects))
+    c.update(telegram_cases(objects))
     for s in sections():
         base = f"/sozlamalar/{s.slug}/"
         obj = objects[s.slug]

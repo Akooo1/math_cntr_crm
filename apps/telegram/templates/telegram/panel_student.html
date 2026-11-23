@@ -1,5 +1,8 @@
-<section class="card flex items-center justify-between gap-3 p-5">
+<section class="card flex flex-wrap items-center justify-between gap-3 p-5">
   <p class="font-semibold">{% translate "Telegram" %}</p>
-  {% if ctx.connected %}<span class="badge bg-emerald-100 text-emerald-800">{% translate "Parent connected" %}</span>
-  {% else %}<span class="badge bg-slate-100 text-slate-600">{% translate "Not connected" %}</span>{% endif %}
+  <div class="flex flex-wrap items-center gap-2">
+    {% if ctx.connected %}<span class="badge bg-emerald-100 text-emerald-800">{% translate "Parent connected" %}</span>
+    {% else %}<span class="badge bg-slate-100 text-slate-600">{% translate "Not connected" %}</span>{% endif %}
+    {% if ctx.connected and user|can:"telegram.send" %}<a class="btn-secondary px-3 py-1.5" href="{% url 'telegram:send' %}?oquvchi={{ ctx.student_id }}">{% icon "send" "w-4 h-4" %}{% translate "Send a message" %}</a>{% endif %}
+  </div>
 </section>
