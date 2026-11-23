@@ -214,9 +214,14 @@ def commit(*, actor, batch: ImportBatch, branch):
     if batch.status != ImportBatch.Status.VALIDATED:
         raise ValidationError(_("This file can't be imported. Upload it again."))
     kind = get_kind(batch.kind)
-    batch.file.open("rb")
-    content = batch.file.read()
-    batch.file.close()
+    try:
+        batch.file.open("rb")
+        content = batch.file.read()
+        batch.file.close()
+    except OSError:
+        # The uploaded file is gone (e.g. hosting without a persistent disk restarted
+        # between "check" and "import"). The data is untouched; ask for the file again.
+        raise ValidationError(_("This file can't be imported. Upload it again.")) from None
     raw, errors = read_rows(kind, content)
     ctx = Context(
         actor=actor,

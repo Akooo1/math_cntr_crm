@@ -42,9 +42,20 @@ def test_database_url_and_railway_domain():
     assert "https://markaz.up.railway.app" in s["csrf"]
 
 
+def test_railway_domain_generated_after_start():
+    # Domain made after the deploy: RAILWAY_PUBLIC_DOMAIN missing, but Railway's ids are set.
+    s = _settings_in_subprocess(RAILWAY_PROJECT_ID="p-123", RAILWAY_PUBLIC_DOMAIN="")
+    assert ".up.railway.app" in s["hosts"] and "https://*.up.railway.app" in s["csrf"]
+
+
 def test_without_railway_variables_nothing_changes():
-    s = _settings_in_subprocess(DATABASE_URL="", RAILWAY_PUBLIC_DOMAIN="")
-    assert "healthcheck.railway.app" not in s["hosts"]
+    s = _settings_in_subprocess(
+        DATABASE_URL="",
+        RAILWAY_PUBLIC_DOMAIN="",
+        RAILWAY_PROJECT_ID="",
+        RAILWAY_ENVIRONMENT_NAME="",
+    )
+    assert "healthcheck.railway.app" not in s["hosts"] and ".up.railway.app" not in s["hosts"]
 
 
 @pytest.mark.django_db

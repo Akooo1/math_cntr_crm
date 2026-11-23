@@ -3,6 +3,7 @@ import io
 
 import pytest
 import time_machine
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.http import Http404
 from openpyxl import Workbook
@@ -82,6 +83,14 @@ class TestGroups:
         assert sorted(group.slots.values_list("weekday", flat=True)) == [1, 3, 5]
         assert group.lessons.exists()
         assert AuditLog.objects.filter(action="students.import.commit").exists()
+
+    def test_file_lost_between_check_and_import(self, admin_a, branch_a, refs):
+        # Hosting without a persistent disk (Railway without a volume) restarted in between.
+        batch = run(admin_a, branch_a, "groups", [GROUP_ROW])
+        batch.file.storage.delete(batch.file.name)
+        with pytest.raises(ValidationError):
+            importing.commit(actor=admin_a, batch=batch, branch=branch_a)
+        assert not Group.objects.exists()
 
     def test_errors_are_per_row_in_uzbek_and_nothing_is_saved(self, admin_a, branch_a, refs):
         bad = {

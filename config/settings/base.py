@@ -37,6 +37,11 @@ CSRF_TRUSTED_ORIGINS = [
 if env("RAILWAY_PUBLIC_DOMAIN", ""):
     ALLOWED_HOSTS += [env("RAILWAY_PUBLIC_DOMAIN"), "healthcheck.railway.app"]
     CSRF_TRUSTED_ORIGINS.append(f"https://{env('RAILWAY_PUBLIC_DOMAIN')}")
+# A domain generated after the service started isn't in RAILWAY_PUBLIC_DOMAIN until the
+# next deploy, which gave "400 Bad Request". On Railway, accept its own subdomains.
+if env("RAILWAY_PROJECT_ID", "") or env("RAILWAY_ENVIRONMENT_NAME", ""):
+    ALLOWED_HOSTS += [".up.railway.app", "healthcheck.railway.app"]
+    CSRF_TRUSTED_ORIGINS.append("https://*.up.railway.app")
 
 INSTALLED_APPS = [
     "django.contrib.auth",
