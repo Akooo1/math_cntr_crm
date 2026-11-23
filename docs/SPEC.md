@@ -690,3 +690,13 @@ in section 5.
   the lesson to `held` and publishes `students.lesson_held`, which a future salary module
   can use.
 - Module notes: [docs/modules/students.md](modules/students.md).
+
+### Owner decisions after phase 3
+
+- **Imported enrollments are never billed for the past.** Billing applies only from the
+  platform's start. An imported enrollment gets no charge for the month it is imported in.
+  The monthly job charges it from the next month on, and any older debt comes only from the
+  opening-balance import.
+- **A frozen student keeps their seat.** Frozen enrollments count toward group capacity.
+- **Discounts and opening balances in the import arrive in phase 4.** The student import gets
+  a discount column, and opening balances become a third import type.
