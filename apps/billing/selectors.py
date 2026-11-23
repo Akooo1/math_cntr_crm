@@ -3,15 +3,20 @@ import datetime as dt
 from .models import InstallmentTemplate, PaymentMethod, Price
 
 
-def effective_price(*, course_id: int, kind: str, on_date: dt.date, branch_id: int | None):
-    """Price in force on `on_date` (SPEC 5.6): the most specific scope wins (branch, then
-    all branches); within a scope the latest effective_from <= on_date, then latest created.
+def effective_price(
+    *, course_id: int, kind: str, on_date: dt.date, branch_id: int | None, group_id=None
+):
+    """Price in force on `on_date` (SPEC 5.6): the most specific scope wins (group, then
+    branch, then all branches); within a scope the latest effective_from <= on_date, then
+    the latest created.
     """
     base = Price.objects.filter(course_id=course_id, kind=kind, effective_from__lte=on_date)
     scopes = []
+    if group_id is not None:
+        scopes.append(base.filter(group_id=group_id))
     if branch_id is not None:
-        scopes.append(base.filter(branch_id=branch_id))
-    scopes.append(base.filter(branch__isnull=True))
+        scopes.append(base.filter(branch_id=branch_id, group__isnull=True))
+    scopes.append(base.filter(branch__isnull=True, group__isnull=True))
     for qs in scopes:
         price = qs.order_by("-effective_from", "-created_at", "-id").first()
         if price is not None:
@@ -20,7 +25,7 @@ def effective_price(*, course_id: int, kind: str, on_date: dt.date, branch_id: i
 
 
 def price_history(course_id: int):
-    return Price.objects.filter(course_id=course_id).select_related("branch", "created_by")
+    return Price.objects.filter(course_id=course_id).select_related("branch", "group", "created_by")
 
 
 def rule_for(template: InstallmentTemplate):

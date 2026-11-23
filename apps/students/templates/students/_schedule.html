@@ -1,0 +1,1 @@
+{% for s in slots %}{{ s.get_weekday_display|slice:":2" }} {{ s.start_time|time:"H:i" }}–{{ s.end_time|time:"H:i" }}{% if not forloop.last %}, {% endif %}{% endfor %}

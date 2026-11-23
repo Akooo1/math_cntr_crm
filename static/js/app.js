@@ -17,10 +17,17 @@
     input.value = out;
   }
 
+  // Time inputs: HH:MM with an automatic colon.
+  function maskTime(input) {
+    var d = input.value.replace(/[^\d]/g, "").slice(0, 4);
+    input.value = d.length > 2 ? d.slice(0, 2) + ":" + d.slice(2) : d;
+  }
+
   document.addEventListener("input", function (e) {
     var t = e.target;
     if (t.matches && t.matches("input[data-money]")) formatMoney(t);
     if (t.matches && t.matches("input[data-mask=date]") && e.inputType !== "deleteContentBackward") maskDate(t);
+    if (t.matches && t.matches("input[data-mask=time]") && e.inputType !== "deleteContentBackward") maskTime(t);
   });
 
   // <form data-confirm="..."> asks before submitting.

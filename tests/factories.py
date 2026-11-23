@@ -75,3 +75,52 @@ def make_lead(actor, branch, **data):
         **data,
     }
     return services.create_lead(actor=actor, branch=branch, data=payload, confirm_duplicate=True)
+
+
+def make_group(
+    actor,
+    branch,
+    *,
+    teacher=None,
+    course=None,
+    start=None,
+    end=None,
+    days=(1, 3, 5),
+    capacity=10,
+    name=None,
+):
+    """A group with lessons, created through the service (so the calendar is real)."""
+    import datetime as dt
+
+    from apps.core.roles import Role
+    from apps.students import services
+    from apps.students.models import Group
+
+    teacher = teacher or UserFactory(role=Role.TEACHER, branches=[branch])
+    course = course or CourseFactory()
+    group = Group(
+        branch=branch,
+        course=course,
+        teacher=teacher,
+        name=name or f"G{next(_lead_seq)}",
+        start_date=start or dt.date(2026, 9, 1),
+        end_date=end,
+        capacity=capacity,
+    )
+    slots = [
+        {"weekday": d, "start_time": dt.time(15, 0), "end_time": dt.time(16, 30), "room": None}
+        for d in days
+    ]
+    return services.save_group(actor=actor, group=group, slots=slots)
+
+
+def make_student(actor, branch, **data):
+    from apps.students import services
+
+    payload = {
+        "first_name": "Aziz",
+        "last_name": "Karimov",
+        "parent_phone": f"+99895{next(_lead_seq):07d}",
+    }
+    payload.update(data)
+    return services.create_student(actor=actor, branch=branch, data=payload)

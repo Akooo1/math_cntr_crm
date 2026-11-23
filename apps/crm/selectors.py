@@ -184,7 +184,9 @@ def get_task(user, pk) -> FollowUpTask:
 
 def trials_for(user, branch_filter=None, *, from_date: dt.date | None = None):
     require_perm(user, "crm.leads.view")
-    qs = TrialLesson.objects.select_related("lead", "lead__stage", "lead__course")
+    qs = TrialLesson.objects.select_related(
+        "lead", "lead__stage", "lead__course", "group", "lesson"
+    )
     qs = apply_branch_filter(
         scope_by_branch(qs, user, field="lead__branch"), branch_filter, "lead__branch"
     )

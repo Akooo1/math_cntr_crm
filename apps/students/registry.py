@@ -1,11 +1,109 @@
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.permissions import register_permission
+from apps.core.registry import DashboardWidget, NavItem, registry
 from apps.core.roles import Role
+from apps.core.system_settings import SettingDef, register_setting
+
+from . import import_kinds
+
+D, A, M, T = Role.DIRECTOR, Role.BRANCH_ADMIN, Role.SALES_MANAGER, Role.TEACHER
 
 # Sotuv menejeri creates students only by converting a lead (docs/SPEC.md 6.2).
-register_permission(
-    "students.create",
-    _("Create students"),
-    {Role.DIRECTOR, Role.BRANCH_ADMIN, Role.SALES_MANAGER},
+register_permission("students.create", _("Create students"), {D, A, M})
+register_permission("students.view", _("View students"), {D, A, M, T})
+register_permission("students.manage", _("Manage students and enrollments"), {D, A})
+register_permission("groups.view", _("View groups"), {D, A, M, T})
+register_permission("groups.manage", _("Manage groups and lessons"), {D, A})
+register_permission("attendance.mark", _("Mark attendance"), {D, A, T})
+register_permission("import.run", _("Import from Excel"), {D, A})
+
+register_setting(
+    SettingDef(
+        key="students.attendance_edit_days",
+        label=_("Teachers can edit attendance for (days)"),
+        help_text=_("How many days back a teacher may mark or change attendance."),
+        default=7,
+        min_value=0,
+        max_value=60,
+        order=50,
+    )
 )
+
+NAV = [
+    NavItem(
+        key="students",
+        label=_("Students"),
+        url_name="students:list",
+        icon="users",
+        permission="students.view",
+        order=20,
+        mobile_priority=15,
+        active_prefix="/oquvchilar/",
+    ),
+    NavItem(
+        key="groups",
+        label=_("Groups"),
+        url_name="students:groups",
+        icon="book",
+        permission="groups.view",
+        order=21,
+        mobile_priority=25,
+        active_prefix="/guruhlar/",
+        role_priority={T: 2},
+    ),
+    NavItem(
+        key="attendance",
+        label=_("Attendance"),
+        url_name="students:attendance",
+        icon="calendar",
+        permission="attendance.mark",
+        order=22,
+        mobile_priority=30,
+        active_prefix="/davomat/",
+        role_priority={T: 1},
+    ),
+    NavItem(
+        key="import",
+        label=_("Import"),
+        url_name="students:import",
+        icon="list",
+        permission="import.run",
+        order=800,
+        mobile_priority=800,
+        active_prefix="/import/",
+    ),
+]
+for item in NAV:
+    registry.add_nav(item)
+
+
+def _today_lessons(request):
+    from apps.core import dates
+
+    from . import selectors
+
+    return {
+        "lessons": list(
+            selectors.lessons_on(request.user, dates.today(), request.branch_filter)[:8]
+        )
+    }
+
+
+def _awaiting(request):
+    from . import selectors
+
+    qs = selectors.awaiting_enrollment(request.user, request.branch_filter)
+    return {"count": qs.count(), "students": list(qs.order_by("-created_at")[:5])}
+
+
+registry.add_widget(
+    DashboardWidget(
+        "today_lessons", "students/widgets/today_lessons.html", "attendance.mark", 5, _today_lessons
+    )
+)
+registry.add_widget(
+    DashboardWidget("awaiting", "students/widgets/awaiting.html", "students.manage", 15, _awaiting)
+)
+
+import_kinds.register()

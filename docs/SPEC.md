@@ -659,3 +659,34 @@ in section 5.
 - `scripts/i18n.sh` blanks gettext's "fuzzy" guesses (msgmerge copies translations from
   similar strings, often wrongly), so every new string is translated by hand.
 - Module notes: [docs/modules/crm.md](modules/crm.md).
+
+### Phase 3 (students, groups, attendance, import)
+
+- The deferred columns were added as planned: `crm_trial_lesson.group_id` and `lesson_id`,
+  `billing_price.group_id`, and `import_batch_id` on student, group and enrollment.
+  Booking a trial now needs a group, and the date must have a non-cancelled lesson of that
+  group. Price scope is group > branch > all branches.
+- `students_import_batch` keeps the target branch inside its `report` JSON
+  (`report.branch_id`) instead of a separate column, so the approved table is unchanged.
+- **Lesson calendar.** The first generation of a new or imported group creates lessons from
+  its start date, so past lessons exist for proration and attendance. Later schedule edits
+  only add or remove lessons from today on. Lessons that are past, marked or cancelled by
+  hand are never touched.
+- **Enrollment windows.** An enrollment covers `[start_date, end_date)`, so `end_date` is the
+  first day not attending. A freeze covers `[from_date, to_date)`. The attendance roster is
+  computed from these dates, never from the status field.
+- **Capacity** counts open enrollments (active and frozen), because a frozen student keeps
+  their seat. Enrolling beyond it needs "Sig'imdan oshirish", which is recorded in the audit
+  row.
+- **Imported enrollments** (Excel) skip the enrollment extensions, so phase 4 won't issue a
+  first-month charge for them. Their past money comes from the opening-balance import.
+  Imports may exceed group capacity, because existing lists reflect reality.
+- **Billing's extension point** (`students.services.register_enrollment_extension`). An
+  extension can add a confirmation step (the prorated-charge suggestion) to enroll, move,
+  freeze, unfreeze and leave. It runs inside the same transaction, so a failing extension
+  rolls the whole action back.
+- **Teachers** edit attendance up to N days back (setting, default 7). Admins and the
+  Direktor have no limit. Future and cancelled lessons can't be marked. The first mark sets
+  the lesson to `held` and publishes `students.lesson_held`, which a future salary module
+  can use.
+- Module notes: [docs/modules/students.md](modules/students.md).

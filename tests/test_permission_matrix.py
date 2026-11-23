@@ -5,7 +5,10 @@ Every named URL must appear in `cases()`. A new URL without an entry fails
 use it.
 """
 
+import datetime as dt
+
 import pytest
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.utils import timezone
 
 from apps.billing.models import DiscountType, InstallmentTemplate, PaymentMethod
@@ -13,7 +16,14 @@ from apps.core.dates import today
 from apps.core.roles import Role
 from apps.core.settings_panel import sections
 from apps.crm.models import LeadSource, LeadStage, RefusalReason
-from tests.factories import CourseFactory, RoomFactory, make_lead
+from tests.factories import (
+    CourseFactory,
+    RoomFactory,
+    UserFactory,
+    make_group,
+    make_lead,
+    make_student,
+)
 from tests.urls_inventory import Case, all_url_names
 
 D, A, M, T = Role.DIRECTOR, Role.BRANCH_ADMIN, Role.SALES_MANAGER, Role.TEACHER
@@ -74,8 +84,124 @@ def crm_cases(o) -> dict[str, list[Case]]:
     )
 
 
+def expect(get: dict, *, default=403) -> dict:
+    return {**only(get, default), "anon": 302}
+
+
+def students_cases(o) -> dict[str, list[Case]]:
+    """Students, groups, attendance, import. `_a` objects are in branch A (teacher_a teaches
+    group A); `_b` objects are in branch B."""
+    view_all = expect({D: 200, A: 200, M: 200, T: 200})
+    manage = expect({D: 200, A: 200})
+    manage_other = expect({D: 200, A: 404})
+    post_manage = expect({D: 302, A: 302})
+    post_manage_other = expect({D: 302, A: 404})
+    marker = expect({D: 200, A: 200, T: 200})
+
+    def two(name, fmt, key, same, other, method="get", data=None):
+        return name, [
+            Case(fmt.format(o[f"{key}_a"].pk), method, same, data or {}),
+            Case(fmt.format(o[f"{key}_b"].pk), method, other, data or {}),
+        ]
+
+    return dict(
+        [
+            ("students:list", [Case("/oquvchilar/", expect=view_all)]),
+            ("students:create", [Case("/oquvchilar/yangi/", expect=manage)]),
+            two(
+                "students:detail",
+                "/oquvchilar/{}/",
+                "student",
+                view_all,
+                expect({D: 200, A: 404, M: 404, T: 404}),
+            ),
+            two("students:edit", "/oquvchilar/{}/tahrirlash/", "student", manage, manage_other),
+            two(
+                "students:enroll",
+                "/oquvchilar/{}/guruhga-qoshish/",
+                "student",
+                manage,
+                manage_other,
+            ),
+            two("students:move", "/qatnashish/{}/otkazish/", "enrollment", manage, manage_other),
+            two("students:freeze", "/qatnashish/{}/muzlatish/", "enrollment", manage, manage_other),
+            two(
+                "students:unfreeze",
+                "/qatnashish/{}/davom-ettirish/",
+                "enrollment",
+                manage,
+                manage_other,
+            ),
+            two("students:leave", "/qatnashish/{}/chiqish/", "enrollment", manage, manage_other),
+            ("students:groups", [Case("/guruhlar/", expect=view_all)]),
+            ("students:group_create", [Case("/guruhlar/yangi/", expect=manage)]),
+            two(
+                "students:group",
+                "/guruhlar/{}/",
+                "group",
+                view_all,
+                expect({D: 200, A: 404, M: 404, T: 404}),
+            ),
+            two("students:group_edit", "/guruhlar/{}/tahrirlash/", "group", manage, manage_other),
+            two(
+                "students:lesson_cancel",
+                "/darslar/{}/bekor-qilish/",
+                "future_lesson",
+                post_manage,
+                post_manage_other,
+                "post",
+                {"reason": "bayram"},
+            ),
+            two(
+                "students:lesson_restore",
+                "/darslar/{}/tiklash/",
+                "future_lesson",
+                post_manage,
+                post_manage_other,
+                "post",
+            ),
+            ("students:attendance", [Case("/davomat/", expect=marker)]),
+            two(
+                "students:attendance_lesson",
+                "/davomat/{}/",
+                "past_lesson",
+                marker,
+                expect({D: 200, A: 404, T: 404}),
+            ),
+            (
+                "students:attendance_mark",
+                [
+                    Case(
+                        f"/davomat/{o['past_lesson_a'].pk}/belgilash/",
+                        "post",
+                        expect({D: 302, A: 302, T: 302}),
+                        {"student": o["student_a"].pk, "status": "present"},
+                    ),
+                    Case(
+                        f"/davomat/{o['past_lesson_b'].pk}/belgilash/",
+                        "post",
+                        expect({D: 302, A: 404, T: 404}),
+                        {"student": o["student_b"].pk, "status": "present"},
+                    ),
+                ],
+            ),
+            ("students:import", [Case("/import/", expect=manage)]),
+            ("students:import_template", [Case("/import/namuna/groups/", expect=manage)]),
+            two("students:import_batch", "/import/{}/", "batch", manage, manage_other),
+            two(
+                "students:import_commit",
+                "/import/{}/tasdiqlash/",
+                "batch",
+                post_manage,
+                post_manage_other,
+                "post",
+            ),
+        ]
+    )
+
+
 @pytest.fixture
-def objects(director, branch_a, branch_b, admin_a):
+def objects(director, branch_a, branch_b, admin_a, teacher_a):
     from apps.billing import services
     from apps.crm import services as crm
 
@@ -86,14 +212,40 @@ def objects(director, branch_a, branch_b, admin_a):
     )
     template = InstallmentTemplate.objects.create(name="T", parts_count=2)
     discount = DiscountType.objects.create(name="D", kind="percent", value=1000)
+    from apps.students import services as st
+    from apps.students.services import importing
+
     leads = {}
+    start = today() - dt.timedelta(days=30)
     for key, branch in (("a", branch_a), ("b", branch_b)):
+        # Group A is taught by teacher_a; group B by a teacher of branch B.
+        teacher = teacher_a if key == "a" else UserFactory(role=T, branches=[branch])
+        group = make_group(
+            director, branch, teacher=teacher, start=start, days=(1, 2, 3, 4, 5, 6, 7)
+        )
+        student = make_student(director, branch)
+        enrollment = st.enroll(actor=director, student=student, group=group, start_date=start)
+        lessons = group.lessons.order_by("date")
+        leads[f"group_{key}"] = group
+        leads[f"student_{key}"] = student
+        leads[f"enrollment_{key}"] = enrollment
+        leads[f"past_lesson_{key}"] = lessons.filter(date__lt=today()).last()
+        leads[f"future_lesson_{key}"] = lessons.filter(date__gt=today()).first()
+        upload = SimpleUploadedFile("x.xlsx", b"not an excel file")
+        leads[f"batch_{key}"] = importing.validate_upload(
+            actor=director, kind_key="groups", branch=branch, uploaded_file=upload
+        )
         lead = make_lead(director, branch)
         leads[f"lead_{key}"] = lead
         leads[f"task_{key}"] = crm.create_task(
             actor=director, lead=lead, assigned_to=director, due_at=timezone.now(), title="t"
         )
-        leads[f"trial_{key}"] = crm.book_trial(actor=director, lead=lead, scheduled_date=today())
+        leads[f"trial_{key}"] = crm.book_trial(
+            actor=director,
+            lead=lead,
+            group=group,
+            scheduled_date=leads[f"future_lesson_{key}"].date,
+        )
     return {
         **leads,
         "stage": LeadStage.objects.get(kind="contacted"),
@@ -135,6 +287,7 @@ def cases(objects) -> dict[str, list[Case]]:
         "settings:section_action": [],
     }
     c.update(crm_cases(objects))
+    c.update(students_cases(objects))
     for s in sections():
         base = f"/sozlamalar/{s.slug}/"
         obj = objects[s.slug]

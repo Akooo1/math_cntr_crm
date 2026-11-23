@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{% if student %}{{ student.full_name }}{% else %}{% translate "New student" %}{% endif %}{% endblock %}
+{% block heading %}{% translate "Students" %}{% endblock %}
+{% block content %}
+  <div class="mb-4"><a href="{% if student %}{% url 'students:detail' student.pk %}{% else %}{% url 'students:list' %}{% endif %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{% if student %}{{ student.full_name }}{% else %}{% translate "Students" %}{% endif %}</a></div>
+  <div class="mx-auto max-w-xl">
+    <h2 class="mb-4 text-xl font-semibold">{% if student %}{% translate "Edit student" %}{% else %}{% translate "New student" %}{% endif %}</h2>
+    <form method="post" class="card space-y-4 p-5" novalidate>{% csrf_token %}
+      {% include "components/form_errors.html" %}
+      <div class="grid gap-4 sm:grid-cols-2">
+        {% for f in form %}{% if f.name != "notes" %}{% field f %}{% endif %}{% endfor %}
+      </div>
+      {% field form.notes %}
+      <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <a href="{% if student %}{% url 'students:detail' student.pk %}{% else %}{% url 'students:list' %}{% endif %}" class="btn-secondary">{% translate "Cancel" %}</a>
+        <button class="btn-primary">{% translate "Save" %}</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

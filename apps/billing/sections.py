@@ -28,7 +28,7 @@ GROUP_FINANCE = _("Finance")
 def _prices_view(request, section):
     today = dates.today()
     courses = Course.objects.filter(is_active=True).prefetch_related(
-        Prefetch("prices", queryset=Price.objects.select_related("branch", "created_by"))
+        Prefetch("prices", queryset=Price.objects.select_related("branch", "group", "created_by"))
     )
     rows = []
     for course in courses:
@@ -79,6 +79,7 @@ class PriceSection(SettingsSection):
             amount=d["amount"],
             effective_from=d["effective_from"],
             note=d["note"],
+            group=d["group"],
         )
 
     def extra_context(self, request, obj):

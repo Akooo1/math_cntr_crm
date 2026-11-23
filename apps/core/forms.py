@@ -29,6 +29,25 @@ class DateInput(forms.TextInput):
         return value
 
 
+class TimeInput(forms.TextInput):
+    """24-hour HH:MM as text: native time pickers show AM/PM in English-locale browsers."""
+
+    def __init__(self, attrs=None):
+        base = {"placeholder": _("HH:MM"), "inputmode": "numeric", "data-mask": "time"}
+        super().__init__({**base, **(attrs or {})})
+
+    def format_value(self, value):
+        if isinstance(value, dt.time):
+            return value.strftime("%H:%M")
+        return value
+
+
+class UzTimeField(forms.TimeField):
+    widget = TimeInput
+    input_formats = ["%H:%M", "%H.%M"]
+    default_error_messages = {"invalid": _("Enter the time as HH:MM, for example 15:30.")}
+
+
 class MoneyInput(forms.TextInput):
     def __init__(self, attrs=None):
         base = {"inputmode": "numeric", "data-money": "1", "autocomplete": "off"}

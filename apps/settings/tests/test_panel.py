@@ -157,6 +157,7 @@ def test_system_settings_saved_and_audited(login, director):
             "billing__backdate_days": "3",
             "billing__grace_days": "0",
             "core__session_timeout_hours": "12",
+            "students__attendance_edit_days": "7",
         },
     )
     assert resp.status_code == 302

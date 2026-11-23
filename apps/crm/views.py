@@ -186,11 +186,11 @@ def lead_detail(request, pk):
             "done_tasks": lead.tasks.filter(done_at__isnull=False).select_related("assigned_to")[
                 :10
             ],
-            "trials": lead.trials.all(),
+            "trials": lead.trials.select_related("group", "lesson"),
             "stage_form": StageForm(initial={"stage": lead.stage_id}),
             "activity_form": ActivityForm(),
             "task_form": TaskForm(lead=lead, user=request.user),
-            "trial_form": TrialForm(),
+            "trial_form": TrialForm(lead=lead),
             "now": dates.now(),
             "can_edit": has_perm(request.user, "crm.leads.edit"),
             "can_convert": has_perm(request.user, "crm.leads.convert") and not lead.is_converted,
@@ -287,7 +287,7 @@ def task_done(request, pk):
 @require_POST
 def trial_book(request, pk):
     lead = selectors.get_lead(request.user, pk)
-    form = TrialForm(request.POST)
+    form = TrialForm(request.POST, lead=lead)
     if form.is_valid():
         try:
             services.book_trial(actor=request.user, lead=lead, **form.cleaned_data)

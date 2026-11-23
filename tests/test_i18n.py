@@ -175,6 +175,8 @@ def test_rendered_pages_have_no_english(client, objects, users_by_role, role):  
     pages |= {"/yoq-sahifa/"}  # the 404 page
     for url in sorted(pages):
         resp = client.get(url)
+        if not resp.get("Content-Type", "").startswith("text/html"):
+            continue
         words = english_words(visible_text(resp.content.decode()))
         if words:
             found[url] = sorted(words)
@@ -202,3 +204,29 @@ def test_detector_catches_english():
     }
     assert not english_words(visible_text("<p>To'lov qabul qilindi. Ha, yo'q.</p>"))
     assert strip_template("<p>{% translate 'Save' %}</p>").strip() == "<p> </p>"
+
+
+def test_gettext_is_never_aliased():
+    """makemessages only extracts _(), gettext(), gettext_lazy(), ngettext(), pgettext()...
+    An alias like `gettext_lazy as _l` hides strings from the catalog, so they stay English."""
+    pattern = re.compile(r"import\s+(n|p|np)?gettext(_lazy|_noop)?\s+as\s+(?!_\b)\w+")
+    offenders = [
+        f"{path.relative_to(ROOT)}"
+        for path in (ROOT / "apps").rglob("*.py")
+        if pattern.search(path.read_text())
+    ]
+    assert not offenders, f"Use `_` or the full function name, never another alias: {offenders}"
+
+
+@pytest.mark.django_db
+def test_excel_templates_have_no_english():
+    import io
+
+    from openpyxl import load_workbook
+
+    from apps.students.services import importing
+
+    for kind in importing.kinds():
+        ws = load_workbook(io.BytesIO(importing.template_workbook(kind))).active
+        headers = " ".join(str(c.value) for c in ws[1])
+        assert not english_words(headers), f"{kind.key}: {headers}"

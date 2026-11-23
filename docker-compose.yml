@@ -33,6 +33,8 @@ services:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
       DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
+    volumes:
+      - media:/app/media  # uploaded Excel imports
     depends_on:
       db:
         condition: service_healthy
@@ -40,3 +42,4 @@ services:
 
 volumes:
   pgdata:
+  media:

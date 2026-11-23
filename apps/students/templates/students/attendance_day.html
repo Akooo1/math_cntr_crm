@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}{% translate "Attendance" %}{% endblock %}
+{% block heading %}{% if is_today %}{% translate "Today's lessons" %}{% else %}{% translate "Attendance" %}{% endif %}{% endblock %}
+{% block content %}
+  <div class="mb-4 flex items-center justify-between gap-2">
+    <a href="?sana={{ prev|sana }}" class="btn-secondary px-3" aria-label="{% translate 'Previous day' %}">{% icon "chevron-left" %}</a>
+    <p class="font-semibold">{{ day|sana }}</p>
+    <a href="?sana={{ next|sana }}" class="btn-secondary px-3" aria-label="{% translate 'Next day' %}">{% icon "chevron-right" %}</a>
+  </div>
+  <ul class="space-y-2">
+    {% for l in lessons %}
+      <li>
+        <a href="{% if l.status != 'cancelled' %}{% url 'students:attendance_lesson' l.pk %}{% else %}#{% endif %}" class="card flex items-center justify-between gap-3 p-4 {% if l.status == 'cancelled' %}opacity-60{% endif %}">
+          <div>
+            <p class="font-semibold">{{ l.start_time|time:"H:i" }}–{{ l.end_time|time:"H:i" }} · {{ l.group.name }}</p>
+            <p class="text-sm text-slate-500">{{ l.group.course.name }}{% if l.room %} · {{ l.room.name }}{% endif %}</p>
+          </div>
+          {% if l.status == 'held' %}<span class="badge bg-emerald-100 text-emerald-800">{% translate "Marked" %}</span>{% elif l.status == 'cancelled' %}<span class="badge bg-slate-100 text-slate-600">{% translate "Cancelled" %}</span>{% else %}<span class="badge bg-amber-100 text-amber-900">{% translate "Not marked" %}</span>{% endif %}
+        </a>
+      </li>
+    {% empty %}<li class="card p-6 text-center text-sm text-slate-500">{% translate "No lessons on this day." %}</li>{% endfor %}
+  </ul>
+{% endblock %}

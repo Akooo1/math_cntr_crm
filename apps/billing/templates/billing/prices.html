@@ -24,7 +24,7 @@
             {% endif %}
           </div>
         </div>
-        {% for u in r.upcoming %}{% if not u.branch %}
+        {% for u in r.upcoming %}{% if not u.branch and not u.group %}
           <p class="mt-2 text-sm text-sky-800">{% blocktranslate with a=u.amount|som d=u.effective_from|sana %}From {{ d }}: {{ a }}{% endblocktranslate %}</p>
         {% endif %}{% endfor %}
         <div class="mt-3 flex flex-wrap gap-2">
@@ -36,7 +36,7 @@
             <thead><tr class="text-left text-xs uppercase text-slate-500"><th class="py-2 pr-4">{% translate "Effective from" %}</th><th class="py-2 pr-4">{% translate "Amount" %}</th><th class="py-2 pr-4">{% translate "Branch" %}</th><th class="py-2 pr-4">{% translate "Note" %}</th><th class="py-2">{% translate "Created by" %}</th></tr></thead>
             <tbody class="divide-y divide-slate-100">
               {% for p in r.history %}
-                <tr><td class="py-2 pr-4">{{ p.effective_from|sana }}</td><td class="py-2 pr-4 font-medium">{{ p.amount|som }}</td><td class="py-2 pr-4">{% if p.branch %}{{ p.branch.name }}{% else %}{% translate "All branches" %}{% endif %}</td><td class="py-2 pr-4">{{ p.note|default:"—" }}</td><td class="py-2">{{ p.created_by.full_name }}<br><span class="text-xs text-slate-500">{{ p.created_at|sana_vaqt }}</span></td></tr>
+                <tr><td class="py-2 pr-4">{{ p.effective_from|sana }}</td><td class="py-2 pr-4 font-medium">{{ p.amount|som }}</td><td class="py-2 pr-4">{% if p.group %}{{ p.group.name }}{% elif p.branch %}{{ p.branch.name }}{% else %}{% translate "All branches" %}{% endif %}</td><td class="py-2 pr-4">{{ p.note|default:"—" }}</td><td class="py-2">{{ p.created_by.full_name }}<br><span class="text-xs text-slate-500">{{ p.created_at|sana_vaqt }}</span></td></tr>
               {% endfor %}
             </tbody>
           </table>

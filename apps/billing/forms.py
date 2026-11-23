@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from apps.core import money
 from apps.core.forms import MoneyField, StyledForm, StyledModelForm, UzDateField
 from apps.settings.models import Branch, Course
+from apps.students.models import Group
 
 from .domain.rounding import BP
 from .models import DiscountType, InstallmentTemplate, PaymentMethod
@@ -20,6 +21,13 @@ class PriceForm(StyledForm):
         required=False,
         empty_label=_("All branches"),
     )
+    group = forms.ModelChoiceField(
+        label=_("Group"),
+        queryset=Group.objects.none(),
+        required=False,
+        empty_label=_("All groups"),
+        help_text=_("Only for a special price in one group."),
+    )
     amount = MoneyField(label=_("Amount"), min_value=1)
     effective_from = UzDateField(label=_("Effective from"))
     note = forms.CharField(label=_("Note"), max_length=255, required=False)
@@ -28,6 +36,12 @@ class PriceForm(StyledForm):
         super().__init__(*args, **kwargs)
         self.fields["course"].queryset = Course.objects.filter(is_active=True)
         self.fields["branch"].queryset = Branch.objects.filter(is_active=True)
+        self.fields["group"].queryset = (
+            Group.objects.exclude(status=Group.Status.FINISHED)
+            .select_related("course", "branch")
+            .order_by("name")
+        )
+        self.fields["group"].label_from_instance = lambda g: f"{g.name} ({g.branch.name})"
 
 
 def parse_percent_bp(raw: str) -> int:

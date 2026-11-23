@@ -35,3 +35,18 @@ class TestScoping:
     def test_settings_permission_is_director_only(self, users_by_role):
         for role, user in users_by_role.items():
             assert permissions.has_perm(user, "settings.manage") is (role == Role.DIRECTOR)
+
+
+@pytest.mark.django_db
+def test_phone_bottom_bar_depends_on_role(rf, users_by_role):
+    from apps.core.context_processors import layout
+
+    def bar(role):
+        request = rf.get("/")
+        request.user = users_by_role[role]
+        request.branch_filter = None
+        return [n["item"].key for n in layout(request)["nav_mobile"]]
+
+    assert bar(Role.TEACHER) == ["home", "attendance", "groups", "students"]
+    assert bar(Role.BRANCH_ADMIN)[:2] == ["home", "students"]
+    assert bar(Role.SALES_MANAGER)[:3] == ["home", "leads", "tasks"]

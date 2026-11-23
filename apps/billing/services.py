@@ -18,15 +18,24 @@ def price_kind_for(course: Course) -> str:
     return Price.Kind.MONTHLY if course.is_monthly else Price.Kind.FULL_COURSE
 
 
-def add_price(*, actor, course, branch, amount: int, effective_from, note: str = "") -> Price:
+def add_price(
+    *, actor, course, branch, amount: int, effective_from, note: str = "", group=None
+) -> Price:
     """Add a price row. Never changes earlier rows or charges already issued (SPEC 6.4.2)."""
     require_perm(actor, "settings.manage")
     if amount <= 0:
         raise ValidationError(_("The amount must be positive."))
+    if group is not None:
+        if group.course_id != course.pk:
+            raise ValidationError(_("The group belongs to another course."))
+        if branch is not None and branch.pk != group.branch_id:
+            raise ValidationError(_("The group is in another branch."))
+        branch = group.branch
     with transaction.atomic():
         price = Price.objects.create(
             course=course,
             branch=branch,
+            group=group,
             kind=price_kind_for(course),
             amount=amount,
             effective_from=effective_from,

@@ -6,8 +6,9 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from apps.core import dates
-from apps.core.forms import PhoneField, StyledForm, StyledModelForm, UzDateField
+from apps.core.forms import PhoneField, StyledForm, StyledModelForm, UzDateField, UzTimeField
 from apps.settings.models import Branch, Course
+from apps.students.models import Group
 
 from . import selectors
 from .models import LeadActivity, LeadSource, LeadStage, RefusalReason
@@ -39,13 +40,6 @@ class RefusalReasonForm(StyledModelForm):
 
 
 # --- Leads ---------------------------------------------------------------------------
-
-
-class TimeInput(forms.TimeInput):
-    input_type = "time"
-
-    def __init__(self, attrs=None):
-        super().__init__(attrs, format="%H:%M")
 
 
 def combine(day: dt.date, time: dt.time | None) -> dt.datetime:
@@ -132,7 +126,7 @@ class ActivityForm(StyledForm):
 class TaskForm(StyledForm):
     title = forms.CharField(label=_("Task"), max_length=200, initial=_("Call back"))
     due_date = UzDateField(label=_("Date"))
-    due_time = forms.TimeField(label=_("Time"), required=False, widget=TimeInput, initial="10:00")
+    due_time = UzTimeField(label=_("Time"), required=False, initial="10:00")
     assigned_to = forms.ModelChoiceField(
         label=_("Assigned to"), queryset=selectors.User.objects.none()
     )
@@ -151,14 +145,37 @@ class TaskForm(StyledForm):
 
 
 class TrialForm(StyledForm):
+    group = forms.ModelChoiceField(label=_("Group"), queryset=Group.objects.none())
     scheduled_date = UzDateField(label=_("Trial lesson date"))
     note = forms.CharField(label=_("Note"), widget=forms.Textarea, required=False)
+
+    def __init__(self, *args, lead=None, **kwargs):
+        super().__init__(*args, **kwargs)
+        qs = Group.objects.none()
+        if lead is not None:
+            qs = (
+                Group.objects.filter(branch_id=lead.branch_id)
+                .exclude(status=Group.Status.FINISHED)
+                .select_related("course")
+                .prefetch_related("slots")
+            )
+            if lead.course_id:
+                self.fields["group"].initial = qs.filter(course_id=lead.course_id).first()
+        self.fields["group"].queryset = qs
+        self.fields["group"].label_from_instance = lambda g: f"{g.name} · {_schedule(g)}"
+        self.style_fields()
 
     def clean_scheduled_date(self):
         value = self.cleaned_data["scheduled_date"]
         if value < dates.today():
             raise ValidationError(_("The trial lesson date can't be in the past."))
         return value
+
+
+def _schedule(group) -> str:
+    return ", ".join(
+        f"{s.get_weekday_display()[:2]} {s.start_time:%H:%M}" for s in group.slots.all()
+    )
 
 
 class ConvertForm(StyledForm):

@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{% translate "Attendance" %}{% endblock %}
+{% block heading %}{% translate "Attendance" %}{% endblock %}
+{% block content %}
+  <div class="mb-4"><a href="{% url 'students:attendance' %}?sana={{ lesson.date|sana }}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{{ lesson.date|sana }}</a></div>
+  <div class="mx-auto max-w-xl">
+    <div class="card mb-4 p-4">
+      <p class="text-lg font-semibold">{{ lesson.group.name }}</p>
+      <p class="text-sm text-slate-500">{{ lesson.date|sana }} · {{ lesson.start_time|time:"H:i" }}–{{ lesson.end_time|time:"H:i" }}{% if lesson.room %} · {{ lesson.room.name }}{% endif %}</p>
+      {% if not editable %}<p class="mt-2 text-sm text-amber-800">{% translate "This lesson can't be marked now (future, cancelled or too old)." %}</p>{% endif %}
+    </div>
+    <ul class="space-y-2">
+      {% for row in rows %}{% include "students/_attendance_row.html" %}{% empty %}
+        <li class="card p-6 text-center text-sm text-slate-500">{% translate "No students in this group on this date." %}</li>
+      {% endfor %}
+    </ul>
+    <p class="mt-4 text-center text-sm text-slate-500">{% translate "Each tap is saved immediately." %}</p>
+  </div>
+{% endblock %}

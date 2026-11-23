@@ -14,6 +14,11 @@ class NavItem:
     order: int = 100
     mobile_priority: int = 100  # lower = shown in the phone bottom bar first
     active_prefix: str = ""
+    # Per-role override of mobile_priority, e.g. {"teacher": 1}.
+    role_priority: dict | None = None
+
+    def priority_for(self, role: str) -> int:
+        return (self.role_priority or {}).get(role, self.mobile_priority)
 
 
 @dataclass(frozen=True)

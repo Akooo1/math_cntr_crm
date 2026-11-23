@@ -14,6 +14,7 @@ from django.utils.translation import gettext as _
 from apps.core import audit, dates, events
 from apps.core.permissions import ensure_branch_access, require_perm
 from apps.students import services as student_services
+from apps.students.models import Lesson
 
 from . import selectors
 from .events import LeadConverted, LeadCreated, TrialLessonBooked
@@ -238,7 +239,8 @@ def complete_task(*, actor, task: FollowUpTask) -> FollowUpTask:
 BEFORE_TRIAL = {Kind.NEW, Kind.CONTACTED, Kind.CUSTOM}
 
 
-def book_trial(*, actor, lead: Lead, scheduled_date: dt.date, note: str = "") -> TrialLesson:
+def book_trial(*, actor, lead: Lead, group, scheduled_date: dt.date, note: str = "") -> TrialLesson:
+    """Book a free trial lesson in a real lesson of a group of the lead's branch."""
     require_perm(actor, "crm.leads.edit")
     ensure_branch_access(actor, lead.branch_id)
     with transaction.atomic():
@@ -247,7 +249,19 @@ def book_trial(*, actor, lead: Lead, scheduled_date: dt.date, note: str = "") ->
             raise ValidationError(_("Reopen the lead before booking a trial lesson."))
         if scheduled_date < dates.today():
             raise ValidationError(_("The trial lesson date can't be in the past."))
-        trial = TrialLesson.objects.create(lead=lead, scheduled_date=scheduled_date, note=note)
+        if group.branch_id != lead.branch_id:
+            raise ValidationError(_("The group is in another branch."))
+        lesson = (
+            Lesson.objects.filter(group=group, date=scheduled_date)
+            .exclude(status=Lesson.Status.CANCELLED)
+            .order_by("start_time")
+            .first()
+        )
+        if lesson is None:
+            raise ValidationError(_("This group has no lesson on that date."))
+        trial = TrialLesson.objects.create(
+            lead=lead, group=group, lesson=lesson, scheduled_date=scheduled_date, note=note
+        )
         old = lead.stage
         if old.kind in BEFORE_TRIAL:
             lead.stage = selectors.stage_of_kind(Kind.TRIAL_BOOKED)

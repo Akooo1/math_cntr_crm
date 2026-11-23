@@ -39,7 +39,7 @@ def layout(request):
         prefix = item.active_prefix or url
         active = request.path == "/" if prefix == "/" else request.path.startswith(prefix)
         nav.append({"item": item, "url": url, "active": active})
-    mobile = sorted(nav, key=lambda n: n["item"].mobile_priority)
+    mobile = sorted(nav, key=lambda n: n["item"].priority_for(user.role))
     return {
         "center_name": _center_name(),
         "nav": nav,

@@ -11,7 +11,7 @@ from apps.core.models import AuditLog, OutboxEvent
 from apps.crm import selectors, services
 from apps.crm.models import FollowUpTask, LeadActivity, LeadStage, RefusalReason, TrialLesson
 from apps.students.models import Student
-from tests.factories import UserFactory, make_lead
+from tests.factories import UserFactory, make_group, make_lead
 
 pytestmark = pytest.mark.django_db
 K = LeadStage.Kind
@@ -169,10 +169,23 @@ class TestTasks:
         assert selectors.tasks_for(manager_a, everyone=True).count() == 1  # manager: own only
 
 
+@pytest.fixture
+def group_a(director, branch_a):
+    """A group with a lesson every day, so 'today' always has one."""
+    return make_group(
+        director, branch_a, start=dates.today() - dt.timedelta(days=7), days=(1, 2, 3, 4, 5, 6, 7)
+    )
+
+
 class TestTrials:
-    def test_booking_moves_to_trial_booked_and_attending_to_attended(self, manager_a, branch_a):
+    def test_booking_moves_to_trial_booked_and_attending_to_attended(
+        self, manager_a, branch_a, group_a
+    ):
         lead = make_lead(manager_a, branch_a)
-        trial = services.book_trial(actor=manager_a, lead=lead, scheduled_date=dates.today())
+        trial = services.book_trial(
+            actor=manager_a, lead=lead, group=group_a, scheduled_date=dates.today()
+        )
+        assert trial.lesson.date == dates.today() and trial.group == group_a
         lead.refresh_from_db()
         assert lead.stage.kind == K.TRIAL_BOOKED
         services.set_trial_status(actor=manager_a, trial=trial, status="attended")
@@ -180,23 +193,45 @@ class TestTrials:
         assert lead.stage.kind == K.TRIAL_ATTENDED
         assert OutboxEvent.objects.filter(event_type="crm.trial_lesson_booked").exists()
 
-    def test_no_show_keeps_stage(self, manager_a, branch_a):
+    def test_no_show_keeps_stage(self, manager_a, branch_a, group_a):
         lead = make_lead(manager_a, branch_a)
-        trial = services.book_trial(actor=manager_a, lead=lead, scheduled_date=dates.today())
+        trial = services.book_trial(
+            actor=manager_a, lead=lead, group=group_a, scheduled_date=dates.today()
+        )
         services.set_trial_status(actor=manager_a, trial=trial, status="no_show")
         lead.refresh_from_db()
         assert lead.stage.kind == K.TRIAL_BOOKED
         assert TrialLesson.objects.get().status == "no_show"
 
-    def test_cannot_book_in_past_or_for_lost_lead(self, manager_a, branch_a):
+    def test_cannot_book_in_past_or_for_lost_lead(self, manager_a, branch_a, group_a):
         lead = make_lead(manager_a, branch_a)
+        yesterday = dates.today() - dt.timedelta(days=1)
         with pytest.raises(ValidationError):
-            services.book_trial(
-                actor=manager_a, lead=lead, scheduled_date=dates.today() - dt.timedelta(days=1)
-            )
+            services.book_trial(actor=manager_a, lead=lead, group=group_a, scheduled_date=yesterday)
         services.refuse(actor=manager_a, lead=lead, reason=RefusalReason.objects.first())
         with pytest.raises(ValidationError):
-            services.book_trial(actor=manager_a, lead=lead, scheduled_date=dates.today())
+            services.book_trial(
+                actor=manager_a, lead=lead, group=group_a, scheduled_date=dates.today()
+            )
+
+    def test_needs_a_lesson_that_day_in_the_lead_branch(
+        self, manager_a, director, branch_a, branch_b
+    ):
+        start = dates.today() - dt.timedelta(days=7)
+        weekly = make_group(director, branch_a, start=start, days=(dates.today().isoweekday(),))
+        lead = make_lead(manager_a, branch_a)
+        tomorrow = dates.today() + dt.timedelta(days=1)
+        with pytest.raises(ValidationError):  # once-a-week group: no lesson tomorrow
+            services.book_trial(actor=manager_a, lead=lead, group=weekly, scheduled_date=tomorrow)
+        other = make_group(director, branch_b, start=start, days=(1, 2, 3, 4, 5, 6, 7))
+        with pytest.raises(ValidationError):  # group of another branch
+            services.book_trial(
+                actor=manager_a, lead=lead, group=other, scheduled_date=dates.today()
+            )
+        trial = services.book_trial(
+            actor=manager_a, lead=lead, group=weekly, scheduled_date=dates.today()
+        )
+        assert trial.lesson == weekly.lessons.get(date=dates.today())
 
 
 class TestConversion:

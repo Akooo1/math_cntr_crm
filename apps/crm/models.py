@@ -242,7 +242,10 @@ class FollowUpTask(models.Model):
 
 
 class TrialLesson(models.Model):
-    """Free trial lesson (no charge). The link to a group and lesson is added in phase 3."""
+    """Free trial lesson (no charge) in a group lesson.
+
+    `group` is nullable only for trials booked before groups existed (phase 2 data).
+    """
 
     class Status(models.TextChoices):
         BOOKED = "booked", _("Booked")
@@ -251,6 +254,22 @@ class TrialLesson(models.Model):
         CANCELLED = "cancelled", _("Cancelled")
 
     lead = models.ForeignKey(Lead, on_delete=models.CASCADE, related_name="trials")
+    group = models.ForeignKey(
+        "students.Group",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Group"),
+    )
+    lesson = models.ForeignKey(
+        "students.Lesson",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Lesson"),
+    )
     scheduled_date = models.DateField(_("Date"), db_index=True)
     status = models.CharField(
         _("Status"), max_length=10, choices=Status.choices, default=Status.BOOKED

@@ -5,6 +5,7 @@ urlpatterns = [
     path("", include("apps.accounts.urls")),
     path("sozlamalar/", include("apps.settings.urls")),
     path("", include("apps.crm.urls")),
+    path("", include("apps.students.urls")),
 ]
 
 handler400 = "apps.core.views.bad_request"

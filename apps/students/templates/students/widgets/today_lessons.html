@@ -1,0 +1,8 @@
+<a href="{% url 'students:attendance' %}" class="card block p-5 hover:border-sky-300">
+  <p class="text-sm font-medium text-slate-500">{% translate "Today's lessons" %}</p>
+  <ul class="mt-3 space-y-2">
+    {% for l in ctx.lessons %}
+      <li class="flex items-center justify-between gap-2 text-sm"><span>{{ l.start_time|time:"H:i" }} · {{ l.group.name }}</span>{% if l.status == 'held' %}<span class="badge bg-emerald-100 text-emerald-800">{% translate "Marked" %}</span>{% elif l.status == 'cancelled' %}<span class="badge bg-slate-100 text-slate-600">{% translate "Cancelled" %}</span>{% else %}<span class="badge bg-amber-100 text-amber-900">{% translate "Not marked" %}</span>{% endif %}</li>
+    {% empty %}<li class="text-sm text-slate-500">{% translate "No lessons today." %}</li>{% endfor %}
+  </ul>
+</a>

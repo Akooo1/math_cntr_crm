@@ -25,6 +25,7 @@ registry.add_nav(
         order=10,
         mobile_priority=10,
         active_prefix="/lidlar/",
+        role_priority={Role.BRANCH_ADMIN: 20},
     )
 )
 registry.add_nav(
@@ -37,6 +38,7 @@ registry.add_nav(
         order=11,
         mobile_priority=11,
         active_prefix="/vazifalar/",
+        role_priority={Role.BRANCH_ADMIN: 21},
     )
 )
 

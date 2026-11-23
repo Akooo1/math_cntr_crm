@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-22 16:57+0500\n"
+"POT-Creation-Date: 2026-11-23 10:24+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -89,6 +89,15 @@ msgstr "Filial"
 
 msgid "All branches"
 msgstr "Barcha filiallar"
+
+msgid "Group"
+msgstr "Guruh"
+
+msgid "All groups"
+msgstr "Barcha guruhlar"
+
+msgid "Only for a special price in one group."
+msgstr "Faqat bitta guruh uchun alohida narx bo'lsa."
 
 msgid "Amount"
 msgstr "Summa"
@@ -315,6 +324,12 @@ msgstr "Foizli yoki belgilangan chegirmalar, masalan aka-uka yoki promo."
 msgid "Cash, card terminal, bank transfer. Online methods come later."
 msgstr "Naqd, terminal, bank o'tkazmasi. Onlayn usullar keyinroq qo'shiladi."
 
+msgid "The group belongs to another course."
+msgstr "Guruh boshqa kursga tegishli."
+
+msgid "The group is in another branch."
+msgstr "Guruh boshqa filialda."
+
 msgid "Example"
 msgstr "Namuna"
 
@@ -438,6 +453,12 @@ msgstr[1] "Kamida %(num)d ta shakl yuboring."
 
 msgid "DD.MM.YYYY"
 msgstr "KK.OO.YYYY"
+
+msgid "HH:MM"
+msgstr "SS:DD"
+
+msgid "Enter the time as HH:MM, for example 15:30."
+msgstr "Vaqtni SS:DD ko'rinishida kiriting, masalan 15:30."
 
 msgid "Enter the date as DD.MM.YYYY."
 msgstr "Sanani KK.OO.YYYY ko'rinishida kiriting."
@@ -738,6 +759,9 @@ msgstr "Kelmadi"
 msgid "Cancelled"
 msgstr "Bekor qilindi"
 
+msgid "Lesson"
+msgstr "Dars"
+
 msgid "Status"
 msgstr "Holat"
 
@@ -810,6 +834,9 @@ msgstr "Matnni yozing."
 
 msgid "Reopen the lead before booking a trial lesson."
 msgstr "Sinov darsiga yozishdan oldin lidni qayta oching."
+
+msgid "This group has no lesson on that date."
+msgstr "Bu guruhda o'sha kuni dars yo'q."
 
 msgid "Unknown status."
 msgstr "Noma'lum holat."
@@ -898,6 +925,9 @@ msgstr "O'quvchi yaratish"
 #, python-format
 msgid "Converted to student %(name)s on %(d)s."
 msgstr "%(d)s da %(name)s o'quvchiga aylantirildi."
+
+msgid "Open the student's profile"
+msgstr "O'quvchi sahifasini ochish"
 
 msgid "Move"
 msgstr "O'tkazish"
@@ -1123,8 +1153,628 @@ msgstr "O'zingizni faolsizlantira olmaysiz."
 msgid "Students"
 msgstr "O'quvchilar"
 
+msgid "Only for installment courses."
+msgstr "Faqat bo'lib to'lanadigan kurslar uchun."
+
+msgid "Starts"
+msgstr "Boshlanadi"
+
+msgid "Ends"
+msgstr "Tugaydi"
+
+msgid "Check the lesson times: each lesson must end after it starts."
+msgstr ""
+"Dars vaqtlarini tekshiring: har bir dars boshlanganidan keyin tugashi kerak."
+
+msgid "Add at least one lesson to the weekly schedule."
+msgstr "Haftalik jadvalga kamida bitta dars qo'shing."
+
+msgid "Over capacity"
+msgstr "Sig'imdan oshirish"
+
+msgid "Start date"
+msgstr "Boshlanish sanasi"
+
+msgid "New group"
+msgstr "Yangi guruh"
+
+msgid "What to import"
+msgstr "Nimani import qilish"
+
+msgid "Excel file (.xlsx)"
+msgstr "Excel fayl (.xlsx)"
+
+msgid "Update existing students"
+msgstr "Mavjud o'quvchilarni yangilash"
+
+msgid "Students found by phone get their details updated instead of an error."
+msgstr "Telefon bo'yicha topilgan o'quvchilar xato o'rniga yangilanadi."
+
+msgid "Upload an .xlsx file."
+msgstr ".xlsx fayl yuklang."
+
+msgid "The file is larger than 5 MB."
+msgstr "Fayl 5 MB dan katta."
+
+msgid "Group name"
+msgstr "Guruh nomi"
+
+msgid "Teacher's phone"
+msgstr "O'qituvchi telefoni"
+
+msgid "Lesson days"
+msgstr "Dars kunlari"
+
+msgid "Lesson starts"
+msgstr "Dars boshlanishi"
+
+msgid "Lesson ends"
+msgstr "Dars tugashi"
+
+msgid "End date"
+msgstr "Tugash sanasi"
+
+msgid "the group name is empty"
+msgstr "guruh nomi bo'sh"
+
+#, python-format
+msgid "a group named \"%(name)s\" already exists"
+msgstr "\"%(name)s\" nomli guruh allaqachon mavjud"
+
+#, python-format
+msgid "the group name \"%(name)s\" repeats in the file"
+msgstr "\"%(name)s\" guruh nomi faylda takrorlangan"
+
+#, python-format
+msgid "course \"%(v)s\" not found in Settings"
+msgstr "\"%(v)s\" kursi Sozlamalarda topilmadi"
+
+#, python-format
+msgid "no teacher with phone \"%(v)s\" in this branch"
+msgstr "bu filialda \"%(v)s\" telefonli o'qituvchi yo'q"
+
+#, python-format
+msgid "room \"%(v)s\" not found in this branch"
+msgstr "bu filialda \"%(v)s\" xonasi topilmadi"
+
+msgid "lesson days are wrong (use Du, Se, Cho, Pa, Ju, Sh, Ya)"
+msgstr "dars kunlari noto'g'ri (Du, Se, Cho, Pa, Ju, Sh, Ya ishlating)"
+
+msgid "the lesson must end after it starts"
+msgstr "dars boshlanganidan keyin tugashi kerak"
+
+msgid "the lesson time is wrong (use HH:MM)"
+msgstr "dars vaqti noto'g'ri (SS:DD ko'rinishida yozing)"
+
+msgid "the start date is empty"
+msgstr "boshlanish sanasi bo'sh"
+
+msgid "the end date is before the start date"
+msgstr "tugash sanasi boshlanish sanasidan oldin"
+
+msgid "a date is wrong (use DD.MM.YYYY)"
+msgstr "sana noto'g'ri (KK.OO.YYYY ko'rinishida yozing)"
+
+msgid "the capacity must be a positive whole number"
+msgstr "sig'im musbat butun son bo'lishi kerak"
+
+msgid "Joined the group on"
+msgstr "Guruhga qo'shilgan sana"
+
+msgid "the last name and first name are required"
+msgstr "familiya va ism majburiy"
+
+msgid "a phone number is wrong (use +998 90 123 45 67)"
+msgstr "telefon raqami noto'g'ri (+998 90 123 45 67 ko'rinishida yozing)"
+
+msgid "enter the student's or the parent's phone"
+msgstr "o'quvchi yoki ota-onasining telefonini kiriting"
+
+#, python-format
+msgid "the phone repeats row %(n)d of the file"
+msgstr "telefon faylning %(n)d-qatorida takrorlangan"
+
+msgid "this phone belongs to a student of another branch"
+msgstr "bu telefon boshqa filial o'quvchisiga tegishli"
+
+#, python-format
+msgid "student %(name)s already exists (tick 'update existing')"
+msgstr ""
+"%(name)s o'quvchi allaqachon mavjud (\"Mavjud o'quvchilarni yangilash\"ni "
+"belgilang)"
+
+#, python-format
+msgid "group \"%(v)s\" not found in this branch"
+msgstr "bu filialda \"%(v)s\" guruhi topilmadi"
+
+msgid "enter the date the student joined the group"
+msgstr "o'quvchi guruhga qo'shilgan sanani kiriting"
+
+msgid "the join date is before the group starts"
+msgstr "qo'shilgan sana guruh boshlanishidan oldin"
+
+msgid "Imported from Excel"
+msgstr "Excel'dan import qilindi"
+
+msgid "Groups"
+msgstr "Guruhlar"
+
+msgid "Courses, teachers and rooms must exist in Settings first."
+msgstr "Avval Sozlamalarda kurslar, o'qituvchilar va xonalar bo'lishi kerak."
+
+msgid "Import groups first. A student is matched by phone."
+msgstr "Avval guruhlarni import qiling. O'quvchi telefon bo'yicha topiladi."
+
+msgid "Opening balances"
+msgstr "Boshlang'ich qoldiqlar"
+
+msgid "Checked, ready to import"
+msgstr "Tekshirildi, import qilishga tayyor"
+
+msgid "Imported"
+msgstr "Import qilindi"
+
+msgid "Has errors"
+msgstr "Xatolar bor"
+
+msgid "File"
+msgstr "Fayl"
+
+msgid "Uploaded by"
+msgstr "Yuklagan"
+
+msgid "Rows"
+msgstr "Qatorlar"
+
+msgid "Import"
+msgstr "Import"
+
+msgid "Imports"
+msgstr "Importlar"
+
+msgid "Planned"
+msgstr "Rejalashtirilgan"
+
+msgid "Finished"
+msgstr "Tugagan"
+
+msgid "This branch already has a group with this name."
+msgstr "Bu filialda shu nomli guruh allaqachon bor."
+
+msgid "The end date must be after the start date."
+msgstr "Tugash sanasi boshlanish sanasidan keyin bo'lishi kerak."
+
+msgid "Monday"
+msgstr "Dushanba"
+
+msgid "Tuesday"
+msgstr "Seshanba"
+
+msgid "Wednesday"
+msgstr "Chorshanba"
+
+msgid "Thursday"
+msgstr "Payshanba"
+
+msgid "Friday"
+msgstr "Juma"
+
+msgid "Saturday"
+msgstr "Shanba"
+
+msgid "Sunday"
+msgstr "Yakshanba"
+
+msgid "Day"
+msgstr "Kun"
+
+msgid "Schedule slot"
+msgstr "Jadvaldagi dars"
+
+msgid "Schedule"
+msgstr "Dars jadvali"
+
+msgid "The lesson must end after it starts."
+msgstr "Dars boshlanganidan keyin tugashi kerak."
+
+msgid "Scheduled"
+msgstr "Rejada"
+
+msgid "Held"
+msgstr "O'tkazildi"
+
+msgid "Cancellation reason"
+msgstr "Bekor qilish sababi"
+
+msgid "Lessons"
+msgstr "Darslar"
+
+msgid "Studying"
+msgstr "O'qiyapti"
+
+msgid "Frozen"
+msgstr "Muzlatilgan"
+
+msgid "Left"
+msgstr "Ketgan"
+
+msgid "Moved to another group"
+msgstr "Boshqa guruhga o'tkazildi"
+
+msgid "Completed"
+msgstr "Tugatgan"
+
+msgid "Enrollment"
+msgstr "Guruhdagi o'qish"
+
+msgid "Enrollments"
+msgstr "Guruhlardagi o'qish"
+
+msgid "The student is already in this group."
+msgstr "O'quvchi allaqachon shu guruhda."
+
+msgid "Enrolled into the group"
+msgstr "Guruhga qo'shildi"
+
+msgid "Unfrozen"
+msgstr "Muzlatish to'xtatildi"
+
+msgid "Moved from another group"
+msgstr "Boshqa guruhdan o'tkazildi"
+
+msgid "Left the group"
+msgstr "Guruhdan chiqdi"
+
+msgid "Enrollment event"
+msgstr "Guruhdagi o'zgarish"
+
+msgid "Enrollment history"
+msgstr "Guruhdagi o'zgarishlar tarixi"
+
+msgid "Freeze"
+msgstr "Muzlatish"
+
+msgid "Freezes"
+msgstr "Muzlatishlar"
+
+msgid "Attendance"
+msgstr "Davomat"
+
 msgid "Create students"
 msgstr "O'quvchi yaratish"
+
+msgid "View students"
+msgstr "O'quvchilarni ko'rish"
+
+msgid "Manage students and enrollments"
+msgstr "O'quvchilar va guruhlarni boshqarish"
+
+msgid "View groups"
+msgstr "Guruhlarni ko'rish"
+
+msgid "Manage groups and lessons"
+msgstr "Guruhlar va darslarni boshqarish"
+
+msgid "Mark attendance"
+msgstr "Davomatni belgilash"
+
+msgid "Import from Excel"
+msgstr "Excel'dan import"
+
+msgid "Teachers can edit attendance for (days)"
+msgstr "O'qituvchi davomatni o'zgartira oladigan muddat (kun)"
+
+msgid "How many days back a teacher may mark or change attendance."
+msgstr ""
+"O'qituvchi necha kun oldingi davomatni belgilashi yoki o'zgartirishi mumkin."
+
+msgid "Attendance for this lesson can no longer be changed."
+msgstr "Bu dars davomatini endi o'zgartirib bo'lmaydi."
+
+msgid "The student is not in this group on this date."
+msgstr "O'quvchi bu sanada guruhda emas."
+
+msgid "Write the reason."
+msgstr "Sababini yozing."
+
+msgid "The group has finished."
+msgstr "Guruh tugagan."
+
+msgid "The date is before the group starts."
+msgstr "Sana guruh boshlanishidan oldin."
+
+msgid "The date is after the group ends."
+msgstr "Sana guruh tugaganidan keyin."
+
+msgid "The group is full. Tick 'Over capacity' to enroll anyway."
+msgstr ""
+"Guruh to'lgan. Baribir qo'shish uchun \"Sig'imdan oshirish\"ni belgilang."
+
+msgid "Only an active enrollment can be moved."
+msgstr "Faqat o'qiyotgan o'quvchini o'tkazish mumkin."
+
+msgid "Choose another group."
+msgstr "Boshqa guruhni tanlang."
+
+msgid "The date is before the student joined the group."
+msgstr "Sana o'quvchi guruhga qo'shilishidan oldin."
+
+msgid "Only an active enrollment can be frozen."
+msgstr "Faqat o'qiyotgan o'quvchini muzlatish mumkin."
+
+msgid "The enrollment is not frozen."
+msgstr "O'quvchi muzlatilmagan."
+
+msgid "The date must be after the freeze started."
+msgstr "Sana muzlatish boshlanganidan keyin bo'lishi kerak."
+
+msgid "The student is no longer in this group."
+msgstr "O'quvchi endi bu guruhda emas."
+
+msgid "The teacher must work in the group's branch."
+msgstr "O'qituvchi guruh filialida ishlashi kerak."
+
+msgid "The room must be in the group's branch."
+msgstr "Xona guruh filialida bo'lishi kerak."
+
+msgid "A group can't move to another branch."
+msgstr "Guruhni boshqa filialga o'tkazib bo'lmaydi."
+
+msgid "Attendance is already marked for this lesson."
+msgstr "Bu dars uchun davomat allaqachon belgilangan."
+
+msgid "Unknown import type."
+msgstr "Noma'lum import turi."
+
+msgid "The file could not be read. Use the .xlsx template."
+msgstr "Faylni o'qib bo'lmadi. .xlsx namunasidan foydalaning."
+
+msgid "The file is empty."
+msgstr "Fayl bo'sh."
+
+#, python-format
+msgid "Missing columns: %(cols)s"
+msgstr "Ustunlar yetishmaydi: %(cols)s"
+
+#, python-format
+msgid "Too many rows (more than %(n)d)."
+msgstr "Qatorlar juda ko'p (%(n)d dan ortiq)."
+
+msgid "The file has no data rows."
+msgstr "Faylda ma'lumot qatorlari yo'q."
+
+msgid "This file can't be imported. Upload it again."
+msgstr "Bu faylni import qilib bo'lmaydi. Qayta yuklang."
+
+msgid "Awaiting enrollment"
+msgstr "Guruhga qo'shilishi kutilmoqda"
+
+msgid "Today's lessons"
+msgstr "Bugungi darslar"
+
+msgid "Previous day"
+msgstr "Oldingi kun"
+
+msgid "Next day"
+msgstr "Keyingi kun"
+
+msgid "Marked"
+msgstr "Belgilangan"
+
+msgid "Not marked"
+msgstr "Belgilanmagan"
+
+msgid "No lessons on this day."
+msgstr "Bu kuni dars yo'q."
+
+msgid "This lesson can't be marked now (future, cancelled or too old)."
+msgstr ""
+"Bu darsni hozir belgilab bo'lmaydi (kelajakdagi, bekor qilingan yoki eski)."
+
+msgid "No students in this group on this date."
+msgstr "Bu sanada guruhda o'quvchi yo'q."
+
+msgid "Each tap is saved immediately."
+msgstr "Har bir bosish darhol saqlanadi."
+
+msgid "Confirm"
+msgstr "Tasdiqlash"
+
+msgid "Continue"
+msgstr "Davom etish"
+
+msgid "Dates"
+msgstr "Sanalar"
+
+msgid "Seats"
+msgstr "O'rinlar"
+
+#, python-format
+msgid "%(taken)s of %(cap)s taken"
+msgstr "%(cap)s tadan %(taken)s tasi band"
+
+msgid "No students yet."
+msgstr "Hali o'quvchi yo'q."
+
+msgid "Upcoming lessons"
+msgstr "Yaqin darslar"
+
+msgid "Restore"
+msgstr "Tiklash"
+
+msgid "Cancel the lesson"
+msgstr "Darsni bekor qilish"
+
+msgid "Reason, e.g. holiday"
+msgstr "Sabab, masalan bayram"
+
+msgid "No upcoming lessons."
+msgstr "Yaqin darslar yo'q."
+
+msgid "Past lessons"
+msgstr "O'tgan darslar"
+
+#, python-format
+msgid "%(p)s of %(m)s came"
+msgstr "%(m)s tadan %(p)s tasi keldi"
+
+msgid "No past lessons."
+msgstr "O'tgan darslar yo'q."
+
+msgid "Edit group"
+msgstr "Guruhni tahrirlash"
+
+msgid "Weekly schedule"
+msgstr "Haftalik jadval"
+
+msgid ""
+"Tick the lesson days. Future lessons are rebuilt when you save; past lessons "
+"and lessons with attendance stay."
+msgstr ""
+"Dars kunlarini belgilang. Saqlaganda kelgusi darslar qayta tuziladi; o'tgan "
+"va davomati bor darslar o'zgarmaydi."
+
+msgid "My groups"
+msgstr "Mening guruhlarim"
+
+msgid "Current"
+msgstr "Joriy"
+
+msgid "All"
+msgstr "Hammasi"
+
+msgid "No groups yet."
+msgstr "Hali guruh yo'q."
+
+msgid "Upload a file"
+msgstr "Fayl yuklash"
+
+msgid ""
+"The file is checked first. Nothing is saved until you confirm, and then all "
+"rows are saved together or none."
+msgstr ""
+"Avval fayl tekshiriladi. Tasdiqlamaguningizcha hech narsa saqlanmaydi, keyin "
+"esa barcha qatorlar birga saqlanadi yoki hech biri saqlanmaydi."
+
+msgid "Check the file"
+msgstr "Faylni tekshirish"
+
+msgid "Templates"
+msgstr "Namunalar"
+
+msgid "Download"
+msgstr "Yuklab olish"
+
+msgid "Order: groups first, then students."
+msgstr "Tartib: avval guruhlar, keyin o'quvchilar."
+
+msgid "Recent imports"
+msgstr "So'nggi importlar"
+
+msgid "Nothing here yet."
+msgstr "Hozircha bo'sh."
+
+#, python-format
+msgid "Rows in the file: %(n)s"
+msgstr "Fayldagi qatorlar: %(n)s"
+
+msgid "No errors found. Press Import to save all rows."
+msgstr "Xato topilmadi. Barcha qatorlarni saqlash uchun \"Import\"ni bosing."
+
+msgid "Import all rows now?"
+msgstr "Barcha qatorlar hozir import qilinsinmi?"
+
+msgid "Groups created"
+msgstr "Yaratilgan guruhlar"
+
+msgid "Students created"
+msgstr "Yaratilgan o'quvchilar"
+
+msgid "Students updated"
+msgstr "Yangilangan o'quvchilar"
+
+msgid "Enrolled into groups"
+msgstr "Guruhga qo'shilganlar"
+
+msgid "Balances created"
+msgstr "Kiritilgan qoldiqlar"
+
+#, python-format
+msgid "%(n)s error"
+msgid_plural "%(n)s errors"
+msgstr[0] "%(n)s ta xato"
+msgstr[1] "%(n)s ta xato"
+
+msgid "Fix the file and upload it again. Nothing was saved."
+msgstr "Faylni tuzatib, qayta yuklang. Hech narsa saqlanmadi."
+
+#, python-format
+msgid "Row %(n)s"
+msgstr "%(n)s-qator"
+
+msgid "Parent"
+msgstr "Ota-onasi"
+
+msgid "Enroll into a group"
+msgstr "Guruhga qo'shish"
+
+msgid "now"
+msgstr "hozirgacha"
+
+msgid "Unfreeze"
+msgstr "Muzlatishni to'xtatish"
+
+msgid "Leave the group"
+msgstr "Guruhdan chiqish"
+
+msgid "Not enrolled in any group yet."
+msgstr "Hali hech qaysi guruhga qo'shilmagan."
+
+msgid "No attendance marks yet."
+msgstr "Hali davomat belgilanmagan."
+
+msgid "New student"
+msgstr "Yangi o'quvchi"
+
+msgid "Edit student"
+msgstr "O'quvchini tahrirlash"
+
+msgid "Nothing found."
+msgstr "Hech narsa topilmadi."
+
+msgid "No lessons today."
+msgstr "Bugun dars yo'q."
+
+msgid "Student created."
+msgstr "O'quvchi yaratildi."
+
+#, python-format
+msgid "Move from %(group)s to another group"
+msgstr "%(group)s guruhidan boshqa guruhga o'tkazish"
+
+msgid "Frozen from"
+msgstr "Muzlatish boshlanadigan sana"
+
+msgid "Attends again from"
+msgstr "Qaytadan qatnashadigan sana"
+
+msgid "First day not attending"
+msgstr "Qatnashmaydigan birinchi kun"
+
+msgid "Saved. The lesson calendar was updated."
+msgstr "Saqlandi. Darslar taqvimi yangilandi."
+
+msgid "The lesson was cancelled."
+msgstr "Dars bekor qilindi."
+
+msgid "The lesson was restored."
+msgstr "Dars tiklandi."
+
+msgid "Import finished."
+msgstr "Import tugadi."
+
+msgid "The data changed since the check. See the errors."
+msgstr "Tekshiruvdan keyin ma'lumotlar o'zgargan. Xatolarni ko'ring."
 
 msgid "Uzbek"
 msgstr "O'zbekcha"
@@ -1177,9 +1827,6 @@ msgstr "Batafsil"
 
 msgid "Field"
 msgstr "Maydon"
-
-msgid "Nothing found."
-msgstr "Hech narsa topilmadi."
 
 #, python-format
 msgid "Welcome, %(name)s!"
@@ -1239,12 +1886,6 @@ msgstr ""
 
 msgid "Own details"
 msgstr "Alohida ma'lumotlar"
-
-msgid "Nothing here yet."
-msgstr "Hozircha bo'sh."
-
-msgid "All"
-msgstr "Hammasi"
 
 msgid "Actions"
 msgstr "Amallar"

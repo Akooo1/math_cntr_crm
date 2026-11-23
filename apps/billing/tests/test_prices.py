@@ -94,3 +94,55 @@ class TestPriceHistory:
     def test_amount_must_be_positive(self, director, course):
         with pytest.raises(Exception):  # noqa: B017 - service or DB constraint
             self.add(director, course, 0, D(2026, 1, 1))
+
+
+@pytest.mark.django_db
+def test_group_price_wins_over_branch_and_general(director, branch_a, course):
+    from tests.factories import make_group
+
+    group = make_group(director, branch_a, course=course)
+    other_group = make_group(director, branch_a, course=course)
+    for branch, grp, amount in (
+        (None, None, 400_000),
+        (branch_a, None, 420_000),
+        (None, group, 350_000),
+    ):
+        services.add_price(
+            actor=director,
+            course=course,
+            branch=branch,
+            group=grp,
+            amount=amount,
+            effective_from=D(2026, 1, 1),
+        )
+
+    def price(group_id):
+        return selectors.effective_price(
+            course_id=course.id,
+            kind="monthly",
+            on_date=D(2026, 7, 1),
+            branch_id=branch_a.pk,
+            group_id=group_id,
+        ).amount
+
+    assert price(group.pk) == 350_000
+    assert price(other_group.pk) == 420_000  # branch price, not the other group's
+    assert Price.objects.get(group=group).branch == branch_a  # branch filled from the group
+
+
+@pytest.mark.django_db
+def test_group_must_match_course(director, branch_a, course):
+    from django.core.exceptions import ValidationError
+
+    from tests.factories import make_group
+
+    group = make_group(director, branch_a)  # a different course
+    with pytest.raises(ValidationError):
+        services.add_price(
+            actor=director,
+            course=course,
+            branch=None,
+            group=group,
+            amount=1,
+            effective_from=D(2026, 1, 1),
+        )

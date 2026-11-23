@@ -11,7 +11,7 @@ class Price(models.Model):
     """Immutable price row. A change is a new row with a new effective date (SPEC 5.6).
 
     Rows are never updated or deleted (database trigger). This table is the price history.
-    Group-level overrides (`group` column) are added when groups exist (phase 3).
+    Scope: group > branch > course (all branches).
     """
 
     class Kind(models.TextChoices):
@@ -29,6 +29,15 @@ class Price(models.Model):
         related_name="+",
         verbose_name=_("Branch"),
         help_text=_("Leave empty for all branches."),
+    )
+    group = models.ForeignKey(
+        "students.Group",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Group"),
+        help_text=_("Only for a special price in one group."),
     )
     kind = models.CharField(_("Price type"), max_length=20, choices=Kind.choices)
     amount = MoneyField(_("Amount"))

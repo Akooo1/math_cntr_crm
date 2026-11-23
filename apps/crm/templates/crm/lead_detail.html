@@ -19,6 +19,7 @@
       {% if lead.is_converted %}
         <div class="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
           {% blocktranslate with name=lead.student.full_name d=lead.converted_at|sana %}Converted to student {{ name }} on {{ d }}.{% endblocktranslate %}
+          <a class="mt-1 block font-medium underline" href="{% url 'students:detail' lead.student_id %}">{% translate "Open the student's profile" %}</a>
         </div>
       {% elif lead.is_lost %}
         <div class="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-sm text-rose-900">
@@ -95,6 +96,7 @@
           {% if can_edit and not lead.is_converted and not lead.is_lost %}<button type="button" class="btn-ghost px-3 py-1.5" @click="add = !add">{% icon "plus" "w-4 h-4" %}{% translate "Book" %}</button>{% endif %}
         </div>
         <form method="post" action="{% url 'crm:trial_book' lead.pk %}" class="mt-3 space-y-3" x-show="add" x-cloak>{% csrf_token %}
+          {% field trial_form.group %}
           {% field trial_form.scheduled_date %}
           {% field trial_form.note %}
           <div class="flex justify-end"><button class="btn-primary">{% translate "Save" %}</button></div>
@@ -102,7 +104,7 @@
         <ul class="mt-3 divide-y divide-slate-100">
           {% for tr in trials %}
             <li class="flex flex-wrap items-center justify-between gap-2 py-2.5">
-              <div><p class="font-medium">{{ tr.scheduled_date|sana }}</p>{% if tr.note %}<p class="text-sm text-slate-500">{{ tr.note }}</p>{% endif %}</div>
+              <div><p class="font-medium">{{ tr.scheduled_date|sana }}{% if tr.lesson %} · {{ tr.lesson.start_time|time:"H:i" }}{% endif %}{% if tr.group %} · {{ tr.group.name }}{% endif %}</p>{% if tr.note %}<p class="text-sm text-slate-500">{{ tr.note }}</p>{% endif %}</div>
               <div class="flex items-center gap-2">
                 <span class="badge {% if tr.status == 'attended' %}bg-emerald-100 text-emerald-800{% elif tr.status == 'booked' %}bg-violet-100 text-violet-800{% else %}bg-slate-100 text-slate-600{% endif %}">{{ tr.get_status_display }}</span>
                 {% if can_edit and tr.status == 'booked' %}{% include "crm/_trial_actions.html" %}{% endif %}

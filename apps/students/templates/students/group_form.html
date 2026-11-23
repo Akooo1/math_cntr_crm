@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{% if group %}{{ group.name }}{% else %}{% translate "New group" %}{% endif %}{% endblock %}
+{% block heading %}{% translate "Groups" %}{% endblock %}
+{% block content %}
+  <div class="mb-4"><a href="{% if group %}{% url 'students:group' group.pk %}{% else %}{% url 'students:groups' %}{% endif %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{% if group %}{{ group.name }}{% else %}{% translate "Groups" %}{% endif %}</a></div>
+  <form method="post" class="mx-auto max-w-3xl space-y-4" novalidate>{% csrf_token %}
+    <h2 class="text-xl font-semibold">{% if group %}{% translate "Edit group" %}{% else %}{% translate "New group" %}{% endif %}</h2>
+    {% include "components/form_errors.html" %}
+    {% include "components/form_errors.html" with form=schedule %}
+    <div class="card grid gap-4 p-5 sm:grid-cols-2">
+      {% for f in form %}{% field f %}{% endfor %}
+    </div>
+    <div class="card p-5">
+      <h3 class="font-semibold">{% translate "Weekly schedule" %}</h3>
+      <p class="mt-1 text-sm text-slate-500">{% translate "Tick the lesson days. Future lessons are rebuilt when you save; past lessons and lessons with attendance stay." %}</p>
+      <div class="mt-4 space-y-2">
+        {% for label, on, start, end in schedule.rows %}
+          <div class="grid grid-cols-[1fr_5.5rem_5.5rem] items-center gap-2 rounded-lg border border-slate-200 p-2 sm:grid-cols-[12rem_7rem_7rem]">
+            <label class="flex items-center gap-2 text-sm font-medium">{{ on }} {{ label }}</label>
+            <label class="sr-only" for="{{ start.id_for_label }}">{% translate "Starts" %}</label>
+            {{ start }}
+            <label class="sr-only" for="{{ end.id_for_label }}">{% translate "Ends" %}</label>
+            {{ end }}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <a href="{% if group %}{% url 'students:group' group.pk %}{% else %}{% url 'students:groups' %}{% endif %}" class="btn-secondary">{% translate "Cancel" %}</a>
+      <button class="btn-primary">{% translate "Save" %}</button>
+    </div>
+  </form>
+{% endblock %}

@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **2 done** (CRM). Next: phase 3 (students, groups, attendance, Excel import). Update this line at the end of each phase.
+- Current phase: **3 done** (students, groups, attendance, Excel import). Next: phase 4 (billing). Update this line at the end of each phase.
 
 ## Ask the owner before
 
@@ -82,6 +82,7 @@ Inside a module:
 ## UI text and i18n
 
 - **No hard-coded user-visible text.** Use `{% translate %}`, `{% blocktranslate %}`, `gettext_lazy` and `ngettext`. This includes form errors, messages, emails, Excel headers and receipt text.
+- Import gettext only as `_` or by its full name (`gettext`, `gettext_lazy`). `makemessages` can't see aliases like `_l` or `_t`, so their strings silently stay English. A test enforces this. Never put a translatable string inside an f-string.
 - Only active language: `uz` (Uzbek, Latin). Code, comments, identifiers and msgids are English. Every msgid must have an Uzbek msgstr. No English may reach the UI (CI checks this).
 - The apostrophe in o', g' and the tutuq belgisi is the ASCII `'`. Search must treat `' ‘ ’ ʻ ʼ` as equal.
 - Money display: `|som` → `1 250 000 so'm` (narrow no-break space U+202F between groups). Amount inputs format with spaces while typing.
@@ -122,6 +123,12 @@ Inside a module:
 | Pipeline board | Doska |
 | Convert to student | O'quvchiga aylantirish |
 | Next follow-up | Keyingi bog'lanish |
+| Today's lessons / my groups | Bugungi darslar / Mening guruhlarim |
+| Awaiting enrollment | Guruhga qo'shilishi kutilmoqda |
+| Over capacity | Sig'imdan oshirish |
+| Seats | O'rinlar |
+| Import / template | Import / Namuna |
+| Studying / left (student status) | O'qiyapti / Ketgan |
 | Settings | Sozlamalar |
 | Reports / dashboard | Hisobotlar / Bosh sahifa |
 | Audit log | Harakatlar jurnali |
@@ -144,7 +151,12 @@ Add new terms here before using them in the UI.
   subclass registered in the module's `ready()`; see `apps/billing/sections.py`.
 - `core.system_settings.register_setting(SettingDef(...))` / `get_setting(key)` — typed
   settings that appear automatically in Sozlamalar → Umumiy sozlamalar.
-- `core.forms`: `StyledForm`, `StyledModelForm`, `MoneyField`, `PhoneField`, `UzDateField`.
+- `core.forms`: `StyledForm`, `StyledModelForm`, `MoneyField`, `PhoneField`, `UzDateField`,
+  `UzTimeField` (24-hour text input; never `<input type="time">`, it shows AM/PM).
+- `students.services`: `register_enrollment_extension` (billing's hook into enroll / move /
+  freeze / unfreeze / leave), `register_profile_panel`, `register_list_badge`,
+  `register_import_kind`. Billing uses these in phase 4; don't edit the students module.
+- `NavItem.role_priority` orders the phone bottom bar per role.
 - Template builtins (no `{% load %}` needed): `i18n`, `|som`, `|raqam`, `|sana`, `|sana_vaqt`,
   `|telefon`, `user|can:"perm.code"`, `{% icon "name" %}`, `{% field form.x %}`.
 - `billing.domain.rounding.round_amount` — the only money rounding function.
