@@ -30,6 +30,32 @@ The phone field accepts any format (`90 000 00 01`, `+998900000001`, ...).
 
 To start from an empty database: `docker compose down -v && docker compose up`.
 
+### Start clean (no demo data)
+
+For real use, start with an empty system: only the defaults it needs (payment methods,
+lead stages, editable lead sources and refusal reasons, the center name) and your own
+Direktor. Put this into a `.env` file next to `docker-compose.yml`:
+
+```bash
+DEMO_SEED=0
+DIRECTOR_PHONE=+998 90 123 45 67
+DIRECTOR_NAME=Ism Familiya
+DIRECTOR_PASSWORD=a-temporary-password
+```
+
+Then, **which deletes the local database including any demo data**:
+
+```bash
+docker compose down -v
+```
+
+```bash
+docker compose up
+```
+
+Log in with that phone and password; the app asks for a new password at once. Then remove
+`DIRECTOR_PASSWORD` from `.env`. Production (Railway or the VPS) never loads demo data.
+
 ## Development without Docker
 
 Needs Python 3.12, [uv](https://docs.astral.sh/uv/), PostgreSQL, gettext (`msgfmt`), Node 22

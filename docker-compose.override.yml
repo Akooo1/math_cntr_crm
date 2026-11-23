@@ -8,7 +8,12 @@ services:
     environment:
       DJANGO_SETTINGS_MODULE: config.settings.dev
       DJANGO_SECRET_KEY: dev-insecure-key-change-me
-      DEMO_SEED: "1"
+      # Demo data on by default. Clean start: DEMO_SEED=0 plus your own Direktor below
+      # (see README, "Start clean").
+      DEMO_SEED: ${DEMO_SEED:-1}
+      DIRECTOR_PHONE: ${DIRECTOR_PHONE:-}
+      DIRECTOR_NAME: ${DIRECTOR_NAME:-}
+      DIRECTOR_PASSWORD: ${DIRECTOR_PASSWORD:-}
     ports:
       - "8000:8000"
     volumes:

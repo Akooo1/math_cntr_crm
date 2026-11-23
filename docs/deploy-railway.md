@@ -18,6 +18,10 @@ four services need about 0.6–0.8 GB of RAM in total, so expect **roughly $7–
 That is an estimate, not a quote: set a usage limit in Railway → Account → Usage so a
 surprise can't happen.
 
+**Clean start.** Railway never loads demo data: the database starts with only the defaults
+the system needs (payment methods, lead stages, editable lead sources and refusal reasons,
+the center name) plus the Direktor from step 3.
+
 **Data location.** Railway's servers are outside Uzbekistan. See docs/SPEC.md (hosting)
 about the personal-data localization law before you load real student data.
 
