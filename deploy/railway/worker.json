@@ -1,0 +1,11 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "scripts/entrypoint.sh /usr/local/bin/supercronic -passthrough-logs /app/deploy/crontab",
+    "restartPolicyType": "ALWAYS"
+  }
+}

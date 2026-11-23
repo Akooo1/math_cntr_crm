@@ -26,6 +26,12 @@ CSRF_TRUSTED_ORIGINS = [
     o.strip() for o in env("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if o.strip()
 ]
 
+# Railway (phase 9) injects RAILWAY_PUBLIC_DOMAIN; its health checks come from
+# healthcheck.railway.app. Trust both without extra configuration.
+if env("RAILWAY_PUBLIC_DOMAIN", ""):
+    ALLOWED_HOSTS += [env("RAILWAY_PUBLIC_DOMAIN"), "healthcheck.railway.app"]
+    CSRF_TRUSTED_ORIGINS.append(f"https://{env('RAILWAY_PUBLIC_DOMAIN')}")
+
 INSTALLED_APPS = [
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -92,6 +98,18 @@ DATABASES = {
         "CONN_HEALTH_CHECKS": True,
     }
 }
+# Hosted Postgres (Railway) gives one DATABASE_URL instead of separate variables.
+if env("DATABASE_URL", ""):
+    from urllib.parse import unquote, urlsplit
+
+    _db = urlsplit(env("DATABASE_URL"))
+    DATABASES["default"].update(
+        NAME=unquote(_db.path.lstrip("/")),
+        USER=unquote(_db.username or ""),
+        PASSWORD=unquote(_db.password or ""),
+        HOST=_db.hostname or "",
+        PORT=str(_db.port or 5432),
+    )
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Login rate limiting uses Django's database cache (table created by `createcachetable`).

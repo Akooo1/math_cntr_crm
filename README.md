@@ -62,6 +62,11 @@ All text lives in `locale/uz/LC_MESSAGES/django.po`. After adding or changing UI
 run `scripts/i18n.sh`, fill in every new `msgstr`, and commit the `.po` file. Tests fail if
 a string is untranslated or English reaches a page.
 
+## Production on Railway
+
+Step by step: [docs/deploy-railway.md](docs/deploy-railway.md) (web, worker, bot and
+Railway's PostgreSQL; about $7–12 a month).
+
 ## Production (one Linux VPS)
 
 Needs Docker with Compose v2, a domain whose DNS A record points at the server, and ports

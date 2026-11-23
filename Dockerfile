@@ -59,4 +59,5 @@ RUN DJANGO_SECRET_KEY=build-only python manage.py collectstatic --noinput \
     && chown -R app /app/media
 USER app
 ENTRYPOINT ["scripts/entrypoint.sh"]
-CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "3", "--access-logfile", "-"]
+# PORT and WEB_CONCURRENCY come from the host (Railway sets PORT); defaults for Compose.
+CMD ["sh", "-c", "exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers ${WEB_CONCURRENCY:-3} --access-logfile -"]

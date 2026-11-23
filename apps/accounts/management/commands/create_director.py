@@ -22,13 +22,27 @@ class Command(BaseCommand):
         parser.add_argument("--phone", required=True)
         parser.add_argument("--name", required=True)
         parser.add_argument("--password", help="Avoid on shared machines; prompts if omitted.")
+        parser.add_argument(
+            "--if-none",
+            action="store_true",
+            help="Do nothing when a Direktor already exists (automatic first start).",
+        )
+        parser.add_argument(
+            "--must-change",
+            action="store_true",
+            help="Ask for a new password at the first login.",
+        )
 
-    def handle(self, *args, phone, name, password=None, **options):
+    def handle(
+        self, *args, phone, name, password=None, if_none=False, must_change=False, **options
+    ):
+        User = get_user_model()
+        if if_none and User.objects.filter(role=Role.DIRECTOR).exists():
+            return
         try:
             number = phones.normalize(phone)
         except phones.InvalidPhone as exc:
             raise CommandError("Phone must look like +998 90 123 45 67") from exc
-        User = get_user_model()
         if User.objects.filter(phone=number).exists():
             raise CommandError("A user with this phone already exists.")
         password = password or getpass.getpass("Password: ")
@@ -38,6 +52,6 @@ class Command(BaseCommand):
         except ValidationError as exc:
             raise CommandError(" ".join(exc.messages)) from exc
         user.set_password(password)
-        user.must_change_password = False
+        user.must_change_password = must_change
         user.save()
         self.stdout.write(self.style.SUCCESS(f"Director {name} ({number}) created."))

@@ -978,3 +978,29 @@ Decisions taken in phase 8:
   a fake Telegram client; the first real test needs the owner's bot token on a server or
   laptop.
 
+---
+
+## 16. Go-live on Railway (phase 9)
+
+The owner chose Railway (after the VPS recommendation and the data-localization note).
+Railway runs the same image as Docker Compose, as three services plus Railway PostgreSQL:
+`web` (gunicorn, migrates), `worker` (supercronic with the same `deploy/crontab`, Tashkent
+time, so no UTC cron translation and no Railway cron drift), `bot` (Telegram polling).
+HTTPS and database backups are Railway's. Step by step: [deploy-railway.md](deploy-railway.md).
+
+Changes that keep Compose working unchanged:
+- `DATABASE_URL` is read when present (URL-encoded passwords handled).
+- gunicorn binds `$PORT` (default 8000) with `$WEB_CONCURRENCY` workers (default 3).
+- `RAILWAY_PUBLIC_DOMAIN` and Railway's health checker are trusted automatically.
+- The first Direktor can be created from `DIRECTOR_PHONE` / `DIRECTOR_NAME` /
+  `DIRECTOR_PASSWORD` (only when no Direktor exists; the password must be changed at the
+  first login; a failure is logged and never blocks start-up).
+- Started as root (Railway volumes), the entrypoint gives `/app/media` to the app user and
+  drops privileges.
+
+Verified in the sandbox: the production image with Railway-style variables (a
+`DATABASE_URL` with an encoded password, a custom port, a Railway domain) migrates, creates
+the Direktor once, answers Railway's health check, logs in over HTTPS proxy headers with
+secure cookies, refuses unknown hosts; worker and bot start. **Not verified:** a deploy on
+Railway itself (no Railway access from here).
+
