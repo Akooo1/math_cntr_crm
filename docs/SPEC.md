@@ -1027,3 +1027,266 @@ phone top bar, the receipt and as favicon, the full logo on the login page. The 
 chart's "charged" series uses the brand blue (palette re-validated with orange: all checks
 pass). Files in `static/brand/`.
 
+
+---
+
+## 17. Module 5: books and counter sales (`apps/store`) — PROPOSAL, not approved
+
+Status: **waiting for the owner's answers to 17.9.** Nothing below is built yet.
+
+Owner's brief:
+
+- **Books** are handed out to students from the student card and paid now or later.
+- **Items** are sold over the counter, with full stock tracking: water in several sizes, pens, notebooks.
+
+### 17.1 Scope
+
+In scope:
+
+- a catalog of books and items with a price history
+- per-branch stock: Kirim (stock received), sales, corrections and reversals
+- "Kitob berish" (give a book) on the student card: pay now, or later as a charge on the student's ledger
+- the sell screen
+- the stock overview, plus a report with period and branch filters and Excel export
+- store sales in Kassa hisoboti and Kunni yopish
+
+Out of scope:
+
+- barcodes
+- suppliers and purchase orders
+- online payments
+- receipts (Chek) for counter sales (Q-S9)
+- book returns that are not mistakes (only reversals)
+- discounts on store goods
+
+### 17.2 Place in the architecture
+
+- `apps/store` sits on the same layer as `reports | salaries | telegram`. It depends on:
+  - `billing`: `services.ledger` for book charges, the payment methods, the Kassa extension point below
+  - `students`: the Student FK and `register_profile_panel`
+  - `settings`: Branch
+  - `core`
+- Nothing imports `store`. `.importlinter` gets `apps.store` added to that layer.
+- `store.domain` (pure stock and margin math) is added to the pure-domain contract.
+
+### 17.3 Rules
+
+1. **Catalog.** One table holds both books and items.
+   - Fields: kind (`book` | `item`), name (with size, e.g. "0,5 L suv"), low-stock threshold, active.
+   - The catalog is global. Stock is per branch.
+   - Products are deactivated, never deleted.
+2. **Prices.** Prices are immutable rows (`store_price`: amount, effective_from).
+   - The price in force on the sale date is copied into the sale line.
+   - A later price never changes a sale.
+   - Prices are global (Q-S1).
+3. **Stock on hand is never stored.**
+   - It is `Σ store_stock_movement.quantity` per (branch, product), exposed as the view `store_stock_on_hand`.
+   - Movements are append-only (trigger).
+   - Kinds, each with a sign CHECK:
+
+     | Kind | Sign | When |
+     |---|---|---|
+     | `receipt` | + | Kirim |
+     | `sale` | − | an item sold or a book given |
+     | `sale_reversal` | + | a sale cancelled |
+     | `correction` | ± | needs a reason; Direktor only |
+4. **No sale below zero.** A sale or book is refused when the branch's on-hand quantity is smaller than the requested quantity.
+   - The check runs under a row lock on the product (`SELECT … FOR UPDATE`), so two cashiers can't both sell the last bottle.
+   - A correction can't make on-hand negative either.
+   - This means stock must be entered as Kirim before the first sale.
+5. **Kirim:**
+   - Fields: branch, product, quantity (> 0), optional total purchase cost (whole so'm), date (today or earlier, never future), optional note.
+   - Who records it: Q-S2.
+   - The cost is the total paid for that delivery. Unit cost is derived only in reports.
+6. **Item sale (sell screen):**
+   - A sale is one basket: one or more lines of active `item` products, one payment method (default Naqd), dated **today** (no backdating, Q-S7), no student.
+   - Price = the current price × quantity. No price override and no discount.
+   - It writes `store_sale` + `store_sale_line` + one `sale` movement per line, plus an audit record, in one transaction.
+7. **Book (student card, "Kitob berish"):**
+   - One active `book` product, a quantity, and a choice of "Hozir to'lash" (pay now, with a method) or "Keyin to'lash" (pay later).
+   - Stock comes from the **student's** branch.
+   - **Pay now** is a `store_sale` with `settlement = paid`, like a counter sale with the student attached. It does **not** touch the ledger (Q-S3).
+   - **Pay later** is a `store_sale` with `settlement = on_account`, plus a billing charge created through `billing.services.ledger.create_charge`:
+     - kind `manual` (the existing "Qo'shimcha hisob" kind, Q-S4)
+     - no enrollment, group or course
+     - `base_amount = amount =` the sale total
+     - `suggested_amount = NULL` and no discount lines
+     - description "Kitob: <name> × <qty>"
+     - `due_date = sale date + store.book_due_days` (default 7)
+   - The sale row keeps `charge_id`. From then on the book is an ordinary charge:
+     - It is in the balance and FIFO, so existing avans pays it automatically.
+     - It shows in Qarzdorlar (unfiltered; it has no group, course or teacher), the Telegram debt reminders and the manager's `payment_status`.
+     - It is paid later through the normal "To'lov qabul qilish" (take payment).
+   - **It never counts toward a teacher's salary.** Salaries count only allocations to charges that have a group (SPEC 13.1), and a book charge has none.
+   - No partial pay-now (Q-S3).
+8. **Reversal (Bekor qilish), Direktor only:**
+   - It reverses the **whole** sale, needs a reason and is dated today.
+   - It writes `store_sale_reversal` and a `sale_reversal` movement per line, so the stock comes back.
+   - For a paid sale it is an outgoing line in today's Kassa, in the sale's method. It is refused if today is already closed for that branch.
+   - For an on-account book it also adds a billing adjustment to the charge: kind `cancellation`, existing kind, net to 0, same reason, via `ledger.adjust`. Money already allocated to that charge becomes avans, as with any cancelled charge.
+9. **Closed day.**
+   - No paid sale and no reversal of a paid sale can be dated on a closed branch-day. This is enforced in the service and by triggers on `store_sale` and `store_sale_reversal` that check `billing_cash_day_close`.
+   - On-account books and stock movements are not cash, so a closed day doesn't block them.
+10. **Money:**
+    - whole so'm `bigint` with CHECKs
+    - `line amount = unit_price × quantity`, with a CHECK
+    - `sale total = Σ lines`
+    - no Decimal or float
+    - all writes audited: `store.product.create/update`, `store.price.create`, `store.stock.receive`, `store.stock.correct`, `store.sale.create`, `store.book.give`, `store.sale.reverse`
+11. **Low stock:** on hand ≤ the product's threshold (threshold 0 = no warning). It shows on the sell screen, the stock overview and the report. At 0 the product shows "Tugagan" and its tap button is disabled.
+
+### 17.4 Kassa extension point (billing change, needs approval)
+
+Billing today reads only `billing_payment`. Proposed additions in `apps/billing`; no table change.
+
+```python
+# billing/services/cash.py
+@dataclass(frozen=True)
+class CashLine:
+    source: str            # "store"
+    method_id: int         # a billing_payment_method row
+    direction: str         # "in" | "out"
+    amount: int            # > 0, whole so'm
+    at: datetime
+    by: User
+    description: str       # already translated, e.g. "1 L suv × 2"
+    url: str = ""          # link to the sale
+
+@dataclass(frozen=True)
+class CashSource:
+    code: str              # "store"
+    label: str             # lazy Uzbek label, e.g. "Savdo"
+    lines: Callable[[int, date], list[CashLine]]   # (branch_id, day) -> lines
+
+def register_cash_source(source: CashSource) -> None: ...
+def lock_day(branch_id: int, day: date) -> None:   # pg_advisory_xact_lock(branch, day)
+```
+
+- `day_report()` adds every source's lines to the per-method in/out/net/count. The result gains a `sources` breakdown: "O'quvchi to'lovlari" plus one entry per registered source, each with in/out/net.
+- The Kassa page shows the source lines in their own list under the payments. The Excel export gets them too.
+- `snapshot()` stores the breakdown in `billing_cash_day_close.totals` (jsonb; old closes keep their old shape).
+- `close_day()` and every cash write take `lock_day(branch, day)` first: payment, reversal, refund and the store's paid sale and reversal.
+  - **This also closes a race that exists today.** The insert trigger only sees committed closes, so a payment committed while a close is being computed can land on a closed day without being in its snapshot. I haven't reproduced it, but nothing in the code prevents it.
+- `payments.is_closed` is re-exported from `billing.selectors` for the store's service check.
+- Methods: a sale may use any active, non-system, non-online method that has `included_in_cash_close`.
+
+### 17.5 Tables (`apps/store`)
+
+| Table | Columns | Notes |
+|---|---|---|
+| `store_product` | kind (`book` \| `item`), name, low_stock_threshold (int ≥ 0), is_active, sort_order, created_by, created_at | unique (kind, name). Audited edits |
+| `store_price` | product_id, amount (> 0), effective_from, note, created_by, created_at | Immutable (trigger). Resolution: latest `effective_from <= date`, then latest `created_at` |
+| `store_stock_movement` | branch_id, product_id, kind (`receipt` \| `sale` \| `sale_reversal` \| `correction`), quantity (signed, ≠ 0, sign CHECK per kind), movement_date, purchase_cost (≥ 0, null; receipt only), sale_line_id null, reason (required for correction), note, created_by, created_at | Append-only (trigger). Index (branch, product, movement_date) |
+| `store_sale` | branch_id, student_id null, sold_on, settlement (`paid` \| `on_account`), method_id null, charge_id null (→ `billing_charge`), total (> 0), sold_by, created_at | CHECKs: paid ⇔ method set; on_account ⇔ charge set ⇔ student set. Append-only. Closed-day trigger when paid |
+| `store_sale_line` | sale_id, product_id, quantity (> 0), price_id, unit_price (> 0), amount | CHECK `amount = unit_price * quantity`. Append-only |
+| `store_sale_reversal` | sale_id (unique), reversed_on, reason, created_by, created_at | Append-only. Closed-day trigger when the sale is paid |
+| `store_stock_on_hand` (view) | branch_id, product_id, quantity | `Σ movements`. Never a column |
+
+Every FK is `PROTECT`. The kind of a sale (item or book) is derived from its lines; the service never mixes them.
+
+### 17.6 Permissions (role defaults)
+
+| Permission | Direktor | Filial administratori | Sotuv menejeri | O'qituvchi |
+|---|---|---|---|---|
+| `store.catalog.manage`: products and prices (Sozlamalar) | ✓ | | | |
+| `store.stock.receive`: Kirim | ✓ | Q-S2 | | |
+| `store.stock.correct`: corrections | ✓ | | | |
+| `store.sell`: sell screen and Kitob berish | ✓ | ✓ own branch | | |
+| `store.sale.reverse` | ✓ | | | |
+| `store.view`: stock overview, sales journal, books panel on the student card | ✓ | ✓ own branch | | |
+| `store.cost.view`: purchase cost and margin columns | ✓ | Q-S5 | | |
+
+- The managers' and teachers' student cards don't show the books panel. They see only the effect of a book charge on `payment_status`.
+- Setting: `store.book_due_days` (int, default 7), in Umumiy sozlamalar.
+
+### 17.7 Screens
+
+- **Savdo** (`/savdo/`, nav for Direktor and admin; second in the admin's phone bar):
+  - A grid of big tap tiles, one per active item: name, price, stock left, a low-stock or "Tugagan" badge.
+  - A tap adds 1 to the basket.
+  - The basket is a sticky bottom bar: lines with − / +, the total, method chips (Naqd first and preselected) and one large "Sotish" button (Q-S6).
+  - "Bugungi savdo" (today's sales) is listed below the grid, with a link to the full journal.
+  - The Direktor with "all branches" selected is asked to pick a branch first.
+  - Two columns of tiles at 360 px; more at `md:` and up.
+- **Savdo jurnali** (`/savdo/jurnal/`): sales for a day or period and branch, with "Bekor qilish" for the Direktor.
+- **Ombor** (`/ombor/`): per branch, every product with on hand and a low-stock flag; "Kirim" and "Tuzatish" buttons by permission. `/ombor/<id>/` is a product's movement history.
+- **Student card panel "Kitoblar"** (`register_profile_panel`): books given (date, book, quantity, amount, paid now / on account and paid status) and a "Kitob berish" button opening `/kitob-berish/<student_id>/`. The form has book, quantity (− / +), the total, "Hozir to'lash" / "Keyin to'lash", the method if paying now, and the due date shown if paying later.
+- **Sozlamalar → Mahsulotlar**: books and items tabs, add and edit, price history and "Yangi narx".
+- **Report "Ombor va savdo"** (`core.reports`, Hisobotlar; `store.view`, with cost columns behind `store.cost.view`). Per product for the period and branch:
+
+  | Column | Definition |
+  |---|---|
+  | Kirim | quantity received |
+  | Sotildi | quantity sold, net of reversals; books included |
+  | Qoldiq | on hand at the period's end |
+  | Savdo summasi | sales amount, net of reversals |
+  | of which on account | books not paid now |
+  | Xarid narxi | purchase cost |
+  | Foyda | margin, Q-S8 |
+  | Kam qoldi | low-stock flag (now) |
+
+  It has an Excel export.
+
+### 17.8 Tests (planned)
+
+- Stock math: received − sold + reversals ± corrections = on hand, per branch, with no leakage between branches.
+- Refusal at insufficient stock, including a concurrent last-unit sale.
+- Pay-now book: no ledger rows, Kassa in.
+- Pay-later book: a charge with the due date = date + N days, then a later payment clears it through FIFO; it shows in debtors after the due date and is excluded from the salary basis.
+- Kassa totals with store lines, per method and per source, plus the snapshot.
+- Closed-day lock: service and trigger, sale and reversal.
+- Reversal: Direktor only, whole sale, stock back, Kassa out, book charge cancelled.
+- Price immutability and price-at-sale snapshot.
+- Append-only triggers.
+- Margin math (pure domain).
+- Every new URL in the permission matrix for all four roles, in and out of branch.
+
+### 17.9 Questions for the owner
+
+Answers to the owner's six proposed rules:
+
+| # | Owner's proposal | My answer |
+|---|---|---|
+| 1 | Stock per branch | **Agree.** |
+| 2 | Sales in Kassa and Kunni yopish; closed day blocks sales | **Agree.** Design in 17.4. It changes billing: approve or change it. |
+| 3 | Direktor manages the catalog, prices and Kirim; admin and Direktor sell and give books | **Agree, except Kirim: see Q-S2.** |
+| 4 | Reversal Direktor only, whole sale, with a reason | **Agree.** For an on-account book it also cancels the charge (17.3.8). |
+| 5 | Can't sell at 0 stock | **Agree.** Stock must be entered as Kirim before the first sale. |
+| 6 | Book due in 7 days (setting), no book discounts | **Agree.** I'd also forbid price overrides on any store sale. |
+
+New questions:
+
+| # | Question | My recommendation | Why |
+|---|---|---|---|
+| Q-S1 | Global prices or per branch? | **Global** (one price per product). | A per-branch price is easy to add later as a nullable branch on `store_price`. |
+| Q-S2 | Who records Kirim? | **Admin too, for their own branch.** Corrections stay Direktor only. | Rule 5 blocks sales at 0. If water arrives while the Direktor is away, admins can't sell until the Direktor logs in. Admin Kirim is audited and the Direktor sees it. |
+| Q-S3 | How is a pay-now book recorded? | **As a store sale outside the ledger** (like water, with the student attached). No partial pay-now: either all now or all on account. | If it were a charge plus a payment, FIFO would put the book money on the **oldest** open charge (e.g. an overdue tuition month). The book would then show as unpaid, and the book money would temporarily count toward the teacher's salary, which breaks your rule. |
+| Q-S4 | Charge kind for a book on account | **Use the existing `manual` kind ("Qo'shimcha hisob")**, description "Kitob: …", linked from `store_sale.charge_id`. No billing schema change. | The alternative is a new kind `book`. It labels the ledger line better, but it's a billing data-model change. |
+| Q-S5 | Can admins see purchase cost and margin? | **No, Direktor only.** | What the center pays suppliers is business-sensitive and admins don't need it to sell. |
+| Q-S6 | Sell-screen interaction | **A tap adds 1 to the basket; one "Sotish" button confirms.** So it's 2 taps for one bottle. | Your brief says "one tap sells 1". If every tap were a final sale, every mis-tap would need a Direktor reversal with a reason. A basket costs one extra tap and avoids that. |
+| Q-S7 | Backdating | **Sales and books are dated today only. Kirim may be backdated (never future).** | A sale is cash in the drawer now. Backdating it would also fight the closed-day lock. |
+| Q-S8 | Purchase cost and margin | **Weighted average.** Unit cost = Σ cost ÷ Σ quantity of the branch's Kirim rows *with a cost*, up to the period's end. Margin = sales amount − sold quantity × unit cost. If any Kirim for that branch and product has no cost, the margin shows "—" rather than a half-true number. Report only, rounded to whole so'm with `round_amount`. | It's the standard method for small retail. The alternatives are FIFO costing (more precise when prices move, more complex) or cash view (revenue − purchases in the period, which isn't margin). |
+| Q-S9 | Receipts (Chek) for counter sales? | **No receipt.** | Billing's gapless receipt counter is for student payments. Adding store sales to it changes billing numbering. A book paid later gets a normal receipt when it's paid. |
+| Q-S10 | Should store sales count in "Tushum" (dashboard, "collected by month/method" reports)? | **No.** Tushum stays student payments only. Kassa shows both with subtotals, and store revenue has its own report. | Mixing them would silently change every past Tushum figure and the dashboard comparison. A book paid later *does* enter Tushum when the student pays it, because it's a student payment. |
+| Q-S11 | Glossary (17.10) | Approve or correct the Uzbek terms. | |
+
+### 17.10 Proposed glossary additions (go into CLAUDE.md once approved)
+
+| Concept | Uzbek |
+|---|---|
+| Sales / sell screen / sell (button) | Savdo / Savdo / Sotish |
+| Today's sales / sales journal | Bugungi savdo / Savdo jurnali |
+| Product / products | Mahsulot / Mahsulotlar |
+| Book / give a book | Kitob / Kitob berish |
+| Stock (warehouse) | Ombor |
+| Stock received | Kirim |
+| On hand | Qoldiq |
+| Sold | Sotildi |
+| Stock correction | Tuzatish |
+| Low stock / out of stock / low-stock threshold | Kam qoldi / Tugagan / Minimal qoldiq |
+| Quantity | Soni |
+| Purchase cost / margin | Xarid narxi / Foyda |
+| Sales amount (store revenue) | Savdo summasi |
+| Pay now / pay later (on account) | Hozir to'lash / Keyin to'lash (hisobga) |
+| Book payment deadline (days) | Kitob uchun to'lov muddati (kun) |
+| Students' payments (Kassa subtotal) | O'quvchi to'lovlari |

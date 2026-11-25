@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **9 prepared** (Railway: config, guide in docs/deploy-railway.md). Waiting for the owner to create the Railway project and deploy. Update this line at the end of each phase.
+- Current phase: **9 prepared** (Railway: config, guide in docs/deploy-railway.md). **Module 5 (store, SPEC §17) proposed**: waiting for the owner's answers in §17.9 before building. Update this line at the end of each phase.
 
 ## Ask the owner before
 
