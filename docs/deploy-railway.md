@@ -113,18 +113,36 @@ about the personal-data localization law before you load real student data.
 
 ## 6. Backups
 
-- **Postgres service → Backups:** turn on a **daily** schedule (and weekly if offered).
-  Restores happen from the same tab.
-- Railway keeps backups in the same place as the database, and deleting the volume deletes
-  them. Once a month, keep a copy on your own computer too. Turn on **Postgres →
-  Settings → Networking → TCP Proxy**, copy `DATABASE_PUBLIC_URL` from its variables, then:
+Railway's own Backups tab is not available on the Hobby plan. Make a copy on your computer
+instead: always before merging an update into `main`, and at least once a week.
 
-  ```bash
-  docker run --rm postgres:17-alpine pg_dump "PASTE_DATABASE_PUBLIC_URL" -Fc > matematika.dump
-  ```
+1. **Postgres → Variables:** copy `DATABASE_PUBLIC_URL` (it starts with `postgresql://` and
+   ends with `.proxy.rlwy.net:<port>/railway`). If it is missing, turn on **Postgres →
+   Settings → Networking → TCP Proxy** first.
+2. In a folder on your computer, with Docker running (works in PowerShell, Command Prompt,
+   Mac and Linux; the file is written by Docker, so Windows can't corrupt it):
 
-  Turn the TCP proxy off again afterwards: while it is on, the database is reachable from
-  the internet (password protected).
+   ```bash
+   docker run --rm -v "${PWD}:/backup" postgres:17-alpine pg_dump "PASTE_DATABASE_PUBLIC_URL" -Fc -f /backup/matematika.dump
+   ```
+
+   In Command Prompt write `%cd%` instead of `${PWD}`. If it says "server version mismatch",
+   use `postgres:18-alpine` (the number must be at least Railway's Postgres version).
+3. Check the copy is readable (prints a long list of tables):
+
+   ```bash
+   docker run --rm -v "${PWD}:/backup" postgres:17-alpine pg_restore --list /backup/matematika.dump
+   ```
+
+4. Keep the file somewhere safe (another disk or cloud folder). It contains all student and
+   payment data.
+
+**Restore** (replaces everything in the Railway database with the copy; stop `web`, `worker`
+and `bot` first so nothing writes meanwhile):
+
+```bash
+docker run --rm -v "${PWD}:/backup" postgres:17-alpine pg_restore --clean --if-exists --no-owner -d "PASTE_DATABASE_PUBLIC_URL" /backup/matematika.dump
+```
 
 ## 7. Updates
 
