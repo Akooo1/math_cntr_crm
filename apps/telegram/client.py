@@ -5,6 +5,7 @@ import json
 import logging
 import urllib.error
 import urllib.request
+import uuid
 
 from django.conf import settings
 
@@ -37,6 +38,9 @@ class TelegramClient:
             data=json.dumps(params).encode(),
             headers={"Content-Type": "application/json"},
         )
+        return self._open(req)
+
+    def _open(self, req):
         try:
             with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                 body = json.loads(resp.read())
@@ -53,6 +57,29 @@ class TelegramClient:
 
     def send(self, chat_id: int, text: str, **extra):
         return self.call("sendMessage", chat_id=chat_id, text=text, **extra)
+
+    def send_document(self, chat_id: int, filename: str, content: bytes, caption: str = ""):
+        """Upload a file (multipart/form-data). Bots may send files up to 50 MB."""
+        boundary = "----mm" + uuid.uuid4().hex
+        parts = []
+        for name, value in (("chat_id", str(chat_id)), ("caption", caption)):
+            parts.append(
+                f'--{boundary}\r\nContent-Disposition: form-data; name="{name}"\r\n\r\n'
+                f"{value}\r\n".encode()
+            )
+        parts.append(
+            f'--{boundary}\r\nContent-Disposition: form-data; name="document"; '
+            f'filename="{filename}"\r\nContent-Type: application/octet-stream\r\n\r\n'.encode()
+            + content
+            + b"\r\n"
+        )
+        parts.append(f"--{boundary}--\r\n".encode())
+        req = urllib.request.Request(
+            self.base + "sendDocument",
+            data=b"".join(parts),
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}"},
+        )
+        return self._open(req)
 
 
 def token() -> str:

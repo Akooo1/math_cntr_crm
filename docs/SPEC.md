@@ -1330,3 +1330,24 @@ New questions:
 - **Confirmed by the owner after the build:** frozen students are unticked by default in the
   group give; a Kirim needs an active product (reactivate first); the Kassa subtotal is
   "O'quvchilar to'lovlari".
+
+---
+
+## 18. Backups to Telegram (owner's request)
+
+Railway Hobby has no database backups, and the owner chose Telegram as the place to keep
+them. `manage.py backup_to_telegram` makes a `pg_dump` (custom format, checked with
+`pg_restore --list`) and sends it with the bot to every active Direktor chat (limit 49 MB;
+the database is well under 1 MB today). Each send is logged in `telegram_message` (kind
+`backup`).
+
+- **Before an update:** `scripts/entrypoint.sh` runs `backup_to_telegram --before-migrate`
+  when the update has database changes (`BACKUP_BEFORE_MIGRATE`: `auto` = on in production
+  with a bot token; `1`; `0`). A failed backup stops the start-up before `migrate`, so the
+  database is never changed without a copy. A new empty database is skipped.
+- **Nightly** 02:30 (`deploy/crontab`, `--nightly-if-configured`: skipped quietly until the
+  token and a Direktor chat exist).
+- The image carries `postgresql-client-18` from the PostgreSQL project's repository, because
+  `pg_dump` must be at least as new as the server.
+- Restore: docs/deploy-railway.md, section 6.
+

@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 19:53+0500\n"
+"POT-Creation-Date: 2026-11-25 20:36+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -2744,7 +2744,7 @@ msgstr "Hozir javonda aslida nechta bor."
 
 msgctxt "product"
 msgid "Book"
-msgstr "Kitob"
+msgstr "Yozish"
 
 msgid "Item"
 msgstr "Mahsulot"
@@ -3693,6 +3693,9 @@ msgstr "Ota-onalarga xabar"
 msgid "Bot reply"
 msgstr "Bot javobi"
 
+msgid "Database backup"
+msgstr "Zaxira nusxa"
+
 msgid "Sent"
 msgstr "Yuborildi"
 
@@ -3774,6 +3777,22 @@ msgstr "Xabar shablonlari"
 
 msgid "Ready messages to parents, e.g. \"Farzandingiz darsga kelmadi\"."
 msgstr "Ota-onalarga tayyor xabarlar, masalan \"Farzandingiz darsga kelmadi\"."
+
+msgid "before an update"
+msgstr "yangilanishdan oldin"
+
+msgid "nightly"
+msgstr "kechki"
+
+#, python-format
+msgid ""
+"Database backup (%(why)s): %(when)s, %(size)s.\n"
+"It contains all the center's data. Keep it, don't forward it. How to "
+"restore: docs/deploy-railway.md, section 6."
+msgstr ""
+"Ma'lumotlar bazasining zaxira nusxasi (%(why)s): %(when)s, %(size)s.\n"
+"Unda markazning barcha ma'lumotlari bor. Saqlab qo'ying, hech kimga "
+"yubormang. Qanday tiklash: docs/deploy-railway.md, 6-bo'lim."
 
 #, python-format
 msgid ""

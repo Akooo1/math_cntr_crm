@@ -113,36 +113,42 @@ about the personal-data localization law before you load real student data.
 
 ## 6. Backups
 
-Railway's own Backups tab is not available on the Hobby plan. Make a copy on your computer
-instead: always before merging an update into `main`, and at least once a week.
+**Automatic, to your Telegram.** The system sends a full copy of the database (a `.dump`
+file) to every Direktor who connected Telegram (Sozlamalar → Telegram → Telegramimni ulash):
 
-1. **Postgres → Variables:** copy `DATABASE_PUBLIC_URL` (it starts with `postgresql://` and
-   ends with `.proxy.rlwy.net:<port>/railway`). If it is missing, turn on **Postgres →
-   Settings → Networking → TCP Proxy** first.
-2. In a folder on your computer, with Docker running (works in PowerShell, Command Prompt,
-   Mac and Linux; the file is written by Docker, so Windows can't corrupt it):
+- **before every update that changes the database.** `web` makes the copy first; if the copy
+  can't be made or delivered, the update stops, the database is not touched and the previous
+  version keeps running. The `web` log says why. Fix it (usually: connect your Telegram) and
+  redeploy, or set `BACKUP_BEFORE_MIGRATE=0` on `web` to skip the backup once;
+- **every night at 02:30** (the `worker` service), as long as the bot token is set and a
+  Direktor is connected.
 
-   ```bash
-   docker run --rm -v "${PWD}:/backup" postgres:17-alpine pg_dump "PASTE_DATABASE_PUBLIC_URL" -Fc -f /backup/matematika.dump
-   ```
+Railway's own Backups tab is not available on the Hobby plan; these files are your backups.
+Keep them; they contain all student and payment data.
 
-   In Command Prompt write `%cd%` instead of `${PWD}`. If it says "server version mismatch",
-   use `postgres:18-alpine` (the number must be at least Railway's Postgres version).
-3. Check the copy is readable (prints a long list of tables):
-
-   ```bash
-   docker run --rm -v "${PWD}:/backup" postgres:17-alpine pg_restore --list /backup/matematika.dump
-   ```
-
-4. Keep the file somewhere safe (another disk or cloud folder). It contains all student and
-   payment data.
-
-**Restore** (replaces everything in the Railway database with the copy; stop `web`, `worker`
-and `bot` first so nothing writes meanwhile):
+**A copy by hand**, any time: on your computer, in a folder, with Docker running. Copy
+`DATABASE_PUBLIC_URL` from Postgres → Variables (turn on Settings → Networking → TCP Proxy if
+it's missing):
 
 ```bash
-docker run --rm -v "${PWD}:/backup" postgres:17-alpine pg_restore --clean --if-exists --no-owner -d "PASTE_DATABASE_PUBLIC_URL" /backup/matematika.dump
+docker run --rm -v "${PWD}:/backup" postgres:18-alpine pg_dump "PASTE_DATABASE_PUBLIC_URL" -Fc -f /backup/matematika.dump
 ```
+
+In Command Prompt write `%cd%` instead of `${PWD}`. Check a copy is readable (prints a long
+list of tables):
+
+```bash
+docker run --rm -v "${PWD}:/backup" postgres:18-alpine pg_restore --list /backup/matematika.dump
+```
+
+**Restore** a copy (from Telegram or by hand): put the `.dump` file in a folder, stop `web`,
+`worker` and `bot` in Railway so nothing writes meanwhile, then:
+
+```bash
+docker run --rm -v "${PWD}:/backup" postgres:18-alpine pg_restore --clean --if-exists --no-owner -d "PASTE_DATABASE_PUBLIC_URL" /backup/matematika-2026-11-25_0230.dump
+```
+
+Start the three services again afterwards.
 
 ## 7. Updates
 

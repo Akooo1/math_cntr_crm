@@ -17,9 +17,14 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     UV_PROJECT_ENVIRONMENT=/opt/venv \
     UV_LINK_MODE=copy \
     PATH="/opt/venv/bin:$PATH"
+# gettext: compilemessages. postgresql-client-18 from the official PostgreSQL repository:
+# pg_dump for the backups (scripts/entrypoint.sh, deploy/crontab); it must be at least as new
+# as the server (Railway / Compose run PostgreSQL 16-18), so the newest client is installed.
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends gettext \
-    && apt-get clean \
+    && apt-get install -y --no-install-recommends gettext postgresql-common ca-certificates \
+    && /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y \
+    && apt-get install -y --no-install-recommends postgresql-client-18 \
+    && apt-get clean && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir uv==0.11.32
 # supercronic runs the scheduled jobs (deploy/crontab) in the cron container.
 ARG TARGETARCH=amd64

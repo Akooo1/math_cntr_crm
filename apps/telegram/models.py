@@ -50,6 +50,7 @@ class Message(models.Model):
         TEST = "test", _("Test message")
         CUSTOM = "custom", _("Message to parents")
         REPLY = "reply", _("Bot reply")
+        BACKUP = "backup", _("Database backup")
 
     class Status(models.TextChoices):
         SENT = "sent", _("Sent")

@@ -13,6 +13,24 @@ echo "Waiting for PostgreSQL at ${POSTGRES_HOST:-db}..."
 python manage.py wait_for_db --timeout 120
 
 if [ "${SKIP_MIGRATE:-0}" != "1" ]; then
+  # Production: before an update changes the database, back it up to the Direktor's Telegram.
+  # If that fails, stop here: the database is not touched and the old version keeps running.
+  # BACKUP_BEFORE_MIGRATE: auto (default: on in production when a bot token is set), 1, 0.
+  case "${BACKUP_BEFORE_MIGRATE:-auto}" in
+    1) backup=1 ;;
+    0) backup=0 ;;
+    *) case "$DJANGO_SETTINGS_MODULE" in
+         *prod*) [ -n "${TELEGRAM_BOT_TOKEN:-}" ] && backup=1 || backup=0 ;;
+         *) backup=0 ;;
+       esac ;;
+  esac
+  if [ "$backup" = "1" ]; then
+    python manage.py backup_to_telegram --before-migrate || {
+      echo "Backup before the update FAILED (see above). Database changes were NOT applied."
+      echo "Fix the cause, or set BACKUP_BEFORE_MIGRATE=0 on this service to skip it once."
+      exit 1
+    }
+  fi
   python manage.py migrate --noinput
   python manage.py createcachetable
   # Hosts without a shell (Railway): create the first Direktor from variables, once.

@@ -8,3 +8,5 @@
 # Telegram (phase 8): the Direktor's morning summary, then debt reminders to parents.
 30 9 * * * python manage.py telegram_send summary
 0 10 * * * python manage.py telegram_send debts
+# Database backup to the Direktor's Telegram (does nothing while the bot has no token).
+30 2 * * * python manage.py backup_to_telegram --nightly-if-configured

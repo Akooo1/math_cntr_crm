@@ -183,6 +183,7 @@ Inside a module:
 | Calendar / choose a date | Taqvim / Sanani tanlang |
 | Just now / N minutes ago / N hours ago / yesterday / N days ago | hozirgina / N daqiqa oldin / N soat oldin / kecha / N kun oldin |
 | Saving… | Saqlanmoqda… |
+| Database backup (nightly / before an update) | Zaxira nusxa (kechki / yangilanishdan oldin) |
 
 Add new terms here before using them in the UI.
 
