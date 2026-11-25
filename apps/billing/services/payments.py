@@ -16,6 +16,7 @@ from ..events import PaymentRecorded, PaymentReversed, RefundIssued
 from ..models import CashDayClose, Payment, PaymentMethod, ReceiptCounter, StudentBalance
 from ..providers import get_provider
 from .allocation import rebuild_for_student
+from .cash import lock_day
 
 
 def next_receipt(branch: Branch) -> tuple[int, str]:
@@ -32,6 +33,9 @@ def is_closed(branch_id: int, day: dt.date) -> bool:
 
 
 def _check_day(branch_id: int, day: dt.date, method: PaymentMethod):
+    """Call inside the transaction: takes the cash-day lock, then checks the close."""
+    if method.included_in_cash_close:
+        lock_day(branch_id, day)
     if method.included_in_cash_close and is_closed(branch_id, day):
         raise ValidationError(
             _("The cash day %(day)s is closed.") % {"day": dates.format_date(day)}

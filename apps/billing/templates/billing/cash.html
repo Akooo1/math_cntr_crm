@@ -46,6 +46,17 @@
         </tbody>
       </table>
     </div>
+    {% if report.has_sources %}
+      <h3 class="mt-4 text-sm font-semibold text-slate-700">{% translate "By source" %}</h3>
+      <ul class="mt-2 grid gap-2 text-sm sm:grid-cols-2">
+        {% for s in report.sources %}
+          <li class="rounded-lg border border-slate-200 p-3">
+            <div class="flex justify-between font-medium"><span>{{ s.label }}</span><span>{{ s.net|som }}</span></div>
+            <div class="mt-1 flex justify-between text-slate-500"><span>{% translate "Received" %} {{ s.in|som }}</span><span>{% translate "Paid out" %} {{ s.out|som }}</span></div>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
     {% if can_close %}
       <form method="post" action="{% url 'billing:cash_close' %}" class="mt-4 flex flex-wrap items-end gap-2" data-confirm="{% translate 'Close the day? Its payments will be locked.' %}">{% csrf_token %}
         <input type="hidden" name="filial" value="{{ branch.pk }}"><input type="hidden" name="sana" value="{{ day|sana }}">
@@ -66,5 +77,16 @@
         </a></li>
       {% empty %}<li class="py-2 text-slate-500">{% translate "No payments on this day." %}</li>{% endfor %}
     </ul>
+    {% for s in report.sources %}{% if s.code != "payments" %}
+      <h3 class="mt-4 text-sm font-semibold text-slate-700">{{ s.label }}</h3>
+      <ul class="mt-1 divide-y divide-slate-100 text-sm">
+        {% for line in report.extra_lines %}{% if line.source == s.code %}
+          <li><a href="{{ line.url|default:'#' }}" class="flex items-center justify-between gap-3 py-2 hover:text-sky-700">
+            <span><span class="font-medium">{{ line.at|time:"H:i" }} · {{ line.description }}</span><span class="block text-slate-500">{% for m in report.methods %}{% if m.method.pk == line.method_id %}{{ m.method.name }}{% endif %}{% endfor %} · {{ line.by_name }}{% if line.kind_label %} · {{ line.kind_label }}{% endif %}</span></span>
+            <span class="font-medium {% if line.direction == 'out' %}text-rose-700{% endif %}">{% if line.direction == 'out' %}−{% endif %}{{ line.amount|som }}</span>
+          </a></li>
+        {% endif %}{% endfor %}
+      </ul>
+    {% endif %}{% endfor %}
   </section>
 {% endblock %}
