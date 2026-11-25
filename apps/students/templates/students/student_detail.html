@@ -4,7 +4,7 @@
 {% block content %}
   <div class="mb-4"><a href="{% url 'students:list' %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{% translate "Students" %}</a></div>
   <div class="grid gap-4 lg:grid-cols-3">
-    <section class="card p-5">
+    <section class="card min-w-0 p-5">
       <div class="flex items-start justify-between gap-3">
         <h2 class="text-xl font-semibold">{{ student.full_name }}</h2>
         {% include "students/_status_badge.html" with st=status %}
@@ -25,7 +25,7 @@
       {% endif %}
     </section>
 
-    <div class="space-y-4 lg:col-span-2">
+    <div class="min-w-0 space-y-4 lg:col-span-2">
       {% for p in panels %}{% include p.panel.template with ctx=p.ctx %}{% endfor %}
 
       <section class="card p-5">
