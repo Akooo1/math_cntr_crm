@@ -67,3 +67,68 @@ def test_first_direktor_from_variables_only_once():
     call_command("create_director", *args, "--password", "Other!2026xx")  # second start
     assert User.objects.filter(role=Role.DIRECTOR).count() == 1
     assert user.check_password("Railway!2026x")
+
+
+# --- which process a container runs (scripts/start.sh) ---------------------------------------
+
+
+def _process(**env):
+    clean = {k: v for k, v in os.environ.items() if k not in ("PROCESS", "RAILWAY_SERVICE_NAME")}
+    out = subprocess.run(
+        ["sh", "scripts/process.sh"], env={**clean, **env}, capture_output=True, text=True
+    )
+    return out.stdout.strip()
+
+
+@pytest.mark.parametrize(
+    ("env", "expected"),
+    [
+        ({}, "web"),
+        ({"RAILWAY_SERVICE_NAME": "web"}, "web"),
+        ({"RAILWAY_SERVICE_NAME": "bot"}, "bot"),
+        ({"RAILWAY_SERVICE_NAME": "Telegram-Bot"}, "bot"),
+        ({"RAILWAY_SERVICE_NAME": "worker"}, "worker"),
+        ({"RAILWAY_SERVICE_NAME": "bot", "PROCESS": "worker"}, "worker"),  # PROCESS wins
+        ({"PROCESS": "bot"}, "bot"),
+        ({"RAILWAY_SERVICE_NAME": "matematika"}, "web"),
+    ],
+)
+def test_process_from_variable_or_railway_service_name(env, expected):
+    assert _process(**env) == expected
+
+
+def test_only_the_website_migrates():
+    text = open("scripts/entrypoint.sh").read()
+    assert '[ "$process" = "web" ]' in text and "migrate --noinput" in text
+
+
+def test_image_default_command_picks_the_process():
+    text = open("Dockerfile").read()
+    assert 'CMD ["scripts/start.sh"]' in text
+    start = open("scripts/start.sh").read()
+    assert "telegram_bot" in start and "supercronic" in start and "gunicorn" in start
+
+
+def test_health_server_answers_ok(tmp_path):
+    import socket
+    import time
+    import urllib.request
+
+    with socket.socket() as s:
+        s.bind(("127.0.0.1", 0))
+        port = s.getsockname()[1]
+    subprocess.run(
+        ["sh", "scripts/health_server.sh"], env={**os.environ, "PORT": str(port)}, check=True
+    )
+    try:
+        for _ in range(50):
+            try:
+                with urllib.request.urlopen(f"http://127.0.0.1:{port}/healthz", timeout=1) as r:
+                    assert (r.status, r.read()) == (200, b"ok")
+                    break
+            except OSError:
+                time.sleep(0.1)
+        else:
+            pytest.fail("health server did not answer")
+    finally:
+        subprocess.run(["pkill", "-f", "ThreadingHTTPServer"], check=False)

@@ -88,8 +88,12 @@ about the personal-data localization law before you load real student data.
    DJANGO_SECRET_KEY=${{web.DJANGO_SECRET_KEY}}
    TZ=Asia/Tashkent
    SKIP_MIGRATE=1
+   PROCESS=worker
    TELEGRAM_BOT_TOKEN=${{bot.TELEGRAM_BOT_TOKEN}}
    ```
+
+   `PROCESS` tells the image what to run, so the service works even if Railway ignores the
+   config file (a service named `worker` also works without it).
 
 4. No domain. In its logs you should see `read crontab: /app/deploy/crontab`.
 
@@ -104,12 +108,13 @@ about the personal-data localization law before you load real student data.
    DJANGO_SECRET_KEY=${{web.DJANGO_SECRET_KEY}}
    TZ=Asia/Tashkent
    SKIP_MIGRATE=1
+   PROCESS=bot
    TELEGRAM_BOT_TOKEN=<token from @BotFather>
    ```
 
 4. Also add `TELEGRAM_BOT_TOKEN=${{bot.TELEGRAM_BOT_TOKEN}}` to `web`, so Sozlamalar →
    Telegram can show the bot and send test messages.
-5. Logs: `Telegram bot is running.` Then follow README → "Telegram bot" from step 4.
+5. Logs: `Process: bot`, then `Telegram bot is running.` Then follow README → "Telegram bot" from step 4.
 
 ## 6. Backups
 
@@ -171,6 +176,7 @@ bot can run on the new code before `web` finished migrating; the jobs are safe t
 
 | Symptom | Check |
 |---|---|
+| `bot` or `worker` logs show `Starting gunicorn` | it runs the website: add `PROCESS=bot` / `PROCESS=worker` to its variables |
 | Deploy fails at "healthcheck" | `web` logs: usually `DJANGO_SECRET_KEY` or `DATABASE_URL` missing |
 | "Bad Request (400)" in the browser | you use a custom domain: step 8 variables |
 | "CSRF verification failed" when logging in | same as above |

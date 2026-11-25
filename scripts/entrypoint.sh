@@ -9,10 +9,13 @@ if [ "$(id -u)" = "0" ] && id app >/dev/null 2>&1; then
   exec setpriv --reuid=app --regid=app --init-groups "$0" "$@"
 fi
 
-echo "Waiting for PostgreSQL at ${POSTGRES_HOST:-db}..."
+echo "Waiting for the database..."
 python manage.py wait_for_db --timeout 120
 
-if [ "${SKIP_MIGRATE:-0}" != "1" ]; then
+# Only the website migrates; the worker and the bot never do (also when SKIP_MIGRATE is unset).
+process=$(scripts/process.sh)
+echo "Process: $process"
+if [ "${SKIP_MIGRATE:-0}" != "1" ] && [ "$process" = "web" ]; then
   # Production: before an update changes the database, back it up to the Direktor's Telegram.
   # If that fails, stop here: the database is not touched and the old version keeps running.
   # BACKUP_BEFORE_MIGRATE: auto (default: on in production when a bot token is set), 1, 0.

@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **Module 5 (store, SPEC §17) and the UI refresh (themes, page pattern, list totals, global search) built and combined**; waiting for the owner's review before merging to `main` (Railway deploys from `main`). Update this line at the end of each phase.
+- Current phase: **Module 5 (store) and the UI refresh are on `main`.** Production fix in progress: the image picks web / worker / bot from `PROCESS` or the Railway service name (Railway ignored the bot's config file, so the bot ran the website). Not on `main` until the owner approves.
 
 ## Ask the owner before
 

@@ -65,5 +65,6 @@ RUN export DJANGO_SECRET_KEY=build-only \
     && chown -R app /app/media
 USER app
 ENTRYPOINT ["scripts/entrypoint.sh"]
+# Website, scheduled jobs or Telegram bot, chosen by PROCESS / the Railway service name.
 # PORT and WEB_CONCURRENCY come from the host (Railway sets PORT); defaults for Compose.
-CMD ["sh", "-c", "exec gunicorn config.wsgi:application --bind 0.0.0.0:${PORT:-8000} --workers ${WEB_CONCURRENCY:-3} --access-logfile -"]
+CMD ["scripts/start.sh"]
