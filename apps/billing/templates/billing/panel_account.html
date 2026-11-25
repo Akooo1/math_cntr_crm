@@ -3,23 +3,23 @@
   <div class="flex flex-wrap items-start justify-between gap-3">
     <div>
       <p class="text-sm text-slate-500">{% translate "Balance" %}</p>
-      <p class="text-2xl font-semibold {% if a.balance < 0 %}text-rose-700{% elif a.balance > 0 %}text-emerald-700{% endif %}">{{ a.balance|som }}</p>
+      <p class="text-2xl font-semibold tabular-nums {% if a.balance < 0 %}text-rose-700{% elif a.balance > 0 %}text-emerald-700{% endif %}">{{ a.balance|som }}</p>
       <p class="text-sm text-slate-500">{% if a.balance < 0 %}{% translate "debt" %}{% elif a.balance > 0 %}{% translate "credit (avans)" %}{% else %}{% translate "settled" %}{% endif %}{% if a.overdue %} · <span class="font-medium text-rose-700">{% blocktranslate with o=a.overdue|som %}overdue {{ o }}{% endblocktranslate %}</span>{% endif %}</p>
     </div>
     <div class="flex flex-wrap gap-2">
       {% if user|can:"billing.payment.create" %}<a href="{% url 'billing:payment_create' %}?oquvchi={{ s.pk }}" class="btn-primary">{% icon "card" "w-4 h-4" %}{% translate "Take payment" %}</a>{% endif %}
       {% if user|can:"billing.discount.assign" %}<a href="{% url 'billing:discount_assign' s.pk %}" class="btn-secondary">{% icon "percent" "w-4 h-4" %}{% translate "Discount" %}</a>{% endif %}
       {% if user|can:"billing.reverse" %}
-        <a href="{% url 'billing:manual_charge' s.pk %}" class="btn-ghost">{% translate "Additional charge" %}</a>
-        {% if a.balance > 0 %}<a href="{% url 'billing:refund' s.pk %}" class="btn-ghost text-rose-700">{% translate "Refund" %}</a>{% endif %}
+        <a href="{% url 'billing:manual_charge' s.pk %}" class="btn-ghost">{% icon "plus" "w-4 h-4" %}{% translate "Additional charge" %}</a>
+        {% if a.balance > 0 %}<a href="{% url 'billing:refund' s.pk %}" class="btn-danger-soft">{% icon "refresh" "w-4 h-4" %}{% translate "Refund" %}</a>{% endif %}
       {% endif %}
     </div>
   </div>
 
-  <div class="mt-4 flex gap-1 rounded-lg bg-slate-100 p-1 text-sm w-fit">
-    <button type="button" @click="tab='charges'" :class="tab==='charges' ? 'bg-white shadow-sm font-medium' : 'text-slate-600'" class="rounded-md px-3 py-1.5">{% translate "Charges" %}</button>
-    <button type="button" @click="tab='payments'" :class="tab==='payments' ? 'bg-white shadow-sm font-medium' : 'text-slate-600'" class="rounded-md px-3 py-1.5">{% translate "Payments" %}</button>
-    <button type="button" @click="tab='discounts'" :class="tab==='discounts' ? 'bg-white shadow-sm font-medium' : 'text-slate-600'" class="rounded-md px-3 py-1.5">{% translate "Discounts" %}</button>
+  <div class="seg mt-4 flex w-full sm:w-fit" role="tablist">
+    <button type="button" role="tab" @click="tab='charges'" :aria-selected="tab==='charges'" :aria-pressed="tab==='charges'" class="seg-item">{% translate "Charges" %} <span class="text-xs opacity-70">{{ a.charges|length }}</span></button>
+    <button type="button" role="tab" @click="tab='payments'" :aria-selected="tab==='payments'" :aria-pressed="tab==='payments'" class="seg-item">{% translate "Payments" %} <span class="text-xs opacity-70">{{ a.payments|length }}</span></button>
+    <button type="button" role="tab" @click="tab='discounts'" :aria-selected="tab==='discounts'" :aria-pressed="tab==='discounts'" class="seg-item">{% translate "Discounts" %} <span class="text-xs opacity-70">{{ a.discounts|length }}</span></button>
   </div>
 
   <ul x-show="tab==='charges'" class="mt-3 divide-y divide-slate-100">
@@ -30,8 +30,8 @@
             <p class="font-medium">{% if c.kind == "monthly" %}{{ c.period_month|date:"F Y" }}{% elif c.kind == "installment" %}{% blocktranslate with n=c.part_no %}Part {{ n }}{% endblocktranslate %}{% else %}{{ c.get_kind_display }}{% endif %}{% if c.group %} · {{ c.group.name }}{% endif %}</p>
             <p class="text-slate-500">{% translate "due" %} {{ c.due_date|sana }}{% if c.description %} · {{ c.description }}{% endif %}</p>
           </div>
-          <div class="text-right">
-            <p class="font-medium">{{ c.net_row.net|som }}</p>
+          <div class="shrink-0 text-right">
+            <p class="font-medium tabular-nums whitespace-nowrap">{{ c.net_row.net|som }}</p>
             {% if c.net_row.open > 0 %}<p class="text-xs {% if c.due_date < ctx.today %}text-rose-700{% else %}text-amber-700{% endif %}">{% blocktranslate with o=c.net_row.open|som %}{{ o }} unpaid{% endblocktranslate %}</p>{% elif c.net_row.net > 0 %}<p class="text-xs text-emerald-700">{% translate "paid" %}</p>{% endif %}
           </div>
         </div>
@@ -39,7 +39,7 @@
           {% if c.amount != c.net_row.net or c.discounts.all or c.adjustments.all %}<p>{% translate "Amount" %} {{ c.amount|som }}{% if c.suggested_amount is not None and c.suggested_amount != c.amount %} ({% blocktranslate with s=c.suggested_amount|som %}suggested {{ s }}{% endblocktranslate %}: {{ c.override_reason }}){% endif %}</p>{% endif %}
           {% for d in c.discounts.all %}<p class="text-emerald-700">{{ d.name_snapshot }}: −{{ d.amount|som }}</p>{% endfor %}
           {% for adj in c.adjustments.all %}<p>{{ adj.get_kind_display }}: {% if adj.amount > 0 %}+{% endif %}{{ adj.amount|som }}{% if adj.reason %} — {{ adj.reason }}{% endif %} ({{ adj.created_at|sana }}{% if adj.created_by %}, {{ adj.created_by.full_name }}{% endif %})</p>{% endfor %}
-          {% if user|can:"billing.reverse" and c.net_row.net > 0 %}<a class="font-medium text-sky-700" href="{% url 'billing:charge_correct' c.pk %}">{% translate "Correct" %}</a>{% endif %}
+          {% if user|can:"billing.reverse" and c.net_row.net > 0 %}<a class="link inline-flex min-h-8 items-center" href="{% url 'billing:charge_correct' c.pk %}">{% translate "Correct" %}</a>{% endif %}
         </div>
       </li>
     {% empty %}<li class="py-2 text-sm text-slate-500">{% translate "No charges yet." %}</li>{% endfor %}
@@ -53,9 +53,9 @@
           <p class="text-slate-500">{{ p.paid_on|sana }} · {{ p.method.name }} · {{ p.received_by.full_name }}</p>
           {% if p.reason %}<p class="text-slate-500">{{ p.reason }}</p>{% endif %}
         </a>
-        <span class="font-medium {% if p.kind != 'payment' %}text-rose-700{% elif p.reversed_by.exists %}text-slate-400 line-through{% else %}text-emerald-700{% endif %}">{% if p.kind != 'payment' %}−{% endif %}{{ p.amount|som }}</span>
+        <span class="shrink-0 whitespace-nowrap font-medium tabular-nums {% if p.kind != 'payment' %}text-rose-700{% elif p.reversed_by.exists %}text-slate-500 line-through{% else %}text-emerald-700{% endif %}">{% if p.kind != 'payment' %}−{% endif %}{{ p.amount|som }}</span>
       </li>
-    {% empty %}<li class="py-2 text-sm text-slate-500">{% translate "No payments yet." %}</li>{% endfor %}
+    {% empty %}<li class="py-2 text-sm text-slate-500">{% translate "No payments yet." %}{% if user|can:"billing.payment.create" %} <a class="link" href="{% url 'billing:payment_create' %}?oquvchi={{ s.pk }}">{% translate "Take payment" %}</a>{% endif %}</li>{% endfor %}
   </ul>
 
   <div x-show="tab==='discounts'" x-cloak class="mt-3 space-y-3">
@@ -64,7 +64,7 @@
         <li class="flex items-start justify-between gap-3 py-2.5 text-sm">
           <div><p class="font-medium">{{ d.discount_type.name }} · {{ d.enrollment.group.name }}</p>
             <p class="text-slate-500">{{ d.valid_from|sana }} — {{ d.valid_to|sana|default:"…" }}{% if d.reason %} · {{ d.reason }}{% endif %}</p></div>
-          {% if not d.valid_to and user|can:"billing.discount.assign" %}<a class="btn-ghost px-2 py-1" href="{% url 'billing:discount_end' d.pk %}">{% translate "End" %}</a>{% endif %}
+          {% if not d.valid_to and user|can:"billing.discount.assign" %}<a class="btn-ghost text-rose-700" href="{% url 'billing:discount_end' d.pk %}">{% translate "End" %}</a>{% endif %}
         </li>
       {% empty %}<li class="py-2 text-sm text-slate-500">{% translate "No discounts." %}</li>{% endfor %}
     </ul>

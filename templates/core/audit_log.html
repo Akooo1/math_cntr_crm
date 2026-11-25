@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% block title %}{% translate "Audit log" %}{% endblock %}
 {% block heading %}{% translate "Audit log" %}{% endblock %}
+{% block menu %}<a href="?{% if query %}{{ query }}&{% endif %}excel=1" class="menu-item" role="menuitem">{% icon "download" "w-4 h-4" %}{% translate "Export to Excel" %}</a>{% endblock %}
 {% block content %}
   <form method="get" class="card mb-4 p-4" x-data="{ open: {% if request.GET %}true{% else %}window.matchMedia('(min-width: 768px)').matches{% endif %} }">
-    <button type="button" class="btn-secondary w-full md:hidden" @click="open = !open" x-show="!open">{% icon "search" %}{% translate "Filter" %}</button>
+    <button type="button" class="btn-secondary w-full md:hidden" @click="open = !open" x-show="!open">{% icon "funnel" "w-4 h-4" %}{% translate "Filter" %}</button>
     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5" x-show="open" x-cloak>
     {% for f in form %}{% field f %}{% endfor %}
     <div class="flex items-end gap-2 sm:col-span-2 lg:col-span-5">
-      <button class="btn-primary">{% icon "search" %}{% translate "Filter" %}</button>
-      <a href="?" class="btn-ghost">{% translate "Reset" %}</a>
-      <a href="?{{ query }}&excel=1" class="btn-ghost">{% icon "download" "w-4 h-4" %}{% translate "Export to Excel" %}</a>
+      <button class="btn-secondary">{% icon "funnel" "w-4 h-4" %}{% translate "Filter" %}</button>
+      {% if totals.filtered %}<a href="?" class="btn-ghost">{% icon "filter-x" "w-4 h-4" %}{% translate "Reset" %}</a>{% endif %}
     </div>
     </div>
   </form>
@@ -22,11 +22,11 @@
             <p class="font-medium">{{ e.verb }} · {{ e.entity }}{% if e.obj.entity_id %} <span class="text-slate-500">#{{ e.obj.entity_id }}</span>{% endif %}</p>
             <p class="text-sm text-slate-500">{% if e.obj.actor %}{{ e.obj.actor.full_name }}{% else %}{% translate "System" %}{% endif %}{% if e.branch %} · {{ e.branch }}{% endif %}</p>
           </div>
-          <span class="text-sm text-slate-500">{{ e.obj.created_at|sana_vaqt }}</span>
+          <span class="text-sm text-slate-500">{% relative_time e.obj.created_at %}</span>
         </div>
         {% if e.obj.reason %}<p class="mt-2 text-sm"><span class="text-slate-500">{% translate "Reason" %}:</span> {{ e.obj.reason }}</p>{% endif %}
         {% if e.changes %}
-          <button type="button" class="mt-2 text-sm font-medium text-sky-700" @click="open = !open">{% translate "Details" %}</button>
+          <button type="button" class="link mt-1 inline-flex min-h-9 items-center text-sm" @click="open = !open" :aria-expanded="open">{% translate "Details" %}</button>
           <div x-show="open" x-cloak class="mt-2 overflow-x-auto">
             <table class="min-w-full text-sm">
               <thead><tr class="text-left text-xs uppercase text-slate-500"><th class="py-1 pr-4">{% translate "Field" %}</th><th class="py-1 pr-4">{% translate "Before" %}</th><th class="py-1">{% translate "After" %}</th></tr></thead>
@@ -38,7 +38,7 @@
         {% endif %}
       </div>
     {% empty %}
-      <div class="card p-8 text-center text-sm text-slate-500">{% translate "Nothing found." %}</div>
+      <div class="card">{% if totals.filtered %}{% include "components/empty.html" with icon="journal" title=_("Nothing found.") reset="?" %}{% else %}{% include "components/empty.html" with icon="journal" title=_("Nothing found.") %}{% endif %}</div>
     {% endfor %}
   </div>
   {% include "components/pagination.html" %}

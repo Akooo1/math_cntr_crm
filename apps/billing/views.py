@@ -2,7 +2,6 @@ import datetime as dt
 
 from django.contrib import messages
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -10,7 +9,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from apps.core import dates, excel, phone
+from apps.core import dates, excel, listing, phone
 from apps.core.money import parse_amount
 from apps.core.permissions import (
     accessible_branch_ids,
@@ -64,7 +63,8 @@ def _to_profile(student):
 
 @perm_required("billing.view")
 def payment_list(request):
-    qs = selectors.payments_for(request.user, request.branch_filter)
+    everything = selectors.payments_for(request.user, request.branch_filter)
+    qs = everything
     start = _date(request.GET.get("dan")) or dates.today() - dt.timedelta(days=30)
     end = _date(request.GET.get("gacha")) or dates.today()
     qs = qs.filter(paid_on__gte=start, paid_on__lte=end)
@@ -107,17 +107,28 @@ def payment_list(request):
                 [_("Total"), "", "", "", "", sum(r[5] for r in rows), "", "", ""],
             ),
         )
-    page = Paginator(qs, 50).get_page(request.GET.get("page"))
-    query = request.GET.copy()
-    query.pop("page", None)
+    totals = listing.totals(everything, qs, amount=selectors.net_amount(qs))
+    qs, sort = listing.sort_queryset(
+        request,
+        qs,
+        {
+            "sana": ("paid_on", "created_at", "id"),
+            "summa": ("amount", "id"),
+            "oquvchi": ("student__last_name", "student__first_name", "id"),
+        },
+        default="-sana",
+    )
+    page, query = listing.paginate(request, qs)
     return render(
         request,
         "billing/payment_list.html",
         {
             "page": page,
+            "totals": totals,
+            "sort": sort,
             "start": start,
             "end": end,
-            "query": query.urlencode(),
+            "query": query,
             "methods": selectors.payment_methods_for_entry(),
         },
     )
@@ -527,12 +538,35 @@ def debtors(request):
         status="finished"
     )
     teachers = {g.teacher_id: g.teacher for g in groups}
+    filtered = listing.active_filters(request, ["guruh", "kurs", "oqituvchi", "kun"])
+    everyone = len(rows)
+    if filtered:
+        everyone = len(selectors.debtors(request.user, request.branch_filter))
+    totals = listing.totals(
+        everyone,
+        len(rows),
+        filtered=filtered,
+        amount=sum(r["overdue"] for r in rows),
+        amount_label=_("Overdue"),
+    )
+    rows, sort = listing.sort_rows(
+        request,
+        rows,
+        {
+            "qarz": lambda r: (r["overdue"], r["days"]),
+            "kun": lambda r: (r["days"], r["overdue"]),
+            "oquvchi": lambda r: (r["student"].last_name, r["student"].first_name),
+        },
+        default="-qarz",
+    )
     return render(
         request,
         "billing/debtors.html",
         {
             "rows": rows,
-            "total_overdue": sum(r["overdue"] for r in rows),
+            "totals": totals,
+            "sort": sort,
+            "total_overdue": totals.amount,
             "groups": groups,
             "courses": Course.objects.filter(is_active=True),
             "teachers": sorted(teachers.values(), key=lambda u: u.full_name),
@@ -594,6 +628,7 @@ def cash_report(request):
             "branches": branches,
             "day": day,
             "report": report,
+            "totals": listing.totals(len(report["rows"]), amount=report["total_net"]),
             "closed": closed,
             "prev": day - dt.timedelta(days=1),
             "next": day + dt.timedelta(days=1),

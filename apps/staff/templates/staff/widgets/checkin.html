@@ -3,7 +3,7 @@
   {% if ctx.checkin %}
     <p class="text-sm text-slate-500">{% translate "Today" %}</p>
     <p class="mt-1 flex items-center gap-2 text-lg font-semibold">
-      {% icon "check" "h-5 w-5 text-emerald-600" %}{% blocktranslate with t=ctx.checkin.checked_in_at|time:"H:i" %}Arrived at {{ t }}{% endblocktranslate %}
+      {% icon "check" "h-5 w-5 text-emerald-700" %}{% blocktranslate with t=ctx.checkin.checked_in_at|time:"H:i" %}Arrived at {{ t }}{% endblocktranslate %}
     </p>
     <p class="text-sm {% if ctx.checkin.late_minutes %}text-amber-700{% else %}text-slate-500{% endif %}">
       {% if ctx.checkin.late_minutes %}{% blocktranslate count m=ctx.checkin.late_minutes %}{{ m }} minute late{% plural %}{{ m }} minutes late{% endblocktranslate %}{% else %}{{ ctx.checkin.branch.name }}{% endif %}
@@ -17,7 +17,7 @@
       <p class="text-sm text-slate-500">{% if ctx.schedule %}{% blocktranslate with t=ctx.schedule.start_time|time:"H:i" %}Work starts at {{ t }}{% endblocktranslate %}{% else %}{% translate "Arrival" %}{% endif %}</p>
       <form method="post" action="{% url 'staff:check_in' %}" class="mt-3">{% csrf_token %}
         <input type="hidden" name="lat"><input type="hidden" name="lng"><input type="hidden" name="accuracy">
-        <button type="button" data-geolocate="submit" class="btn-primary w-full py-4 text-lg">
+        <button type="button" data-geolocate="submit" class="btn-primary min-h-14 w-full text-lg">
           {% icon "map-pin" "h-6 w-6" %}<span data-idle>{% translate "I'm here" %}</span><span data-busy hidden>{% translate "Finding your location…" %}</span>
         </button>
       </form>

@@ -7,7 +7,7 @@
       <label for="{{ f.id_for_label }}" class="text-sm font-medium text-slate-800">{{ f.label }}</label>
     </div>
   {% else %}
-    <label {% if not w.allow_multiple_selected and w.input_type != 'radio' %}for="{{ f.id_for_label }}"{% endif %} class="label">{{ f.label }}{% if f.field.required %} <span class="text-rose-600">*</span>{% endif %}</label>
+    <label {% if not w.allow_multiple_selected and w.input_type != 'radio' %}for="{{ f.id_for_label }}"{% endif %} class="label">{{ f.label }}{% if f.field.required %} <span class="text-rose-700">*</span>{% endif %}</label>
     <div class="{% if w.allow_multiple_selected or w.input_type == 'radio' %}checkbox-list{% endif %}">{{ f }}</div>
   {% endif %}
   {% if hint %}<p class="mt-1 text-xs text-slate-500">{{ hint }}</p>{% endif %}

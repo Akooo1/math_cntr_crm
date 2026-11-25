@@ -2,10 +2,11 @@
 {% block title %}{% translate "Attendance" %}{% endblock %}
 {% block heading %}{% if is_today %}{% translate "Today's lessons" %}{% else %}{% translate "Attendance" %}{% endif %}{% endblock %}
 {% block content %}
-  <div class="mb-4 flex items-center justify-between gap-2">
-    <a href="?sana={{ prev|sana }}" class="btn-secondary px-3" aria-label="{% translate 'Previous day' %}">{% icon "chevron-left" %}</a>
-    <p class="font-semibold">{{ day|sana }}</p>
-    <a href="?sana={{ next|sana }}" class="btn-secondary px-3" aria-label="{% translate 'Next day' %}">{% icon "chevron-right" %}</a>
+  <div class="mb-4 flex items-center gap-2">
+    <a href="?sana={{ prev|sana }}" class="btn-secondary btn-icon" aria-label="{% translate 'Previous day' %}">{% icon "chevron-left" %}</a>
+    <form method="get" class="min-w-0 flex-1 sm:flex-none"><label for="att-day" class="sr-only">{% translate "Date" %}</label><input id="att-day" name="sana" value="{{ day|sana }}" data-mask="date" inputmode="numeric" class="input w-full text-center font-semibold sm:w-44" data-autosubmit></form>
+    <a href="?sana={{ next|sana }}" class="btn-secondary btn-icon" aria-label="{% translate 'Next day' %}">{% icon "chevron-right" %}</a>
+    {% if not is_today %}<a href="?" class="btn-ghost">{% translate "Today" %}</a>{% endif %}
   </div>
   <ul class="space-y-2">
     {% for l in lessons %}
@@ -18,6 +19,6 @@
           {% if l.status == 'held' %}<span class="badge bg-emerald-100 text-emerald-800">{% translate "Marked" %}</span>{% elif l.status == 'cancelled' %}<span class="badge bg-slate-100 text-slate-600">{% translate "Cancelled" %}</span>{% else %}<span class="badge bg-amber-100 text-amber-900">{% translate "Not marked" %}</span>{% endif %}
         </a>
       </li>
-    {% empty %}<li class="card p-6 text-center text-sm text-slate-500">{% translate "No lessons on this day." %}</li>{% endfor %}
+    {% empty %}<li class="card">{% include "components/empty.html" with icon="calendar" title=_("No lessons on this day.") %}</li>{% endfor %}
   </ul>
 {% endblock %}

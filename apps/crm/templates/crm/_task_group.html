@@ -8,12 +8,12 @@
       <li class="card flex items-center gap-3 p-3 {% if title_key == 'overdue' %}border-rose-200 bg-rose-50{% endif %}">
         <a href="{% url 'crm:lead' t.lead_id %}" class="min-w-0 flex-1">
           <p class="font-medium">{{ t.title }} · {{ t.lead.full_name }}</p>
-          <p class="text-sm {% if title_key == 'overdue' %}font-semibold text-rose-700{% else %}text-slate-500{% endif %}">{{ t.due_at|sana_vaqt }}{% if everyone %} · {{ t.assigned_to.full_name }}{% endif %}</p>
+          <p class="text-sm {% if title_key == 'overdue' %}font-semibold text-rose-700{% else %}text-slate-500{% endif %}">{% relative_time t.due_at %}{% if everyone %} · {{ t.assigned_to.full_name }}{% endif %}</p>
           <p class="text-sm text-slate-500">{{ t.lead.phone|telefon }}</p>
         </a>
-        <a href="tel:{{ t.lead.phone }}" class="btn-secondary px-3" aria-label="{% translate 'Call' %}">{% icon "phone" "w-4 h-4" %}</a>
+        <a href="tel:{{ t.lead.phone }}" class="btn-secondary btn-icon" aria-label="{% translate 'Call' %}">{% icon "phone" "w-4 h-4" %}</a>
         <form method="post" action="{% url 'crm:task_done' t.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
-          <button class="btn-secondary px-3" aria-label="{% translate 'Done' %}">{% icon "check" "w-4 h-4" %}</button>
+          <button class="btn-secondary btn-icon" aria-label="{% translate 'Done' %}">{% icon "check" "w-4 h-4" %}</button>
         </form>
       </li>
     {% endfor %}

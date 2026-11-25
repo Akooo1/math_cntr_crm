@@ -1,18 +1,16 @@
 {% extends "base.html" %}
 {% block title %}{% translate "Groups" %}{% endblock %}
 {% block heading %}{% if user.role == "teacher" %}{% translate "My groups" %}{% else %}{% translate "Groups" %}{% endif %}{% endblock %}
+{% block primary %}{% if can_manage %}<a href="{% url 'students:group_create' %}" class="btn-primary">{% icon "plus" %}<span>{% translate "New group" %}</span></a>{% endif %}{% endblock %}
 {% block content %}
-  <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-    <div class="flex gap-1 rounded-lg bg-slate-100 p-1 text-sm">
-      <a href="?holat=faol" class="rounded-md px-3 py-1.5 {% if show == 'faol' %}bg-white font-medium shadow-sm{% else %}text-slate-600{% endif %}">{% translate "Current" %}</a>
-      <a href="?holat=tugagan" class="rounded-md px-3 py-1.5 {% if show == 'tugagan' %}bg-white font-medium shadow-sm{% else %}text-slate-600{% endif %}">{% translate "Finished" %}</a>
-      <a href="?holat=hammasi" class="rounded-md px-3 py-1.5 {% if show == 'hammasi' %}bg-white font-medium shadow-sm{% else %}text-slate-600{% endif %}">{% translate "All" %}</a>
-    </div>
-    {% if can_manage %}<a href="{% url 'students:group_create' %}" class="btn-primary">{% icon "plus" %}{% translate "New group" %}</a>{% endif %}
+  <div class="chip-row mb-4">
+    <a href="?holat=faol" class="chip" {% if show == 'faol' %}aria-current="page"{% endif %}>{% translate "Current" %}</a>
+    <a href="?holat=tugagan" class="chip" {% if show == 'tugagan' %}aria-current="page"{% endif %}>{% translate "Finished" %}</a>
+    <a href="?holat=hammasi" class="chip" {% if show == 'hammasi' %}aria-current="page"{% endif %}>{% translate "All" %}</a>
   </div>
   <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
     {% for g in groups %}
-      <a href="{% url 'students:group' g.pk %}" class="card block p-4 hover:border-sky-300">
+      <a href="{% url 'students:group' g.pk %}" class="card block p-4">
         <div class="flex items-start justify-between gap-2">
           <p class="font-semibold">{{ g.name }}</p>
           <span class="badge {% if g.open_count >= g.capacity %}bg-rose-100 text-rose-800{% else %}bg-emerald-100 text-emerald-800{% endif %}">{{ g.open_count }}/{{ g.capacity }}</span>
@@ -20,8 +18,8 @@
         <p class="text-sm text-slate-600">{{ g.course.name }}</p>
         <p class="mt-1 text-sm text-slate-500">{{ g.teacher.full_name }}{% if g.room %} · {{ g.room.name }}{% endif %}</p>
         <p class="mt-1 text-sm text-slate-500">{% include "students/_schedule.html" with slots=g.slots.all %}</p>
-        {% if user.is_director and not request.branch_filter %}<p class="mt-1 text-xs text-slate-400">{{ g.branch.name }}</p>{% endif %}
+        {% if user.is_director and not request.branch_filter %}<p class="mt-1 text-xs text-slate-500">{{ g.branch.name }}</p>{% endif %}
       </a>
-    {% empty %}<p class="card p-6 text-center text-sm text-slate-500 md:col-span-3">{% translate "No groups yet." %}</p>{% endfor %}
+    {% empty %}<div class="card md:col-span-2 xl:col-span-3">{% if can_manage and show != 'tugagan' %}{% url 'students:group_create' as add %}{% include "components/empty.html" with icon="book" title=_("No groups yet.") text=_("Create a group, set its schedule, then enroll students.") url=add label=_("New group") %}{% else %}{% include "components/empty.html" with icon="book" title=_("No groups yet.") %}{% endif %}</div>{% endfor %}
   </div>
 {% endblock %}

@@ -1,5 +1,5 @@
-<nav class="mb-4 -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 text-sm md:mx-0 md:px-0">
-  <a href="{% url 'crm:board' %}" class="shrink-0 rounded-full px-4 py-2 font-medium {% if tab == 'board' %}bg-sky-700 text-white{% else %}bg-white text-slate-700 ring-1 ring-slate-200{% endif %}">{% translate "Leads" %}</a>
-  <a href="{% url 'crm:tasks' %}" class="shrink-0 rounded-full px-4 py-2 font-medium {% if tab == 'tasks' %}bg-sky-700 text-white{% else %}bg-white text-slate-700 ring-1 ring-slate-200{% endif %}">{% translate "My tasks" %}</a>
-  <a href="{% url 'crm:trials' %}" class="shrink-0 rounded-full px-4 py-2 font-medium {% if tab == 'trials' %}bg-sky-700 text-white{% else %}bg-white text-slate-700 ring-1 ring-slate-200{% endif %}">{% translate "Trial lessons" %}</a>
+<nav class="chip-row mb-4" aria-label="{% translate 'Leads' %}">
+  <a href="{% url 'crm:board' %}" class="chip" {% if tab == 'board' %}aria-current="page"{% endif %}>{% icon "board" "w-4 h-4" %}{% translate "Leads" %}</a>
+  <a href="{% url 'crm:tasks' %}" class="chip" {% if tab == 'tasks' %}aria-current="page"{% endif %}>{% icon "check" "w-4 h-4" %}{% translate "My tasks" %}</a>
+  <a href="{% url 'crm:trials' %}" class="chip" {% if tab == 'trials' %}aria-current="page"{% endif %}>{% icon "calendar" "w-4 h-4" %}{% translate "Trial lessons" %}</a>
 </nav>

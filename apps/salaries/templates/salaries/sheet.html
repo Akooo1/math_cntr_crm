@@ -1,18 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{% translate "Salary sheet" %}{% endblock %}
-{% block heading %}{% if user|can:"salaries.manage" %}{% translate "Salaries" %}{% else %}{% translate "My salary" %}{% endif %}{% endblock %}
+{% block heading %}{{ sheet.teacher.full_name }}{% endblock %}
+{% block breadcrumbs %}{% if user|can:"salaries.manage" %}<a href="{% url 'salaries:index' %}?oy={{ month|date:'m.Y' }}">{% translate "Salaries" %}</a>{% else %}<a href="{% url 'salaries:mine' %}">{% translate "My salary" %}</a>{% endif %}{% endblock %}
+{% block count %}{% include "salaries/_state.html" with state=sheet.state %}{% endblock %}
 {% block content %}
   {% with manage=user|can:"salaries.manage" %}
-  <div class="mb-2">
-    {% if manage %}<a href="{% url 'salaries:index' %}?oy={{ month|date:'m.Y' }}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{% translate "Salaries" %}</a>
-    {% else %}<a href="{% url 'salaries:mine' %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{% translate "My salary" %}</a>{% endif %}
-  </div>
-  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-    <div>
-      <h2 class="text-xl font-semibold">{{ sheet.teacher.full_name }}</h2>
-      <p class="text-sm text-slate-500">{% blocktranslate with r=sheet.rate %}Rate: {{ r }}%{% endblocktranslate %}</p>
-    </div>
-    <div class="flex flex-wrap items-center gap-3">{% include "salaries/_month_picker.html" %}{% include "salaries/_state.html" with state=sheet.state %}</div>
+  <div class="mb-4 flex flex-wrap items-center gap-3">
+    {% include "salaries/_month_picker.html" %}
+    <p class="text-sm text-slate-500">{% blocktranslate with r=sheet.rate %}Rate: {{ r }}%{% endblocktranslate %}</p>
   </div>
 
   <div class="card mb-4 p-4">
@@ -40,34 +35,35 @@
       </form>
     {% elif sheet.payout %}
       <details class="card mb-4 p-4">
-        <summary class="cursor-pointer text-sm font-medium text-rose-700">{% translate "Cancel the payout" %}</summary>
-        <form method="post" action="{% url 'salaries:payout_cancel' sheet.payout.pk %}" class="mt-3 grid gap-3 sm:grid-cols-3 sm:items-end">{% csrf_token %}
+        <summary class="flex min-h-9 cursor-pointer items-center text-sm font-medium text-rose-700">{% translate "Cancel the payout" %}</summary>
+        {% translate "Cancel the payout?" as cancel_q %}<form method="post" action="{% url 'salaries:payout_cancel' sheet.payout.pk %}" data-confirm="{{ cancel_q }}" class="mt-3 grid gap-3 sm:grid-cols-3 sm:items-end">{% csrf_token %}
           <div class="sm:col-span-2">{% field reason_form.reason %}</div>
-          <button class="btn-danger">{% translate "Cancel the payout" %}</button>
+          <button class="btn-danger">{% icon "x-circle" %}{% translate "Cancel the payout" %}</button>
         </form>
       </details>
     {% endif %}
   {% endif %}
 
-  <h3 class="mb-2 font-semibold">{% translate "Students' payments" %}</h3>
-  <div class="space-y-2 md:hidden">
+  <h3 class="mb-2 font-semibold">{% translate "Students' payments" %} <span class="count-pill ml-1 align-middle">{{ sheet.lines|length }}</span></h3>
+  <div class="space-y-2 {% if sheet.lines %}md:hidden{% endif %}">
     {% for l in sheet.lines %}
       <div class="card p-4">
         <div class="flex justify-between gap-2"><p class="font-medium">{{ l.student.full_name }}</p><p class="font-semibold tabular-nums {% if l.amount < 0 %}text-rose-700{% endif %}">{{ l.amount|som }}</p></div>
         <p class="text-sm text-slate-500">{{ l.group.name }} · {% blocktranslate with p=l.base|som r=l.rate %}{{ p }} × {{ r }}%{% endblocktranslate %}</p>
         {% if l.kind == "correction" %}<p class="text-xs text-amber-700">{% blocktranslate with m=l.payment_month|date:"F Y" %}Correction for {{ m }}{% endblocktranslate %}</p>{% endif %}
       </div>
-    {% empty %}<p class="card p-6 text-center text-sm text-slate-500">{% translate "No payments yet." %}</p>{% endfor %}
+    {% empty %}<div class="card">{% include "components/empty.html" with icon="card" title=_("No payments yet.") %}</div>{% endfor %}
   </div>
-  <div class="card hidden overflow-x-auto md:block">
-    <table class="min-w-full divide-y divide-slate-200">
-      <thead class="bg-slate-50"><tr>
+  {% if sheet.lines %}
+  <div class="card table-scroll hidden md:block">
+    <table class="min-w-full">
+      <thead><tr>
         <th class="table-head">{% translate "Student" %}</th><th class="table-head">{% translate "Group" %}</th><th class="table-head">{% translate "Payment month" %}</th>
         <th class="table-head text-right">{% translate "Money paid" %}</th><th class="table-head text-right">{% translate "Rate" %}</th><th class="table-head text-right">{% translate "Share" %}</th>
       </tr></thead>
       <tbody class="divide-y divide-slate-100">
         {% for l in sheet.lines %}
-          <tr>
+          <tr class="hover:bg-surface-2">
             <td class="table-cell font-medium">{{ l.student.full_name }}</td>
             <td class="table-cell">{{ l.group.name }}</td>
             <td class="table-cell">{{ l.payment_month|date:"F Y" }}{% if l.kind == "correction" %} <span class="badge bg-amber-100 text-amber-900">{% translate "Correction" %}</span>{% endif %}</td>
@@ -75,10 +71,12 @@
             <td class="table-cell text-right tabular-nums">{{ l.rate }}%</td>
             <td class="table-cell text-right font-semibold tabular-nums {% if l.amount < 0 %}text-rose-700{% endif %}">{{ l.amount|som }}</td>
           </tr>
-        {% empty %}<tr><td colspan="6" class="table-cell text-center text-slate-500">{% translate "No payments yet." %}</td></tr>{% endfor %}
+        {% endfor %}
       </tbody>
+      <tfoot><tr class="table-foot"><td class="table-cell" colspan="3">{% translate "Total" %}</td><td class="table-cell text-right tabular-nums">{{ sheet.totals.paid|som }}</td><td class="table-cell"></td><td class="table-cell text-right tabular-nums">{{ sheet.totals.share|som }}</td></tr></tfoot>
     </table>
   </div>
+  {% endif %}
 
   <h3 class="mb-2 mt-6 font-semibold">{% translate "Bonuses and deductions" %}</h3>
   <div class="card divide-y divide-slate-100">
@@ -86,10 +84,10 @@
       <div class="flex flex-wrap items-center justify-between gap-2 p-4">
         <div class="min-w-0">
           <p class="font-medium">{{ a.get_kind_display }} · <span class="tabular-nums {% if a.amount < 0 %}text-rose-700{% else %}text-emerald-700{% endif %}">{{ a.amount|som }}</span></p>
-          <p class="text-sm text-slate-500">{{ a.reason }}{% if a.created_by %} · {{ a.created_by.full_name }}, {{ a.created_at|sana_vaqt }}{% endif %}</p>
+          <p class="text-sm text-slate-500">{{ a.reason }}{% if a.created_by %} · {{ a.created_by.full_name }}, {% relative_time a.created_at %}{% endif %}</p>
         </div>
         {% if manage and sheet.state != "closed" and a.kind != "carry" %}
-          <form method="post" action="{% url 'salaries:adjustment_delete' a.pk %}">{% csrf_token %}<button class="btn-ghost px-3 py-1.5 text-rose-700">{% icon "x" "w-4 h-4" %}{% translate "Delete" %}</button></form>
+          {% translate "Delete this line?" as del_q %}<form method="post" action="{% url 'salaries:adjustment_delete' a.pk %}" data-confirm="{{ del_q }}">{% csrf_token %}<button class="btn-ghost text-rose-700">{% icon "x" "w-4 h-4" %}{% translate "Delete" %}</button></form>
         {% endif %}
       </div>
     {% empty %}<p class="p-4 text-sm text-slate-500">{% translate "None." %}</p>{% endfor %}

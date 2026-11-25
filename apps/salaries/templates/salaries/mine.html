@@ -1,16 +1,17 @@
 {% extends "base.html" %}
 {% block title %}{% translate "My salary" %}{% endblock %}
 {% block heading %}{% translate "My salary" %}{% endblock %}
+{% block count %}<span class="count-pill">{{ months|length }}</span>{% endblock %}
 {% block content %}
   <div class="space-y-2">
     {% for m in months %}
-      <a href="{% url 'salaries:mine' %}?oy={{ m.month|date:'m.Y' }}" class="card flex items-center justify-between gap-3 p-4 hover:bg-slate-50">
+      <a href="{% url 'salaries:mine' %}?oy={{ m.month|date:'m.Y' }}" class="card flex items-center justify-between gap-3 p-4">
         <div>
           <p class="font-medium">{{ m.month|date:"F Y" }}</p>
           <p class="text-sm">{% if m.payout %}<span class="text-emerald-700">{% blocktranslate with d=m.payout.paid_on|sana %}Paid out {{ d }}{% endblocktranslate %}</span>{% elif m.state == "open" %}<span class="text-amber-700">{% translate "Being calculated" %}</span>{% elif m.state == "closed" %}<span class="text-slate-500">{% translate "Closed" %}</span>{% else %}<span class="text-slate-500">—</span>{% endif %}</p>
         </div>
         <p class="text-lg font-semibold tabular-nums">{{ m.total|som }}</p>
       </a>
-    {% empty %}<p class="card p-6 text-center text-sm text-slate-500">{% translate "No salary months yet." %}</p>{% endfor %}
+    {% empty %}<div class="card">{% include "components/empty.html" with icon="wallet" title=_("No salary months yet.") %}</div>{% endfor %}
   </div>
 {% endblock %}

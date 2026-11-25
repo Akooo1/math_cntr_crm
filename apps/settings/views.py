@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
+from apps.core import listing
 from apps.core.permissions import has_perm, perm_required, require_perm
 from apps.core.settings_panel import get_section, sections
 
@@ -37,8 +38,10 @@ def section_list(request, slug):
     if section.custom_view is not None:
         return section.custom_view(request, section)
     show_inactive = request.GET.get("nofaol") == "1"
-    qs = section.get_queryset(request)
-    if hasattr(section.model, "is_active") and not show_inactive:
+    everything = section.get_queryset(request)
+    qs = everything
+    has_flag = hasattr(section.model, "is_active")
+    if has_flag and not show_inactive:
         qs = qs.filter(is_active=True)
     rows = [
         {
@@ -54,8 +57,11 @@ def section_list(request, slug):
         {
             "section": section,
             "rows": rows,
+            "totals": listing.totals(
+                everything, len(rows), filtered=has_flag and not show_inactive
+            ),
             "show_inactive": show_inactive,
-            "has_active_flag": hasattr(section.model, "is_active"),
+            "has_active_flag": has_flag,
             "can_create": section.can_create(request),
         },
     )

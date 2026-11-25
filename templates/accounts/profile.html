@@ -2,7 +2,7 @@
 {% block title %}{% translate "Profile" %}{% endblock %}
 {% block heading %}{% translate "Profile" %}{% endblock %}
 {% block content %}
-  <div class="mx-auto max-w-md card divide-y divide-slate-100">
+  <div class="max-w-xl card divide-y divide-slate-100">
     <div class="p-5">
       <p class="text-lg font-semibold">{{ user.full_name }}</p>
       <p class="text-sm text-slate-500">{{ user.get_role_display }}</p>
@@ -12,9 +12,13 @@
       <div class="flex justify-between gap-4"><dt class="text-slate-500">{% translate "Branches" %}</dt>
         <dd class="text-right font-medium">{% if user.is_director %}{% translate "All branches" %}{% else %}{% for link in user.branch_links.all %}{{ link.branch.name }}{% if not forloop.last %}, {% endif %}{% empty %}—{% endfor %}{% endif %}</dd></div>
     </dl>
+    <div class="space-y-2 p-5">
+      <p class="text-sm font-medium text-slate-700">{% translate "Theme" %}</p>
+      {% include "components/theme_switch.html" %}
+    </div>
     <div class="p-5 flex flex-col gap-2">
       <a class="btn-secondary" href="{% url 'accounts:password_change' %}">{% icon "key" %}{% translate "Change password" %}</a>
-      <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn-ghost w-full">{% icon "logout" %}{% translate "Log out" %}</button></form>
+      <form method="post" action="{% url 'accounts:logout' %}" data-no-busy>{% csrf_token %}<button class="btn-ghost w-full">{% icon "logout" %}{% translate "Log out" %}</button></form>
     </div>
   </div>
 {% endblock %}

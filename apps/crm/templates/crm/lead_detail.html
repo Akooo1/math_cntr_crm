@@ -1,19 +1,27 @@
 {% extends "base.html" %}
 {% block title %}{{ lead.full_name }}{% endblock %}
-{% block heading %}{% translate "Lead" %}{% endblock %}
+{% block heading %}{{ lead.full_name }}{% endblock %}
+{% block count %}<span class="badge {{ lead.stage.badge_css }}">{{ lead.stage.name }}</span>{% endblock %}
+{% block menu %}{% if can_edit %}
+  {% if not lead.is_converted %}<a href="{% url 'crm:lead_edit' lead.pk %}" class="menu-item" role="menuitem">{% icon "pencil" "w-4 h-4" %}{% translate "Edit" %}</a>{% endif %}
+  {% if lead.is_lost %}
+    <form method="post" action="{% url 'crm:reopen' lead.pk %}">{% csrf_token %}<button class="menu-item" role="menuitem">{% icon "refresh" "w-4 h-4" %}{% translate "Reopen" %}</button></form>
+  {% elif not lead.is_converted %}
+    <a href="{% url 'crm:refuse' lead.pk %}" class="menu-item menu-item-danger" role="menuitem">{% icon "x-circle" "w-4 h-4" %}{% translate "Refused" %}</a>
+  {% endif %}
+{% endif %}{% endblock %}
+{% block primary %}{% if can_edit %}{% if can_convert and not lead.is_lost and not lead.is_converted %}<a href="{% url 'crm:convert' lead.pk %}" class="btn-primary">{% icon "user-plus" %}<span>{% translate "Convert to student" %}</span></a>{% elif not lead.is_converted %}<a href="tel:{{ lead.phone }}" class="btn-primary">{% icon "phone" %}<span>{% translate "Call" %}</span></a>{% endif %}{% endif %}{% endblock %}
+{% block breadcrumbs %}<a href="{% url 'crm:board' %}">{% translate "Leads" %}</a>{% endblock %}
 {% block content %}
-  <div class="mb-4"><a href="{% url 'crm:board' %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{% translate "Leads" %}</a></div>
 
   <div class="grid gap-4 lg:grid-cols-3">
     {# Left: card #}
-    <section class="card p-5 lg:col-span-1">
+    <section class="card min-w-0 p-5 lg:col-span-1">
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0">
-          <h2 class="text-xl font-semibold">{{ lead.full_name }}</h2>
-          <a href="tel:{{ lead.phone }}" class="mt-1 inline-flex items-center gap-1.5 text-sky-700">{% icon "phone" "w-4 h-4" %}{{ lead.phone|telefon }}</a>
+          <a href="tel:{{ lead.phone }}" class="inline-flex items-center gap-1.5 font-medium text-sky-700">{% icon "phone" "w-4 h-4" %}{{ lead.phone|telefon }}</a>
           {% if lead.extra_phone %}<a href="tel:{{ lead.extra_phone }}" class="mt-1 flex items-center gap-1.5 text-sm text-sky-700">{% icon "phone" "w-4 h-4" %}{{ lead.extra_phone|telefon }}</a>{% endif %}
         </div>
-        <span class="badge shrink-0 {{ lead.stage.badge_css }}">{{ lead.stage.name }}</span>
       </div>
 
       {% if lead.is_converted %}
@@ -36,7 +44,7 @@
         <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Next follow-up" %}</dt><dd class="text-right {% if lead.next_follow_up_at and lead.next_follow_up_at < now %}font-semibold text-rose-700{% endif %}">{{ lead.next_follow_up_at|sana_vaqt|default:"—" }}</dd></div>
         <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Created" %}</dt><dd class="text-right">{{ lead.created_at|sana }}, {{ lead.created_by.full_name }}</dd></div>
       </dl>
-      {% if lead.notes %}<p class="mt-4 whitespace-pre-line rounded-lg bg-slate-50 p-3 text-sm">{{ lead.notes }}</p>{% endif %}
+      {% if lead.notes %}<p class="mt-4 whitespace-pre-line rounded-lg bg-surface-2 p-3 text-sm">{{ lead.notes }}</p>{% endif %}
 
       {% if can_edit %}
         <div class="mt-5 space-y-3">
@@ -44,48 +52,39 @@
             <form method="post" action="{% url 'crm:move' lead.pk %}" class="flex gap-2">{% csrf_token %}
               <label for="id_stage" class="sr-only">{% translate "Stage" %}</label>
               <div class="flex-1">{{ stage_form.stage }}</div>
-              <button class="btn-secondary">{% translate "Move" %}</button>
+              <button class="btn-secondary">{% icon "arrow-right" "w-4 h-4" %}{% translate "Move" %}</button>
             </form>
           {% endif %}
-          <div class="grid grid-cols-2 gap-2">
-            {% if can_convert and not lead.is_lost %}<a href="{% url 'crm:convert' lead.pk %}" class="btn-primary col-span-2">{% icon "user-plus" %}{% translate "Convert to student" %}</a>{% endif %}
-            {% if not lead.is_converted %}<a href="{% url 'crm:lead_edit' lead.pk %}" class="btn-secondary">{% icon "pencil" "w-4 h-4" %}{% translate "Edit" %}</a>{% endif %}
-            {% if lead.is_lost %}
-              <form method="post" action="{% url 'crm:reopen' lead.pk %}">{% csrf_token %}<button class="btn-secondary w-full">{% icon "refresh" "w-4 h-4" %}{% translate "Reopen" %}</button></form>
-            {% elif not lead.is_converted %}
-              <a href="{% url 'crm:refuse' lead.pk %}" class="btn-secondary text-rose-700">{% icon "x-circle" "w-4 h-4" %}{% translate "Refused" %}</a>
-            {% endif %}
-          </div>
         </div>
       {% endif %}
     </section>
 
     {# Right: tasks, trials, history #}
-    <div class="space-y-4 lg:col-span-2">
+    <div class="min-w-0 space-y-4 lg:col-span-2">
       <section class="card p-5" x-data="{ add: false }">
         <div class="flex items-center justify-between">
           <h3 class="font-semibold">{% translate "Tasks" %}</h3>
-          {% if can_edit and not lead.is_converted %}<button type="button" class="btn-ghost px-3 py-1.5" @click="add = !add">{% icon "plus" "w-4 h-4" %}{% translate "Add" %}</button>{% endif %}
+          {% if can_edit and not lead.is_converted %}<button type="button" class="btn-ghost" @click="add = !add" :aria-expanded="add">{% icon "plus" "w-4 h-4" %}{% translate "Add" %}</button>{% endif %}
         </div>
         <form method="post" action="{% url 'crm:task_create' lead.pk %}" class="mt-3 grid gap-3 sm:grid-cols-2" x-show="add" x-cloak>{% csrf_token %}
           <div class="sm:col-span-2">{% field task_form.title %}</div>
           {% field task_form.due_date %}
           {% field task_form.due_time %}
           <div class="sm:col-span-2">{% field task_form.assigned_to %}</div>
-          <div class="sm:col-span-2 flex justify-end"><button class="btn-primary">{% translate "Save" %}</button></div>
+          <div class="sm:col-span-2 flex justify-end"><button class="btn-primary">{% icon "check" %}{% translate "Save" %}</button></div>
         </form>
         <ul class="mt-3 divide-y divide-slate-100">
           {% for t in open_tasks %}
             <li class="flex items-center justify-between gap-3 py-2.5">
               <div class="min-w-0">
                 <p class="font-medium">{{ t.title }}</p>
-                <p class="text-sm {% if t.due_at < now %}font-semibold text-rose-700{% else %}text-slate-500{% endif %}">{{ t.due_at|sana_vaqt }} · {{ t.assigned_to.full_name }}</p>
+                <p class="text-sm {% if t.due_at < now %}font-semibold text-rose-700{% else %}text-slate-500{% endif %}">{% relative_time t.due_at %} · {{ t.assigned_to.full_name }}</p>
               </div>
-              {% if can_edit %}<form method="post" action="{% url 'crm:task_done' t.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}"><button class="btn-secondary px-3 py-1.5" aria-label="{% translate 'Done' %}">{% icon "check" "w-4 h-4" %}<span class="hidden sm:inline">{% translate "Done" %}</span></button></form>{% endif %}
+              {% if can_edit %}<form method="post" action="{% url 'crm:task_done' t.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}"><button class="btn-secondary" aria-label="{% translate 'Done' %}">{% icon "check" "w-4 h-4" %}<span class="hidden sm:inline">{% translate "Done" %}</span></button></form>{% endif %}
             </li>
           {% empty %}<li class="py-2 text-sm text-slate-500">{% translate "No open tasks." %}</li>{% endfor %}
           {% for t in done_tasks %}
-            <li class="py-2 text-sm text-slate-400 line-through">{{ t.title }} · {{ t.due_at|sana }}</li>
+            <li class="py-2 text-sm text-slate-500 line-through">{{ t.title }} · {{ t.due_at|sana }}</li>
           {% endfor %}
         </ul>
       </section>
@@ -93,13 +92,13 @@
       <section class="card p-5" x-data="{ add: false }">
         <div class="flex items-center justify-between">
           <h3 class="font-semibold">{% translate "Trial lessons" %}</h3>
-          {% if can_edit and not lead.is_converted and not lead.is_lost %}<button type="button" class="btn-ghost px-3 py-1.5" @click="add = !add">{% icon "plus" "w-4 h-4" %}{% translate "Book" %}</button>{% endif %}
+          {% if can_edit and not lead.is_converted and not lead.is_lost %}<button type="button" class="btn-ghost" @click="add = !add" :aria-expanded="add">{% icon "plus" "w-4 h-4" %}{% translate "Book" %}</button>{% endif %}
         </div>
         <form method="post" action="{% url 'crm:trial_book' lead.pk %}" class="mt-3 space-y-3" x-show="add" x-cloak>{% csrf_token %}
           {% field trial_form.group %}
           {% field trial_form.scheduled_date %}
           {% field trial_form.note %}
-          <div class="flex justify-end"><button class="btn-primary">{% translate "Save" %}</button></div>
+          <div class="flex justify-end"><button class="btn-primary">{% icon "check" %}{% translate "Save" %}</button></div>
         </form>
         <ul class="mt-3 divide-y divide-slate-100">
           {% for tr in trials %}
@@ -118,27 +117,27 @@
         <h3 class="font-semibold">{% translate "History" %}</h3>
         {% if can_edit %}
           <form method="post" action="{% url 'crm:add_activity' lead.pk %}" class="mt-3 space-y-3">{% csrf_token %}
-            <div class="flex gap-1 rounded-lg bg-slate-100 p-1 text-sm w-fit" role="radiogroup">
+            <div class="seg flex-wrap" role="radiogroup">
               {% for choice in activity_form.kind %}
-                <label class="cursor-pointer rounded-md px-3 py-1.5 has-[:checked]:bg-white has-[:checked]:font-medium has-[:checked]:shadow-sm">
+                <label class="seg-item cursor-pointer has-[:checked]:bg-surface has-[:checked]:text-fg has-[:checked]:shadow-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-sky-500">
                   <input type="radio" name="{{ choice.data.name }}" value="{{ choice.data.value }}" class="sr-only" {% if choice.data.selected %}checked{% endif %}>{{ choice.choice_label }}
                 </label>
               {% endfor %}
             </div>
             <label for="id_text" class="sr-only">{% translate "Text" %}</label>
             {{ activity_form.text }}
-            <div class="flex justify-end"><button class="btn-secondary">{% icon "chat" "w-4 h-4" %}{% translate "Add to history" %}</button></div>
+            <div class="flex justify-end"><button class="btn-primary">{% icon "chat" "w-4 h-4" %}{% translate "Add to history" %}</button></div>
           </form>
         {% endif %}
-        <ol class="mt-4 space-y-3 border-l-2 border-slate-100 pl-4">
+        <ol class="mt-4 space-y-4 border-l-2 border-slate-200 pl-4">
           {% for a in activities %}
             <li class="relative">
-              <span class="absolute -left-[1.4rem] top-1.5 h-2.5 w-2.5 rounded-full {% if a.kind == 'converted' %}bg-emerald-500{% elif a.kind == 'call' %}bg-sky-500{% else %}bg-slate-300{% endif %}"></span>
+              <span class="absolute -left-[1.4rem] top-1.5 h-2.5 w-2.5 rounded-full {% if a.kind == 'converted' %}bg-emerald-500{% elif a.kind == 'call' %}bg-sky-500{% else %}bg-slate-400{% endif %} ring-4 ring-surface"></span>
               <p class="text-sm">
                 <span class="font-medium">{{ a.get_kind_display }}</span>{% if a.from_stage and a.to_stage and a.from_stage != a.to_stage %}: {{ a.from_stage.name }} → {{ a.to_stage.name }}{% endif %}
               </p>
               {% if a.text %}<p class="mt-0.5 whitespace-pre-line text-sm text-slate-700">{{ a.text }}</p>{% endif %}
-              <p class="text-xs text-slate-500">{{ a.created_at|sana_vaqt }} · {{ a.created_by.full_name }}</p>
+              <p class="text-xs text-slate-500">{% relative_time a.created_at %} · {{ a.created_by.full_name }}</p>
             </li>
           {% endfor %}
         </ol>

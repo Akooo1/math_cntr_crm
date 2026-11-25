@@ -49,4 +49,17 @@ ICONS = {
     "map-pin": '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
     "send": '<path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/>',
     "wallet": '<path d="M4 7a2 2 0 0 1 2-2h11v4"/><rect x="4" y="7" width="16" height="12" rx="2"/><path d="M16 13h2"/>',
+    "sun": '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2'
+    'M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
+    "moon": '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+    "monitor": '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+    "arrow-up": '<path d="M12 19V5M6 11l6-6 6 6"/>',
+    "arrow-down": '<path d="M12 5v14M6 13l6 6 6-6"/>',
+    "sort": '<path d="M8 9l4-4 4 4M8 15l4 4 4-4"/>',
+    "info": '<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.5"/>',
+    "alert": '<path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17v.5"/>',
+    "check-circle": '<circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/>',
+    "inbox": '<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1.5 2.5h5L16 13h5"/>',
+    "filter-x": '<path d="M3 4h18l-7 9v6l-4 2v-8z"/><path d="M16 16l5 5M21 16l-5 5"/>',
+    "arrow-right": '<path d="M5 12h14M13 6l6 6-6 6"/>',
 }

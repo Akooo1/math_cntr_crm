@@ -1,0 +1,6 @@
+{# Light / Dark / System, remembered in this browser (static/js/app.js). compact=True: icons only. #}
+<div class="seg w-full" role="group" aria-label="{% translate 'Theme' %}" data-theme-switch>
+  <button type="button" class="seg-item" data-theme-set="light" aria-pressed="false" title="{% translate 'Light' %}">{% icon "sun" "w-4 h-4" %}<span {% if compact %}class="sr-only"{% endif %}>{% translate "Light" %}</span></button>
+  <button type="button" class="seg-item" data-theme-set="dark" aria-pressed="false" title="{% translate 'Dark' %}">{% icon "moon" "w-4 h-4" %}<span {% if compact %}class="sr-only"{% endif %}>{% translate "Dark" %}</span></button>
+  <button type="button" class="seg-item" data-theme-set="system" aria-pressed="false" title="{% translate 'System' %}">{% icon "monitor" "w-4 h-4" %}<span {% if compact %}class="sr-only"{% endif %}>{% translate "System" %}</span></button>
+</div>

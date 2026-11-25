@@ -1,14 +1,12 @@
 {% extends "base.html" %}
 {% block title %}{% translate "Salaries" %}{% endblock %}
 {% block heading %}{% translate "Salaries" %}{% endblock %}
+{% block menu %}
+  <a class="menu-item" role="menuitem" href="?oy={{ month|date:'m.Y' }}&excel=1">{% icon "download" "w-4 h-4" %}{% translate "Export to Excel" %}</a>
+  {% if user|can:"settings.manage" %}<a class="menu-item" role="menuitem" href="{% url 'settings:section_list' 'stavkalar' %}">{% icon "cog" "w-4 h-4" %}{% translate "Teacher rates" %}</a>{% endif %}
+{% endblock %}
 {% block content %}
-  <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
-    <div class="flex flex-wrap items-center gap-3">{% include "salaries/_month_picker.html" %}{% include "salaries/_state.html" %}</div>
-    <div class="flex flex-wrap gap-2">
-      <a class="btn-secondary px-3 py-1.5" href="?oy={{ month|date:'m.Y' }}&excel=1">{% icon "download" "w-4 h-4" %}{% translate "Export to Excel" %}</a>
-      {% if user|can:"settings.manage" %}<a class="btn-ghost px-3 py-1.5" href="{% url 'settings:section_list' 'stavkalar' %}">{% icon "cog" "w-4 h-4" %}{% translate "Teacher rates" %}</a>{% endif %}
-    </div>
-  </div>
+  <div class="mb-4 flex flex-wrap items-center gap-3">{% include "salaries/_month_picker.html" %}{% include "salaries/_state.html" %}</div>
 
   <div class="card mb-4 grid grid-cols-2 gap-x-3 gap-y-4 p-4 md:grid-cols-4">
     <div class="min-w-0"><p class="text-sm text-slate-500">{% translate "Money paid" %}</p><p class="text-lg font-semibold tabular-nums sm:text-xl">{{ grand.paid|som }}</p></div>
@@ -25,32 +23,33 @@
       {% translate "Close the month? Its salaries can't be changed afterwards." as close_question %}
       <form method="post" action="{% url 'salaries:close' %}" class="mb-4" data-confirm="{{ close_question }}">{% csrf_token %}
         <input type="hidden" name="oy" value="{{ month|date:'m.Y' }}">
-        <button class="btn-primary w-full sm:w-auto">{% icon "check" %}{% blocktranslate with m=month|date:"F Y" %}Close {{ m }}{% endblocktranslate %}</button>
+        <button class="btn-secondary w-full sm:w-auto">{% icon "check" %}{% blocktranslate with m=month|date:"F Y" %}Close {{ m }}{% endblocktranslate %}</button>
       </form>
     {% endif %}
   {% elif state == "later" %}
     <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">{% blocktranslate with m=open_month|date:"F Y" %}{{ m }} is not closed yet. This month is calculated after it.{% endblocktranslate %}</div>
   {% endif %}
 
-  <div class="space-y-2 md:hidden">
+  <div class="space-y-2 {% if sheets %}md:hidden{% endif %}">
     {% for s in sheets %}
       <a href="{% url 'salaries:sheet' s.teacher.pk %}?oy={{ month|date:'m.Y' }}" class="card block p-4">
         <div class="flex justify-between gap-2"><p class="font-medium">{{ s.teacher.full_name }}</p><p class="font-semibold tabular-nums">{{ s.totals.total|som }}</p></div>
         <p class="text-sm text-slate-500">{% blocktranslate with p=s.totals.paid|som %}Paid by students: {{ p }}{% endblocktranslate %}</p>
         {% if s.payout %}<p class="text-sm text-emerald-700">{% blocktranslate with d=s.payout.paid_on|sana %}Paid out {{ d }}{% endblocktranslate %}</p>{% endif %}
       </a>
-    {% empty %}<p class="card p-6 text-center text-sm text-slate-500">{% translate "No teachers yet." %}</p>{% endfor %}
+    {% empty %}<div class="card">{% include "components/empty.html" with icon="wallet" title=_("No teachers yet.") %}</div>{% endfor %}
   </div>
-  <div class="card hidden overflow-x-auto md:block">
-    <table class="min-w-full divide-y divide-slate-200">
-      <thead class="bg-slate-50"><tr>
+  {% if sheets %}
+  <div class="card table-scroll hidden md:block">
+    <table class="min-w-full">
+      <thead><tr>
         <th class="table-head">{% translate "Teacher" %}</th><th class="table-head text-right">{% translate "Money paid" %}</th><th class="table-head text-right">{% translate "Share" %}</th>
         <th class="table-head text-right">{% translate "Corrections" %}</th><th class="table-head text-right">{% translate "Bonuses" %}</th><th class="table-head text-right">{% translate "Deductions" %}</th>
         <th class="table-head text-right">{% translate "Total" %}</th><th class="table-head">{% translate "Salary given" %}</th>
       </tr></thead>
       <tbody class="divide-y divide-slate-100">
         {% for s in sheets %}
-          <tr class="hover:bg-slate-50">
+          <tr class="hover:bg-surface-2">
             <td class="table-cell font-medium"><a class="hover:text-sky-700" href="{% url 'salaries:sheet' s.teacher.pk %}?oy={{ month|date:'m.Y' }}">{{ s.teacher.full_name }}</a></td>
             <td class="table-cell text-right tabular-nums">{{ s.totals.paid|som }}</td>
             <td class="table-cell text-right tabular-nums">{{ s.totals.share|som }}</td>
@@ -60,8 +59,10 @@
             <td class="table-cell text-right font-semibold tabular-nums">{{ s.totals.total|som }}</td>
             <td class="table-cell">{% if s.payout %}<span class="text-emerald-700">{{ s.payout.paid_on|sana }}</span>{% elif state == "closed" and s.totals.total > 0 %}<span class="text-amber-700">{% translate "Not yet" %}</span>{% else %}—{% endif %}</td>
           </tr>
-        {% empty %}<tr><td colspan="8" class="table-cell text-center text-slate-500">{% translate "No teachers yet." %}</td></tr>{% endfor %}
+        {% endfor %}
       </tbody>
+      <tfoot><tr class="table-foot"><td class="table-cell">{% translate "Total" %}</td><td class="table-cell text-right tabular-nums">{{ grand.paid|som }}</td><td class="table-cell text-right tabular-nums">{{ grand.share|som }}</td><td class="table-cell text-right tabular-nums">{{ grand.corrections|som }}</td><td class="table-cell text-right tabular-nums">{{ grand.bonuses|som }}</td><td class="table-cell text-right tabular-nums">{{ grand.deductions|som }}</td><td class="table-cell text-right tabular-nums">{{ grand.total|som }}</td><td class="table-cell"></td></tr></tfoot>
     </table>
   </div>
+  {% endif %}
 {% endblock %}

@@ -8,7 +8,7 @@
       {% include "components/form_errors.html" %}
       {% for f in form %}{% field f %}{% endfor %}
       <p class="text-sm text-slate-500">{% translate "The file is checked first. Nothing is saved until you confirm, and then all rows are saved together or none." %}</p>
-      <button class="btn-primary w-full">{% translate "Check the file" %}</button>
+      <div class="form-actions"><button class="btn-primary w-full">{% icon "check" %}{% translate "Check the file" %}</button></div>
     </form>
     <div class="space-y-4">
       <section class="card p-5">
@@ -17,7 +17,7 @@
           {% for k in kinds %}
             <li class="flex items-start justify-between gap-3">
               <div><p class="font-medium">{{ k.label }}</p><p class="text-sm text-slate-500">{{ k.help_text }}</p></div>
-              <a class="btn-secondary shrink-0 px-3 py-1.5" href="{% url 'students:import_template' k.key %}">{% translate "Download" %}</a>
+              <a class="btn-secondary shrink-0" href="{% url 'students:import_template' k.key %}" download>{% icon "download" "w-4 h-4" %}{% translate "Download" %}</a>
             </li>
           {% endfor %}
         </ul>

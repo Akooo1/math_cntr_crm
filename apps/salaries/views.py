@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from apps.core import dates, excel
+from apps.core import dates, excel, listing
 from apps.core.permissions import perm_required
 from apps.core.roles import Role
 
@@ -44,7 +44,13 @@ def index(request):
     return render(
         request,
         "salaries/index.html",
-        {**data, "months": selectors.months_for_picker()},
+        {
+            **data,
+            "months": selectors.months_for_picker(),
+            "totals": listing.totals(
+                len(data["sheets"]), amount=data["grand"].total, amount_label=_("To pay")
+            ),
+        },
     )
 
 

@@ -1,0 +1,16 @@
+{% for g in groups %}
+  <div class="palette-group" role="presentation">{{ g.provider.label }}</div>
+  {% for h in g.hits %}
+    <a id="sr-{{ g.provider.key }}-{{ forloop.counter }}" class="palette-item" role="option" aria-selected="false" href="{{ h.url }}">
+      {% icon g.provider.icon %}
+      <span class="min-w-0 flex-1"><span class="block truncate font-medium">{{ h.title }}</span>{% if h.subtitle %}<span class="block truncate text-xs text-muted">{{ h.subtitle }}</span>{% endif %}</span>
+      {% icon "chevron-right" "w-4 h-4" %}
+    </a>
+  {% endfor %}
+{% empty %}
+  {% if q|length >= min_query %}
+    {% include "components/empty.html" with icon="search" title=_("Nothing found.") text=_("Try a phone number, a surname or a receipt number.") %}
+  {% else %}
+    <p class="px-3 py-4 text-sm text-muted">{% translate "Type at least 2 letters or digits." %}</p>
+  {% endif %}
+{% endfor %}

@@ -1,12 +1,14 @@
 {% extends "base.html" %}
 {% block title %}{{ section.title }}{% endblock %}
-{% block heading %}{% translate "Settings" %}{% endblock %}
+{% block heading %}{{ section.title }}{% endblock %}
+{% block breadcrumbs %}<a href="{% url 'settings:index' %}">{% translate "Settings" %}</a>{% endblock %}
+{% block count %}<span class="count-pill">{{ rows|length }}</span>{% endblock %}
+{% block primary %}<a href="{% url 'settings:section_create' section.slug %}" class="btn-primary">{% icon "plus" %}<span>{% translate "New rate" %}</span></a>{% endblock %}
 {% block content %}
   {% include "settings/_header.html" %}
   <div class="mb-4 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
     {% translate "A teacher gets this share of the money students paid for the teacher's groups. Teachers without their own rate get the default rate from General settings. A new rate applies from the month you choose; closed months never change." %}
   </div>
-  <div class="mb-4 flex justify-end"><a href="{% url 'settings:section_create' section.slug %}" class="btn-primary">{% icon "plus" %}{% translate "New rate" %}</a></div>
   <div class="space-y-3">
     {% for r in rows %}
       <div class="card p-4" x-data="{ open: false }">
@@ -15,18 +17,18 @@
           <p class="text-lg font-semibold">{{ r.rate }}%</p>
         </div>
         <div class="mt-3 flex flex-wrap gap-2">
-          <a class="btn-secondary px-3 py-1.5" href="{% url 'settings:section_create' section.slug %}?oqituvchi={{ r.teacher.pk }}">{% icon "plus" "w-4 h-4" %}{% translate "Change rate" %}</a>
-          {% if r.history %}<button type="button" class="btn-ghost px-3 py-1.5" @click="open = !open">{% icon "list" "w-4 h-4" %}{% translate "History" %} ({{ r.history|length }})</button>{% endif %}
+          <a class="btn-secondary" href="{% url 'settings:section_create' section.slug %}?oqituvchi={{ r.teacher.pk }}">{% icon "plus" "w-4 h-4" %}{% translate "Change rate" %}</a>
+          {% if r.history %}<button type="button" class="btn-ghost" @click="open = !open" :aria-expanded="open">{% icon "list" "w-4 h-4" %}{% translate "History" %} ({{ r.history|length }})</button>{% endif %}
         </div>
         <div x-show="open" x-cloak class="mt-3 overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead><tr class="text-left text-xs uppercase text-slate-500"><th class="py-2 pr-4">{% translate "From month" %}</th><th class="py-2 pr-4">{% translate "Rate" %}</th><th class="py-2 pr-4">{% translate "Reason" %}</th><th class="py-2">{% translate "Created by" %}</th></tr></thead>
             <tbody class="divide-y divide-slate-100">
-              {% for h in r.history %}<tr><td class="py-2 pr-4">{{ h.effective_from|date:"F Y" }}</td><td class="py-2 pr-4 font-medium">{{ h.rate_text }}%</td><td class="py-2 pr-4">{{ h.reason|default:"—" }}</td><td class="py-2">{{ h.created_by.full_name }}<br><span class="text-xs text-slate-500">{{ h.created_at|sana_vaqt }}</span></td></tr>{% endfor %}
+              {% for h in r.history %}<tr><td class="py-2 pr-4">{{ h.effective_from|date:"F Y" }}</td><td class="py-2 pr-4 font-medium">{{ h.rate_text }}%</td><td class="py-2 pr-4">{{ h.reason|default:"—" }}</td><td class="py-2">{{ h.created_by.full_name }}<br><span class="text-xs text-slate-500">{% relative_time h.created_at %}</span></td></tr>{% endfor %}
             </tbody>
           </table>
         </div>
       </div>
-    {% empty %}<div class="card p-8 text-center text-sm text-slate-500">{% translate "Add teachers first." %}</div>{% endfor %}
+    {% empty %}<div class="card">{% include "components/empty.html" with icon="user" title=_("Add teachers first.") %}</div>{% endfor %}
   </div>
 {% endblock %}

@@ -1,39 +1,37 @@
 {% extends "base.html" %}
 {% block title %}{% translate "Debtors" %}{% endblock %}
 {% block heading %}{% translate "Debtors" %}{% endblock %}
+{% block menu %}<a class="menu-item" role="menuitem" href="?{{ request.GET.urlencode }}&excel=1">{% icon "download" "w-4 h-4" %}{% translate "Export to Excel" %}</a>{% endblock %}
 {% block content %}
-  <form method="get" class="card mb-4 grid gap-2 p-4 sm:grid-cols-5">
-    <select name="guruh" class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base" aria-label="{% translate 'Group' %}"><option value="">{% translate "All groups" %}</option>{% for g in groups %}<option value="{{ g.pk }}" {% if f.guruh == g.pk|stringformat:"s" %}selected{% endif %}>{{ g.name }}</option>{% endfor %}</select>
-    <select name="kurs" class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base" aria-label="{% translate 'Course' %}"><option value="">{% translate "All courses" %}</option>{% for c in courses %}<option value="{{ c.pk }}" {% if f.kurs == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>
-    <select name="oqituvchi" class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base" aria-label="{% translate 'Teacher' %}"><option value="">{% translate "All teachers" %}</option>{% for t in teachers %}<option value="{{ t.pk }}" {% if f.oqituvchi == t.pk|stringformat:"s" %}selected{% endif %}>{{ t.full_name }}</option>{% endfor %}</select>
-    <input name="kun" value="{{ f.kun }}" inputmode="numeric" placeholder="{% translate 'At least N days overdue' %}" aria-label="{% translate 'At least N days overdue' %}" class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base">
-    <button class="btn-secondary">{% translate "Filter" %}</button>
+  <form method="get" class="card mb-4 grid gap-2 p-4 sm:grid-cols-2 lg:grid-cols-5">
+    <select name="guruh" class="input" aria-label="{% translate 'Group' %}"><option value="">{% translate "All groups" %}</option>{% for g in groups %}<option value="{{ g.pk }}" {% if f.guruh == g.pk|stringformat:"s" %}selected{% endif %}>{{ g.name }}</option>{% endfor %}</select>
+    <select name="kurs" class="input" aria-label="{% translate 'Course' %}"><option value="">{% translate "All courses" %}</option>{% for c in courses %}<option value="{{ c.pk }}" {% if f.kurs == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select>
+    <select name="oqituvchi" class="input" aria-label="{% translate 'Teacher' %}"><option value="">{% translate "All teachers" %}</option>{% for t in teachers %}<option value="{{ t.pk }}" {% if f.oqituvchi == t.pk|stringformat:"s" %}selected{% endif %}>{{ t.full_name }}</option>{% endfor %}</select>
+    <input name="kun" value="{{ f.kun }}" inputmode="numeric" class="input" placeholder="{% translate 'At least N days overdue' %}" aria-label="{% translate 'At least N days overdue' %}">
+    {% if request.GET.tartib %}<input type="hidden" name="tartib" value="{{ request.GET.tartib }}">{% endif %}
+    <button class="btn-secondary">{% icon "funnel" "w-4 h-4" %}{% translate "Filter" %}</button>
   </form>
-  <div class="card mb-4 flex flex-wrap items-center justify-between gap-3 p-4">
-    <a class="btn-secondary px-3 py-1.5" href="?{{ request.GET.urlencode }}&excel=1">{% icon "download" "w-4 h-4" %}{% translate "Export to Excel" %}</a>
-    <p>{% blocktranslate count n=rows|length %}{{ n }} debtor{% plural %}{{ n }} debtors{% endblocktranslate %}</p>
-    <p class="text-lg font-semibold text-rose-700">{{ total_overdue|som }}</p>
-  </div>
-  <div class="space-y-2 md:hidden">
+  <div class="space-y-2 {% if rows %}md:hidden{% endif %}">
     {% for r in rows %}
       <a href="{% url 'students:detail' r.student.pk %}" class="card block p-4">
         <div class="flex justify-between gap-2"><p class="font-medium">{{ r.student.full_name }}</p><p class="font-semibold text-rose-700">{{ r.overdue|som }}</p></div>
         <p class="text-sm text-slate-500">{{ r.groups|join:", " }}</p>
         <p class="text-sm"><span class="text-rose-700">{% blocktranslate count d=r.days %}{{ d }} day overdue{% plural %}{{ d }} days overdue{% endblocktranslate %}</span> · {{ r.student.parent_phone|default:r.student.phone|telefon }}</p>
       </a>
-    {% empty %}<p class="card p-6 text-center text-sm text-slate-500">{% translate "No debtors." %}</p>{% endfor %}
+    {% empty %}<div class="card">{% if totals.filtered %}{% url 'billing:debtors' as reset %}{% include "components/empty.html" with icon="check-circle" title=_("No debtors.") reset=reset %}{% else %}{% include "components/empty.html" with icon="check-circle" title=_("No debtors.") text=_("Everyone has paid what is due.") %}{% endif %}</div>{% endfor %}
   </div>
-  <div class="card hidden overflow-x-auto md:block">
-    <table class="min-w-full divide-y divide-slate-200">
-      <thead class="bg-slate-50"><tr>
-        <th class="table-head">{% translate "Student" %}</th><th class="table-head">{% translate "Phone" %}</th><th class="table-head">{% translate "Parent's phone" %}</th><th class="table-head">{% translate "Groups" %}</th>
-        <th class="table-head text-right">{% translate "Overdue" %}</th><th class="table-head text-right">{% translate "Unpaid total" %}</th><th class="table-head text-right">{% translate "Days overdue" %}</th><th class="table-head">{% translate "Last payment" %}</th>
+  {% if rows %}
+  <div class="card table-scroll hidden md:block">
+    <table class="min-w-full">
+      <thead><tr>
+        {% include "components/sort_th.html" with key="oquvchi" label=_("Student") %}<th class="table-head">{% translate "Phone" %}</th><th class="table-head">{% translate "Parent's phone" %}</th><th class="table-head">{% translate "Groups" %}</th>
+        {% include "components/sort_th.html" with key="qarz" label=_("Overdue") cls="text-right" %}<th class="table-head text-right">{% translate "Unpaid total" %}</th>{% include "components/sort_th.html" with key="kun" label=_("Days overdue") cls="text-right" %}<th class="table-head">{% translate "Last payment" %}</th>
       </tr></thead>
       <tbody class="divide-y divide-slate-100">
         {% for r in rows %}
-          <tr class="hover:bg-slate-50">
+          <tr class="hover:bg-surface-2">
             <td class="table-cell font-medium"><a class="hover:text-sky-700" href="{% url 'students:detail' r.student.pk %}">{{ r.student.full_name }}</a></td>
-            <td class="table-cell">{{ r.student.phone|telefon|default:"—" }}</td>
+            <td class="table-cell tabular-nums">{{ r.student.phone|telefon|default:"—" }}</td>
             <td class="table-cell">{{ r.student.parent_phone|telefon|default:"—" }}</td>
             <td class="table-cell">{{ r.groups|join:", " }}</td>
             <td class="table-cell text-right font-semibold text-rose-700">{{ r.overdue|som }}</td>
@@ -41,8 +39,10 @@
             <td class="table-cell text-right">{{ r.days }}</td>
             <td class="table-cell">{{ r.last_payment|sana|default:"—" }}</td>
           </tr>
-        {% empty %}<tr><td colspan="8" class="table-cell text-center text-slate-500">{% translate "No debtors." %}</td></tr>{% endfor %}
+        {% endfor %}
       </tbody>
+      <tfoot><tr class="table-foot"><td class="table-cell" colspan="4">{% translate "Total" %}</td><td class="table-cell text-right tabular-nums text-rose-700">{{ total_overdue|som }}</td><td class="table-cell" colspan="3"></td></tr></tfoot>
     </table>
   </div>
+  {% endif %}
 {% endblock %}

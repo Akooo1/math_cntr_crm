@@ -1,7 +1,13 @@
-{% if page.has_other_pages %}
-  <nav class="mt-4 flex items-center justify-between gap-2 text-sm">
-    {% if page.has_previous %}<a class="btn-secondary" href="?{% if query %}{{ query }}&{% endif %}page={{ page.previous_page_number }}">{% icon "chevron-left" %}{% translate "Previous" %}</a>{% else %}<span></span>{% endif %}
-    <span class="text-slate-600">{% blocktranslate with n=page.number total=page.paginator.num_pages %}Page {{ n }} of {{ total }}{% endblocktranslate %}</span>
-    {% if page.has_next %}<a class="btn-secondary" href="?{% if query %}{{ query }}&{% endif %}page={{ page.next_page_number }}">{% translate "Next" %}{% icon "chevron-right" %}</a>{% else %}<span></span>{% endif %}
+{# "1–25 / 248" and previous / next. Needs `page` (a Paginator page) and `query` (other GET params). #}
+{% if page.paginator.count %}
+  <nav class="mt-4 flex flex-wrap items-center justify-between gap-2 text-sm" aria-label="{% translate 'Pages' %}">
+    <p class="tabular-nums text-muted" data-range>{{ page.start_index|raqam }}–{{ page.end_index|raqam }} / {{ page.paginator.count|raqam }}</p>
+    {% if page.has_other_pages %}
+      <div class="flex items-center gap-2">
+        {% if page.has_previous %}<a class="btn-secondary" rel="prev" href="?{% if query %}{{ query }}&{% endif %}page={{ page.previous_page_number }}">{% icon "chevron-left" %}<span class="hidden sm:inline">{% translate "Previous" %}</span><span class="sr-only sm:hidden">{% translate "Previous" %}</span></a>{% endif %}
+        <span class="tabular-nums text-muted">{{ page.number }} / {{ page.paginator.num_pages }}</span>
+        {% if page.has_next %}<a class="btn-secondary" rel="next" href="?{% if query %}{{ query }}&{% endif %}page={{ page.next_page_number }}"><span class="hidden sm:inline">{% translate "Next" %}</span><span class="sr-only sm:hidden">{% translate "Next" %}</span>{% icon "chevron-right" %}</a>{% endif %}
+      </div>
+    {% endif %}
   </nav>
 {% endif %}

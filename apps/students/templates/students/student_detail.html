@@ -1,38 +1,33 @@
 {% extends "base.html" %}
 {% block title %}{{ student.full_name }}{% endblock %}
-{% block heading %}{% translate "Student" %}{% endblock %}
+{% block heading %}{{ student.full_name }}{% endblock %}
+{% block count %}{% include "students/_status_badge.html" with st=status %}{% endblock %}
+{% block menu %}{% if can_manage %}<a href="{% url 'students:edit' student.pk %}" class="menu-item" role="menuitem">{% icon "pencil" "w-4 h-4" %}{% translate "Edit" %}</a>{% endif %}{% endblock %}
+{% block primary %}{% if can_manage %}<a href="{% url 'students:enroll' student.pk %}" class="btn-primary">{% icon "plus" %}<span>{% translate "Enroll into a group" %}</span></a>{% endif %}{% endblock %}
+{% block breadcrumbs %}<a href="{% url 'students:list' %}">{% translate "Students" %}</a>{% endblock %}
 {% block content %}
-  <div class="mb-4"><a href="{% url 'students:list' %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{% translate "Students" %}</a></div>
   <div class="grid gap-4 lg:grid-cols-3">
     <section class="card p-5">
-      <div class="flex items-start justify-between gap-3">
-        <h2 class="text-xl font-semibold">{{ student.full_name }}</h2>
-        {% include "students/_status_badge.html" with st=status %}
-      </div>
-      <dl class="mt-4 space-y-2 text-sm">
+      <h2 class="text-sm font-semibold uppercase tracking-wide text-slate-500">{% translate "Contacts" %}</h2>
+      <dl class="mt-3 space-y-2.5 text-sm">
         <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Phone" %}</dt><dd class="text-right">{% if student.phone %}<a class="text-sky-700" href="tel:{{ student.phone }}">{{ student.phone|telefon }}</a>{% else %}—{% endif %}</dd></div>
         <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Parent" %}</dt><dd class="text-right">{{ student.parent_name|default:"—" }}{% if student.parent_phone %}<br><a class="text-sky-700" href="tel:{{ student.parent_phone }}">{{ student.parent_phone|telefon }}</a>{% endif %}</dd></div>
         {% if student.extra_phone %}<div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Extra phone" %}</dt><dd>{{ student.extra_phone|telefon }}</dd></div>{% endif %}
         <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Date of birth" %}</dt><dd>{{ student.birth_date|sana|default:"—" }}</dd></div>
         <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Branch" %}</dt><dd>{{ student.branch.name }}</dd></div>
       </dl>
-      {% if student.notes %}<p class="mt-4 whitespace-pre-line rounded-lg bg-slate-50 p-3 text-sm">{{ student.notes }}</p>{% endif %}
-      {% if can_manage %}
-        <div class="mt-5 grid grid-cols-2 gap-2">
-          <a href="{% url 'students:enroll' student.pk %}" class="btn-primary col-span-2">{% icon "plus" %}{% translate "Enroll into a group" %}</a>
-          <a href="{% url 'students:edit' student.pk %}" class="btn-secondary col-span-2">{% icon "pencil" "w-4 h-4" %}{% translate "Edit" %}</a>
-        </div>
-      {% endif %}
+      {% if student.notes %}<p class="mt-4 whitespace-pre-line rounded-lg bg-surface-2 p-3 text-sm">{{ student.notes }}</p>{% endif %}
+      {% if can_manage %}<a href="{% url 'students:edit' student.pk %}" class="btn-secondary mt-5 w-full">{% icon "pencil" "w-4 h-4" %}{% translate "Edit" %}</a>{% endif %}
     </section>
 
-    <div class="space-y-4 lg:col-span-2">
+    <div class="min-w-0 space-y-4 lg:col-span-2">
       {% for p in panels %}{% include p.panel.template with ctx=p.ctx %}{% endfor %}
 
       <section class="card p-5">
         <h3 class="font-semibold">{% translate "Groups" %}</h3>
         <ul class="mt-3 space-y-3">
           {% for e in enrollments %}
-            <li class="rounded-lg border border-slate-200 p-3" x-data="{ open: false }">
+            <li class="rounded-xl border border-line p-3" x-data="{ open: false }">
               <div class="flex flex-wrap items-start justify-between gap-2">
                 <div>
                   <a href="{% url 'students:group' e.group_id %}" class="font-medium hover:text-sky-700">{{ e.group.name }}</a>
@@ -44,22 +39,22 @@
               {% if can_manage and e.is_open %}
                 <div class="mt-3 flex flex-wrap gap-2">
                   {% if e.status == 'active' %}
-                    <a href="{% url 'students:move' e.pk %}" class="btn-secondary px-3 py-1.5">{% translate "Move" %}</a>
-                    <a href="{% url 'students:freeze' e.pk %}" class="btn-secondary px-3 py-1.5">{% translate "Freeze" %}</a>
+                    <a href="{% url 'students:move' e.pk %}" class="btn-secondary">{% icon "arrow-right" "w-4 h-4" %}{% translate "Move" %}</a>
+                    <a href="{% url 'students:freeze' e.pk %}" class="btn-secondary">{% icon "clock" "w-4 h-4" %}{% translate "Freeze" %}</a>
                   {% else %}
-                    <a href="{% url 'students:unfreeze' e.pk %}" class="btn-secondary px-3 py-1.5">{% translate "Unfreeze" %}</a>
+                    <a href="{% url 'students:unfreeze' e.pk %}" class="btn-secondary">{% icon "refresh" "w-4 h-4" %}{% translate "Unfreeze" %}</a>
                   {% endif %}
-                  <a href="{% url 'students:leave' e.pk %}" class="btn-ghost px-3 py-1.5 text-rose-700">{% translate "Leave the group" %}</a>
+                  <a href="{% url 'students:leave' e.pk %}" class="btn-danger-soft">{% icon "logout" "w-4 h-4" %}{% translate "Leave the group" %}</a>
                 </div>
               {% endif %}
-              <button type="button" class="mt-2 text-sm font-medium text-sky-700" @click="open = !open">{% translate "History" %}</button>
+              <button type="button" class="link mt-2 inline-flex min-h-9 items-center text-sm" @click="open = !open" :aria-expanded="open">{% translate "History" %}</button>
               <ol x-show="open" x-cloak class="mt-2 space-y-1 text-sm">
                 {% for ev in e.events.all %}
-                  <li><span class="font-medium">{{ ev.effective_date|sana }}</span> · {{ ev.get_kind_display }}{% if ev.reason %} — {{ ev.reason }}{% endif %} <span class="text-xs text-slate-500">({{ ev.created_by.full_name }}, {{ ev.created_at|sana_vaqt }})</span></li>
+                  <li><span class="font-medium">{{ ev.effective_date|sana }}</span> · {{ ev.get_kind_display }}{% if ev.reason %} — {{ ev.reason }}{% endif %} <span class="text-xs text-slate-500">({{ ev.created_by.full_name }}, {% relative_time ev.created_at %})</span></li>
                 {% endfor %}
               </ol>
             </li>
-          {% empty %}<li class="text-sm text-slate-500">{% translate "Not enrolled in any group yet." %}</li>{% endfor %}
+          {% empty %}<li>{% if can_manage %}{% url 'students:enroll' student.pk as enroll_url %}{% include "components/empty.html" with icon="book" title=_("Not enrolled in any group yet.") url=enroll_url label=_("Enroll into a group") %}{% else %}<p class="text-sm text-slate-500">{% translate "Not enrolled in any group yet." %}</p>{% endif %}</li>{% endfor %}
         </ul>
       </section>
 

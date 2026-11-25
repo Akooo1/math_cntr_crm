@@ -1,28 +1,26 @@
 {% extends "base.html" %}
 {% block title %}{{ payment.receipt_number }}{% endblock %}
-{% block heading %}{% translate "Payment" %}{% endblock %}
+{% block heading %}{{ payment.receipt_number }}{% endblock %}
+{% block count %}<span class="badge {% if payment.kind == 'payment' %}bg-emerald-100 text-emerald-800{% else %}bg-rose-100 text-rose-800{% endif %}">{{ payment.get_kind_display }}</span>{% endblock %}
+{% block menu %}{% if can_reverse and payment.kind == 'payment' and not reversal and payment.provider_code == 'manual' %}<a href="{% url 'billing:reverse' payment.pk %}" class="menu-item menu-item-danger" role="menuitem">{% icon "x-circle" "w-4 h-4" %}{% translate "Reverse" %}</a>{% endif %}{% endblock %}
+{% block primary %}<a href="{% url 'billing:receipt' payment.pk %}" target="_blank" class="btn-primary">{% icon "receipt" %}<span>{% translate "Print receipt" %}</span></a>{% endblock %}
+{% block breadcrumbs %}{% if user|can:"billing.view" %}<a href="{% url 'billing:payments' %}">{% translate "Payments" %}</a>{% endif %}<a href="{% url 'students:detail' payment.student_id %}">{{ payment.student.full_name }}</a>{% endblock %}
 {% block content %}
-  <div class="mb-4"><a href="{% url 'students:detail' payment.student_id %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{{ payment.student.full_name }}</a></div>
-  <div class="mx-auto max-w-xl space-y-4">
+  <div class="max-w-xl space-y-4">
     <section class="card p-5">
       <div class="flex items-start justify-between gap-3">
-        <div><p class="text-sm text-slate-500">{{ payment.get_kind_display }}</p><p class="text-2xl font-semibold">{{ payment.amount|som }}</p></div>
-        <span class="badge bg-slate-100 text-slate-700">{{ payment.receipt_number }}</span>
+        <div><p class="text-sm text-slate-500">{% translate "Amount" %}</p><p class="text-3xl font-semibold tabular-nums">{{ payment.amount|som }}</p></div>
       </div>
       <dl class="mt-4 space-y-2 text-sm">
-        <div class="flex justify-between"><dt class="text-slate-500">{% translate "Date" %}</dt><dd>{{ payment.paid_on|sana }} ({{ payment.created_at|sana_vaqt }})</dd></div>
-        <div class="flex justify-between"><dt class="text-slate-500">{% translate "Payment method" %}</dt><dd>{{ payment.method.name }}</dd></div>
-        <div class="flex justify-between"><dt class="text-slate-500">{% translate "Received by" %}</dt><dd>{{ payment.received_by.full_name }}</dd></div>
-        <div class="flex justify-between"><dt class="text-slate-500">{% translate "Branch" %}</dt><dd>{{ payment.branch.name }}</dd></div>
-        {% if payment.comment %}<div class="flex justify-between"><dt class="text-slate-500">{% translate "Comment" %}</dt><dd>{{ payment.comment }}</dd></div>{% endif %}
-        {% if payment.reason %}<div class="flex justify-between"><dt class="text-slate-500">{% translate "Reason" %}</dt><dd>{{ payment.reason }}</dd></div>{% endif %}
-        {% if payment.reverses %}<div class="flex justify-between"><dt class="text-slate-500">{% translate "Reverses" %}</dt><dd><a class="text-sky-700" href="{% url 'billing:payment' payment.reverses_id %}">{{ payment.reverses.receipt_number }}</a></dd></div>{% endif %}
+        <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Date" %}</dt><dd class="text-right">{{ payment.paid_on|sana }} <span class="text-slate-500">({% relative_time payment.created_at %})</span></dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Payment method" %}</dt><dd>{{ payment.method.name }}</dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Received by" %}</dt><dd>{{ payment.received_by.full_name }}</dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Branch" %}</dt><dd>{{ payment.branch.name }}</dd></div>
+        {% if payment.comment %}<div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Comment" %}</dt><dd>{{ payment.comment }}</dd></div>{% endif %}
+        {% if payment.reason %}<div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Reason" %}</dt><dd>{{ payment.reason }}</dd></div>{% endif %}
+        {% if payment.reverses %}<div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Reverses" %}</dt><dd><a class="text-sky-700" href="{% url 'billing:payment' payment.reverses_id %}">{{ payment.reverses.receipt_number }}</a></dd></div>{% endif %}
       </dl>
       {% if reversal %}<p class="mt-4 rounded-lg bg-rose-50 p-3 text-sm text-rose-800">{% blocktranslate with n=reversal.receipt_number d=reversal.paid_on|sana %}Reversed on {{ d }} ({{ n }}).{% endblocktranslate %} {{ reversal.reason }}</p>{% endif %}
-      <div class="mt-5 flex flex-wrap gap-2">
-        <a href="{% url 'billing:receipt' payment.pk %}" target="_blank" class="btn-primary">{% icon "receipt" "w-4 h-4" %}{% translate "Print receipt" %}</a>
-        {% if can_reverse and payment.kind == 'payment' and not reversal and payment.provider_code == 'manual' %}<a href="{% url 'billing:reverse' payment.pk %}" class="btn-ghost text-rose-700">{% translate "Reverse" %}</a>{% endif %}
-      </div>
     </section>
     {% if allocations %}
       <section class="card p-5">

@@ -1,0 +1,2 @@
+{# Header count: "248", or "25 / 248" when a filter narrows the list. t = core.listing.Totals #}
+{% if t.filtered and t.shown != t.total %}<span class="count-pill" title="{% blocktranslate with shown=t.shown|raqam total=t.total|raqam %}{{ shown }} of {{ total }}{% endblocktranslate %}" data-count="{{ t.shown }}/{{ t.total }}">{{ t.shown|raqam }} <span class="font-normal text-muted">/ {{ t.total|raqam }}</span></span>{% else %}<span class="count-pill" title="{% translate 'Total' %}" data-count="{{ t.total }}">{{ t.total|raqam }}</span>{% endif %}

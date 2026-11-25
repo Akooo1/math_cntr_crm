@@ -8,12 +8,8 @@ from django.utils.translation import gettext_lazy as _
 
 from . import dates, money, phone
 
-INPUT_CSS = (
-    "block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base "
-    "text-slate-900 shadow-sm focus:border-sky-600 focus:outline-none focus:ring-2 "
-    "focus:ring-sky-600/20 disabled:bg-slate-100"
-)
-CHECK_CSS = "h-5 w-5 rounded border-slate-300 text-sky-700 focus:ring-sky-600"
+INPUT_CSS = "input"
+CHECK_CSS = "check"
 
 
 class DateInput(forms.TextInput):

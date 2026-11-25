@@ -1,6 +1,8 @@
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.audit_display import register_labels as register_audit_labels
+from apps.core.global_search import SearchHit, SearchProvider, register_search_provider
 from apps.core.permissions import register_permission
 from apps.core.registry import DashboardWidget, NavItem, registry
 from apps.core.roles import Role
@@ -127,4 +129,55 @@ register_audit_labels(
         "marked_by": _("Marked by"),
         "marked_at": _("Marked at"),
     }
+)
+
+
+# --- Global search (Ctrl+K) -----------------------------------------------------------
+
+
+def _search_students(request, query, limit):
+    from apps.core.phone import format_phone
+
+    from . import selectors
+
+    qs = selectors.search_students(
+        selectors.students_for(request.user, request.branch_filter), query
+    ).order_by("last_name", "first_name")
+    return [
+        SearchHit(
+            title=s.full_name,
+            url=reverse("students:detail", args=[s.pk]),
+            subtitle=" · ".join(
+                x for x in (format_phone(s.phone or s.parent_phone), s.branch.name) if x
+            ),
+        )
+        for s in qs[:limit]
+    ]
+
+
+def _search_groups(request, query, limit):
+    from apps.core.search import text_search
+
+    from . import selectors
+
+    qs = text_search(
+        selectors.groups_for(request.user, request.branch_filter), query, ["name"]
+    ).order_by("name")
+    return [
+        SearchHit(
+            title=g.name,
+            url=reverse("students:group", args=[g.pk]),
+            subtitle=" · ".join(
+                x for x in (g.course.name, g.teacher.full_name if g.teacher else "") if x
+            ),
+        )
+        for g in qs[:limit]
+    ]
+
+
+register_search_provider(
+    SearchProvider("students", _("Students"), "users", "students.view", _search_students, 10)
+)
+register_search_provider(
+    SearchProvider("groups", _("Groups"), "book", "groups.view", _search_groups, 30)
 )
