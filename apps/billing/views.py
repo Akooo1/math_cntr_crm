@@ -577,6 +577,20 @@ def cash_report(request):
             ]
             for p in report["rows"]
         ]
+        labels = {src["code"]: src["label"] for src in report["sources"]}
+        methods = {m["method"].pk: m["method"].name for m in report["methods"]}
+        data += [
+            [
+                timezone.localtime(line.at).strftime("%H:%M"),
+                "",
+                line.description,
+                " · ".join(str(x) for x in (labels.get(line.source, ""), line.kind_label) if x),
+                methods.get(line.method_id, ""),
+                line.signed_amount,
+                line.by_name,
+            ]
+            for line in report["extra_lines"]
+        ]
         kinds = ["text", "text", "text", "text", "text", "money", "text"]
         totals = [_("Total"), "", "", "", "", report["total_net"], ""]
         return excel.response(

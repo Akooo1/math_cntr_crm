@@ -90,6 +90,14 @@ def check_cash():
     by_day = defaultdict(int)
     for p in Payment.objects.filter(method__included_in_cash_close=True):
         by_day[(p.branch_id, p.paid_on)] += p.amount if p.kind == "payment" else -p.amount
+    # Counter sales and books paid at the desk are in the same cash report (SPEC 17.4).
+    from apps.store.models import Sale, SaleReversal
+
+    for sale in Sale.objects.filter(settlement="paid", method__included_in_cash_close=True):
+        by_day[(sale.branch_id, sale.sold_on)] += sale.total
+    for rev in SaleReversal.objects.filter(sale__settlement="paid").select_related("sale"):
+        by_day[(rev.sale.branch_id, rev.reversed_on)] -= rev.sale.total
+    assert Sale.objects.filter(settlement="paid").exists()
     assert by_day
     for (branch_id, day), total in by_day.items():
         report = services.cash.day_report(branch_id, day)

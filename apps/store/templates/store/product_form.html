@@ -1,0 +1,17 @@
+{% extends "settings/section_form.html" %}
+{% block after_form %}
+  {% if obj %}
+    <section class="card mt-4 p-5">
+      <div class="flex items-center justify-between gap-2">
+        <h3 class="font-semibold">{% translate "Price history" %}</h3>
+        <a href="{% url 'settings:section_action' section.slug obj.pk 'narx' %}" class="btn-secondary px-3 py-1.5">{% icon "plus" "w-4 h-4" %}{% translate "New price" %}</a>
+      </div>
+      <ul class="mt-2 divide-y divide-slate-100 text-sm">
+        {% for p in prices %}
+          <li class="flex justify-between gap-3 py-2"><span><span class="font-medium">{{ p.effective_from|sana }}</span>{% if p.effective_from > today %} <span class="badge bg-sky-100 text-sky-800">{% translate "Upcoming" %}</span>{% endif %}<span class="block text-slate-500">{{ p.created_by.full_name }}{% if p.note %} · {{ p.note }}{% endif %}</span></span><span class="font-semibold">{{ p.amount|som }}</span></li>
+        {% endfor %}
+      </ul>
+      <p class="mt-2 text-xs text-slate-500">{% translate "A sold book or item keeps the price it was sold at." %}</p>
+    </section>
+  {% endif %}
+{% endblock %}

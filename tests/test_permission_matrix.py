@@ -18,6 +18,7 @@ from apps.core.roles import Role
 from apps.core.settings_panel import sections
 from apps.crm.models import LeadSource, LeadStage, RefusalReason
 from tests.factories import (
+    BranchFactory,
     CourseFactory,
     RoomFactory,
     UserFactory,
@@ -350,11 +351,13 @@ def objects(director, branch_a, branch_b, admin_a, teacher_a):
             scheduled_date=leads[f"future_lesson_{key}"].date,
         )
     leads.update(_salary_objects(director, teacher_a, leads["group_b"].teacher))
+    leads.update(_store_objects(director, branch_a, branch_b, leads, cash))
     return {
         **leads,
         "stage": LeadStage.objects.get(kind="contacted"),
         "foydalanuvchilar": admin_a,
-        "filiallar": branch_a,
+        # A branch of its own: the toggle case deactivates it, and later cases use branch A.
+        "filiallar": BranchFactory(name="Uchinchi filial", receipt_prefix="UF"),
         "xonalar": room,
         "kurslar": course,
         "narxlar": price,
@@ -373,6 +376,111 @@ def objects(director, branch_a, branch_b, admin_a, teacher_a):
         "bildirishnomalar": branch_a,
         "telegram": branch_a,
         "xabar-shablonlari": _first_template(),
+        "mahsulotlar": leads["product"],
+    }
+
+
+def _store_objects(director, branch_a, branch_b, o, cash):
+    """An item and a book stocked in both branches; a paid sale in each branch and a book
+    given on account to student A."""
+    from apps.store import services as store
+
+    item = store.create_product(
+        actor=director, kind="item", name="Suv", price=3000, effective_from=today()
+    )
+    book = store.create_product(
+        actor=director, kind="book", name="Kitob", price=50_000, effective_from=today()
+    )
+    for branch in (branch_a, branch_b):
+        for product in (item, book):
+            store.receive_stock(
+                actor=director, branch=branch, product=product, quantity=50, received_on=today()
+            )
+    sale_a = store.sell_items(actor=director, branch=branch_a, lines=[(item, 1)], method=cash)
+    sale_b = store.sell_items(actor=director, branch=branch_b, lines=[(item, 1)], method=cash)
+    book_a = store.give_book(actor=director, student=o["student_a"], product=book)
+    return {
+        "branch_a_id": branch_a.pk,
+        "branch_b_id": branch_b.pk,
+        "product": item,
+        "book": book,
+        "sale_a": sale_a,
+        "sale_b": sale_b,
+        "book_sale_a": book_a,
+        "cash": cash,
+    }
+
+
+def store_cases(o) -> dict[str, list[Case]]:
+    """Store: Direktor everywhere; Filial administratori sells, gives books and records Kirim
+    in their own branch; corrections and cancellations are the Direktor's. Sotuv menejeri and
+    O'qituvchi never."""
+    both = expect({D: 200, A: 200})
+    other = expect({D: 200, A: 404})
+    director = expect({D: 200})
+    post_both = expect({D: 302, A: 302})
+    fa, fb = o["branch_a_id"], o["branch_b_id"]
+    sa, sb = o["student_a"].pk, o["student_b"].pk
+    sell_data = {"filial": fa, f"q_{o['product'].pk}": 1, "method": o["cash"].pk}
+    receive_data = {
+        "filial": fa,
+        "product": o["book"].pk,  # the item is deactivated by the settings toggle case
+        "quantity": 1,
+        "received_on": today().strftime("%d.%m.%Y"),
+    }
+    return {
+        "store:sell": [
+            Case("/savdo/", expect=both),
+            Case(f"/savdo/?filial={fa}", expect=both),
+            Case(f"/savdo/?filial={fb}", expect=other),
+            Case("/savdo/", "post", post_both, sell_data),
+        ],
+        "store:journal": [
+            Case("/savdo/jurnal/", expect=both),
+            Case("/savdo/jurnal/?dan=01.01.2026&gacha=31.12.2026", expect=both),
+        ],
+        "store:sale": [
+            Case(f"/savdo/{o['sale_a'].pk}/", expect=both),
+            Case(f"/savdo/{o['sale_b'].pk}/", expect=other),
+        ],
+        "store:reverse": [
+            Case(f"/savdo/{o['sale_a'].pk}/bekor-qilish/", expect=director),
+            Case(f"/savdo/{o['sale_b'].pk}/bekor-qilish/", expect=director),
+            Case(
+                f"/savdo/{o['book_sale_a'].pk}/bekor-qilish/",
+                "post",
+                expect({D: 302}),
+                {"reason": "x"},
+            ),
+        ],
+        "store:stock": [
+            Case("/ombor/", expect=both),
+            Case(f"/ombor/?filial={fb}", expect=other),
+        ],
+        "store:receive": [
+            Case(f"/ombor/kirim/?filial={fa}", expect=both),
+            Case(f"/ombor/kirim/?filial={fb}", expect=other),
+            Case("/ombor/kirim/", "post", post_both, receive_data),
+        ],
+        "store:correct": [
+            Case(f"/ombor/tuzatish/?filial={fa}", expect=director),
+            Case(f"/ombor/tuzatish/?filial={fb}", expect=director),
+        ],
+        "store:product": [
+            Case(f"/ombor/mahsulot/{o['product'].pk}/", expect=both),
+            Case(f"/ombor/mahsulot/{o['product'].pk}/?filial={fb}", expect=other),
+            Case(f"/ombor/mahsulot/{o['product'].pk + 10**6}/", expect=expect({D: 404, A: 404})),
+        ],
+        "store:give_book": [
+            Case(f"/kitob-berish/{sa}/", expect=both),
+            Case(f"/kitob-berish/{sb}/", expect=other),
+            Case(f"/kitob-berish/{sa}/", "post", post_both, {"book": o["book"].pk, "pay": "later"}),
+        ],
+        "store:give_group": [
+            Case("/guruhga-kitob/", expect=both),
+            Case(f"/guruhga-kitob/?guruh={o['group_a'].pk}", expect=both),
+            Case(f"/guruhga-kitob/?guruh={o['group_b'].pk}", expect=other),
+        ],
     }
 
 
@@ -518,6 +626,7 @@ def cases(objects) -> dict[str, list[Case]]:
     c.update(salaries_cases(objects))
     c.update(staff_cases(objects))
     c.update(telegram_cases(objects))
+    c.update(store_cases(objects))
     for s in sections():
         base = f"/sozlamalar/{s.slug}/"
         obj = objects[s.slug]

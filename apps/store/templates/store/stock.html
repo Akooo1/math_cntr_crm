@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}{% translate "Stock" %}{% endblock %}
+{% block heading %}{% translate "Stock" %}{% endblock %}
+{% block content %}
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+    {% if branches|length > 1 %}
+      <form method="get"><label class="sr-only" for="filial">{% translate "Branch" %}</label>
+        <select id="filial" name="filial" onchange="this.form.submit()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-base">{% for b in branches %}<option value="{{ b.pk }}" {% if b.pk == branch.pk %}selected{% endif %}>{{ b.name }}</option>{% endfor %}</select>
+      </form>
+    {% else %}<p class="text-sm font-medium text-slate-600">{{ branch.name }}</p>{% endif %}
+    <div class="flex flex-wrap gap-2">
+      {% if user|can:"store.stock.receive" %}<a href="{% url 'store:receive' %}?filial={{ branch.pk }}" class="btn-primary">{% icon "plus" %}{% translate "Stock received" %}</a>{% endif %}
+      {% if user|can:"store.stock.correct" %}<a href="{% url 'store:correct' %}?filial={{ branch.pk }}" class="btn-secondary">{% icon "pencil" "w-4 h-4" %}{% translate "Stock correction" %}</a>{% endif %}
+    </div>
+  </div>
+
+  {% if not rows %}
+    <div class="card p-8 text-center text-sm text-slate-500">{% translate "No products yet. The director adds them in Settings → Products." %}</div>
+  {% else %}
+    <ul class="space-y-3 md:hidden">
+      {% for r in rows %}
+        <li class="card p-4 {% if not r.product.is_active %}opacity-60{% endif %}">
+          <a href="{% url 'store:product' r.product.pk %}?filial={{ branch.pk }}" class="flex items-start justify-between gap-3">
+            <span class="min-w-0"><span class="block font-semibold">{{ r.product.name }}</span><span class="block text-sm text-slate-500">{{ r.product.get_kind_display }}{% if r.price %} · {{ r.price.amount|som }}{% endif %}</span></span>
+            <span class="shrink-0 text-right"><span class="block text-2xl font-bold {% if r.on_hand <= 0 %}text-rose-700{% elif r.low %}text-amber-700{% endif %}">{{ r.on_hand }}</span>
+              {% if r.on_hand <= 0 %}<span class="badge bg-rose-100 text-rose-800">{% translate "Out of stock" %}</span>{% elif r.low %}<span class="badge bg-amber-100 text-amber-800">{% translate "Low stock" %}</span>{% endif %}</span>
+          </a>
+          {% if user|can:"store.stock.receive" and r.product.is_active %}<a href="{% url 'store:receive' %}?filial={{ branch.pk }}&mahsulot={{ r.product.pk }}" class="btn-secondary mt-3 w-full py-2">{% icon "plus" "w-4 h-4" %}{% translate "Stock received" %}</a>{% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+    <div class="card hidden overflow-x-auto md:block">
+      <table class="min-w-full divide-y divide-slate-200">
+        <thead class="bg-slate-50"><tr>
+          <th class="table-head">{% translate "Product" %}</th><th class="table-head">{% translate "Type" %}</th>
+          <th class="table-head text-right">{% translate "Price" %}</th><th class="table-head text-right">{% translate "On hand" %}</th>
+          <th class="table-head text-right">{% translate "Low-stock threshold" %}</th><th class="table-head"><span class="sr-only">{% translate "Actions" %}</span></th>
+        </tr></thead>
+        <tbody class="divide-y divide-slate-100">
+          {% for r in rows %}
+            <tr class="{% if not r.product.is_active %}opacity-60{% endif %}">
+              <td class="table-cell font-medium"><a class="hover:text-sky-700" href="{% url 'store:product' r.product.pk %}?filial={{ branch.pk }}">{{ r.product.name }}</a></td>
+              <td class="table-cell">{{ r.product.get_kind_display }}</td>
+              <td class="table-cell text-right">{% if r.price %}{{ r.price.amount|som }}{% endif %}</td>
+              <td class="table-cell text-right font-semibold {% if r.on_hand <= 0 %}text-rose-700{% elif r.low %}text-amber-700{% endif %}">{{ r.on_hand }}
+                {% if r.on_hand <= 0 %}<span class="badge bg-rose-100 text-rose-800">{% translate "Out of stock" %}</span>{% elif r.low %}<span class="badge bg-amber-100 text-amber-800">{% translate "Low stock" %}</span>{% endif %}</td>
+              <td class="table-cell text-right">{{ r.product.low_stock_threshold }}</td>
+              <td class="table-cell text-right">{% if user|can:"store.stock.receive" and r.product.is_active %}<a href="{% url 'store:receive' %}?filial={{ branch.pk }}&mahsulot={{ r.product.pk }}" class="btn-ghost px-3 py-1.5">{% icon "plus" "w-4 h-4" %}{% translate "Stock received" %}</a>{% endif %}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+{% endblock %}

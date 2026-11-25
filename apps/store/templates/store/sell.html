@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}{% translate "Sales" %}{% endblock %}
+{% block heading %}{% translate "Sales" %}{% endblock %}
+{% block content %}
+{{ tiles_data|json_script:"sell-tiles" }}
+<script>
+  // No translated text here: labels come from the page, the currency from data-unit.
+  document.addEventListener("alpine:init", () => {
+    Alpine.data("sellScreen", () => {
+      const tiles = JSON.parse(document.getElementById("sell-tiles").textContent);
+      const stock = {}, price = {};
+      tiles.forEach((t) => { stock[t.id] = t.stock; price[t.id] = t.price; });
+      return {
+        basket: {},
+        busy: false,
+        qty(id) { return this.basket[id] || 0; },
+        left(id) { return stock[id] - this.qty(id); },
+        none(id) { return this.left(id) <= 0; },
+        add(id) { if (this.left(id) > 0) this.basket[id] = this.qty(id) + 1; },
+        dec(id) { const q = this.qty(id) - 1; if (q > 0) { this.basket[id] = q; } else { delete this.basket[id]; } },
+        clear() { this.basket = {}; },
+        count() { return Object.values(this.basket).reduce((a, b) => a + b, 0); },
+        total() { return Object.entries(this.basket).reduce((s, [id, q]) => s + price[id] * q, 0); },
+        money(v) { return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, " ") + " " + this.$root.dataset.unit; },
+      };
+    });
+  });
+</script>
+
+<div x-data="sellScreen" data-unit="{% translate 'sum' context 'currency' %}">
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+    {% if branches|length > 1 %}
+      <form method="get"><label class="sr-only" for="filial">{% translate "Branch" %}</label>
+        <select id="filial" name="filial" onchange="this.form.submit()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-base">{% for b in branches %}<option value="{{ b.pk }}" {% if b.pk == branch.pk %}selected{% endif %}>{{ b.name }}</option>{% endfor %}</select>
+      </form>
+    {% else %}<p class="text-sm font-medium text-slate-600">{{ branch.name }}</p>{% endif %}
+    <div class="flex flex-wrap gap-2 text-sm">
+      {% if user|can:"store.sell" %}<a href="{% url 'store:give_group' %}" class="btn-ghost px-3 py-1.5">{% icon "book" "w-4 h-4" %}{% translate "Give books to a group" %}</a>{% endif %}
+      <a href="{% url 'store:stock' %}?filial={{ branch.pk }}" class="btn-ghost px-3 py-1.5">{% icon "list" "w-4 h-4" %}{% translate "Stock" %}</a>
+    </div>
+  </div>
+
+  {% if closed %}
+    <div class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">{% translate "Today's cash day is closed. No more sales can be made today." %}</div>
+  {% endif %}
+
+  {% if tiles %}
+    <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+      {% for t in tiles %}{% with pk=t.product.pk %}
+        <button type="button" @click="add({{ pk }})" :disabled="none({{ pk }})" {% if closed or t.on_hand <= 0 %}disabled{% endif %}
+                class="relative flex min-h-[7.5rem] flex-col rounded-xl border-2 bg-white p-3 text-left shadow-sm transition active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-50"
+                :class="qty({{ pk }}) ? 'border-sky-500 bg-sky-50' : 'border-slate-200'">
+          <span class="text-base font-semibold leading-snug text-slate-900">{{ t.product.name }}</span>
+          <span class="mt-auto pt-2 text-lg font-bold text-sky-800">{{ t.price.amount|som }}</span>
+          <span class="mt-1 flex flex-wrap items-center justify-between gap-1 text-xs">
+            <span class="text-slate-500">{% translate "On hand" %}: <span class="font-semibold text-slate-700" x-text="left({{ pk }})">{{ t.on_hand }}</span></span>
+            {% if t.on_hand <= 0 %}<span class="badge bg-rose-100 text-rose-800">{% translate "Out of stock" %}</span>{% elif t.low %}<span class="badge bg-amber-100 text-amber-800">{% translate "Low stock" %}</span>{% endif %}
+          </span>
+          <span x-show="qty({{ pk }})" x-cloak class="absolute -right-2 -top-2 flex h-8 min-w-8 items-center justify-center rounded-full bg-sky-800 px-2 text-sm font-bold text-white shadow" x-text="qty({{ pk }})"></span>
+        </button>
+      {% endwith %}{% endfor %}
+    </div>
+  {% else %}
+    <div class="card p-8 text-center text-sm text-slate-500">{% translate "No items to sell yet. The director adds them in Settings → Products." %}</div>
+  {% endif %}
+
+  <section class="card mt-6 p-4 md:p-5">
+    <div class="flex items-center justify-between gap-2">
+      <h2 class="font-semibold">{% translate "Today's sales" %}</h2>
+      <a href="{% url 'store:journal' %}" class="btn-ghost px-3 py-1.5 text-sm">{% translate "Sales journal" %}</a>
+    </div>
+    <ul class="mt-2 divide-y divide-slate-100 text-sm">
+      {% for s in sales %}
+        <li><a href="{% url 'store:sale' s.pk %}" class="flex items-center justify-between gap-3 py-2.5 hover:text-sky-700">
+          <span class="min-w-0"><span class="block truncate font-medium">{% for l in s.lines.all %}{{ l.product.name }} × {{ l.quantity }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+            <span class="block text-slate-500">{{ s.created_at|time:"H:i" }} · {% if s.method %}{{ s.method.name }}{% else %}{% translate "Pay later" %}{% endif %}{% if s.student %} · {{ s.student.full_name }}{% endif %}</span></span>
+          <span class="shrink-0 text-right font-medium {% if s.reversal %}text-slate-400 line-through{% endif %}">{{ s.total|som }}</span>
+        </a></li>
+      {% empty %}<li class="py-2 text-slate-500">{% translate "No sales today yet." %}</li>{% endfor %}
+    </ul>
+  </section>
+
+  {# Space so the basket bar never covers the list. #}
+  <div x-show="count()" class="h-64"></div>
+
+  <form method="post" x-show="count()" x-cloak @submit="busy = true"
+        class="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-20 border-t border-slate-200 bg-white px-3 pb-3 pt-2 shadow-[0_-6px_16px_rgba(15,23,42,.08)] md:bottom-0 md:left-64 md:px-8">
+    {% csrf_token %}<input type="hidden" name="filial" value="{{ branch.pk }}">
+    <div class="mx-auto max-w-6xl">
+      <ul class="max-h-36 divide-y divide-slate-100 overflow-y-auto">
+        {% for t in tiles %}{% with pk=t.product.pk %}
+          <li x-show="qty({{ pk }})" class="flex items-center gap-2 py-1">
+            <span class="min-w-0 flex-1 truncate text-sm font-medium">{{ t.product.name }}</span>
+            <button type="button" @click="dec({{ pk }})" class="h-10 w-10 shrink-0 rounded-lg border border-slate-300 text-xl font-semibold" aria-label="{% translate 'One less' %}">−</button>
+            <span class="w-7 text-center text-base font-semibold" x-text="qty({{ pk }})"></span>
+            <button type="button" @click="add({{ pk }})" :disabled="none({{ pk }})" class="h-10 w-10 shrink-0 rounded-lg border border-slate-300 text-xl font-semibold disabled:opacity-40" aria-label="{% translate 'One more' %}">+</button>
+            <input type="hidden" name="q_{{ pk }}" :value="qty({{ pk }})">
+          </li>
+        {% endwith %}{% endfor %}
+      </ul>
+      <div class="mt-1 flex items-baseline justify-between gap-3">
+        <p class="min-w-0 text-sm text-slate-500">{% translate "Total" %} <span class="ml-1 text-xl font-bold text-slate-900" x-text="money(total())"></span></p>
+        <button type="button" @click="clear()" class="shrink-0 text-sm font-medium text-slate-500 underline-offset-2 hover:underline">{% translate "Clear" %}</button>
+      </div>
+      <fieldset class="-mx-3 mt-2 flex gap-2 overflow-x-auto px-3 pb-1 md:mx-0 md:px-0">
+        <legend class="sr-only">{% translate "Payment method" %}</legend>
+        {% for m in methods %}
+          <label class="shrink-0 cursor-pointer">
+            <input type="radio" name="method" value="{{ m.pk }}" class="peer sr-only" {% if m.pk == default_method.pk %}checked{% endif %}>
+            <span class="inline-flex min-h-10 items-center whitespace-nowrap rounded-full border border-slate-300 px-4 text-sm font-medium peer-checked:border-sky-800 peer-checked:bg-sky-800 peer-checked:text-white">{{ m.name }}</span>
+          </label>
+        {% endfor %}
+      </fieldset>
+      <button class="btn-primary mt-2 h-12 w-full text-base md:ml-auto md:flex md:w-64" :disabled="busy">{% icon "check" %}{% translate "Sell" %}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

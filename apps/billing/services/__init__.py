@@ -1,6 +1,6 @@
 """Public write interface of the billing module."""
 
-from ..domain.rounding import percent_of
+from ..domain.rounding import percent_of, round_amount
 from . import allocation, cash, corrections, discounts, installments, ledger, monthly, payments
 from .pricing import add_price, price_kind_for, save_installment_template
 
@@ -15,6 +15,7 @@ __all__ = [
     "monthly",
     "payments",
     "percent_of",
+    "round_amount",
     "price_kind_for",
     "save_installment_template",
 ]

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{{ section.title }}{% endblock %}
+{% block heading %}{% translate "Settings" %}{% endblock %}
+{% block content %}
+  <div class="mb-4"><a href="{% url 'settings:section_edit' section.slug product.pk %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{{ product.name }}</a></div>
+  <div class="mx-auto max-w-xl">
+    <h2 class="mb-1 text-xl font-semibold">{% translate "New price" %}</h2>
+    <p class="mb-4 text-sm text-slate-600">{{ product.name }}. {% translate "A sold book or item keeps the price it was sold at." %}</p>
+    <form method="post" class="card space-y-4 p-5" novalidate>{% csrf_token %}
+      {% include "components/form_errors.html" %}
+      {% for f in form %}{% field f %}{% endfor %}
+      <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <a href="{% url 'settings:section_edit' section.slug product.pk %}" class="btn-secondary">{% translate "Back" %}</a>
+        <button class="btn-primary">{% translate "Save" %}</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

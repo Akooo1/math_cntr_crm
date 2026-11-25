@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{% translate "Sale" %}{% endblock %}
+{% block heading %}{% translate "Sale" %}{% endblock %}
+{% block content %}
+  <div class="mb-4"><a href="{% url 'store:journal' %}?dan={{ sale.sold_on|sana }}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{% translate "Sales journal" %}</a></div>
+  <div class="mx-auto max-w-xl">
+    <section class="card p-5">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <p class="text-sm text-slate-500">{{ sale.sold_on|sana }} {{ sale.created_at|time:"H:i" }} · {{ sale.branch.name }}</p>
+          <p class="text-2xl font-semibold {% if sale.reversal %}text-slate-400 line-through{% endif %}">{{ sale.total|som }}</p>
+          <p class="text-sm text-slate-600">{% if sale.method %}{{ sale.method.name }}{% else %}{% translate "Pay later" %}{% endif %} · {{ sale.sold_by.full_name }}</p>
+          {% if sale.student %}<p class="mt-1 text-sm"><a class="font-medium text-sky-700 hover:underline" href="{% url 'students:detail' sale.student.pk %}">{{ sale.student.full_name }}</a></p>{% endif %}
+        </div>
+        {% if sale.reversal %}<span class="badge bg-rose-100 text-rose-800">{% translate "Cancelled" %}</span>{% endif %}
+      </div>
+      <ul class="mt-4 divide-y divide-slate-100 text-sm">
+        {% for l in sale.lines.all %}<li class="flex justify-between gap-3 py-2"><span>{{ l.product.name }} × {{ l.quantity }} <span class="text-slate-500">({{ l.unit_price|som }})</span></span><span class="font-medium">{{ l.amount|som }}</span></li>{% endfor %}
+      </ul>
+      {% if sale.reversal %}
+        <div class="mt-4 rounded-lg bg-rose-50 p-3 text-sm text-rose-900">
+          <p class="font-medium">{% blocktranslate with who=sale.reversal.created_by.full_name day=sale.reversal.reversed_on|sana %}Cancelled by {{ who }} on {{ day }}{% endblocktranslate %}</p>
+          <p>{{ sale.reversal.reason }}</p>
+        </div>
+      {% endif %}
+      {% if can_reverse %}
+        <a href="{% url 'store:reverse' sale.pk %}" class="btn-ghost mt-4 text-rose-700">{% icon "x-circle" "w-4 h-4" %}{% translate "Cancel the sale" %}</a>
+      {% endif %}
+    </section>
+  </div>
+{% endblock %}
