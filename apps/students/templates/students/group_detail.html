@@ -6,7 +6,7 @@
 {% block breadcrumbs %}<a href="{% url 'students:groups' %}">{% translate "Groups" %}</a>{% endblock %}
 {% block content %}
   <div class="grid gap-4 lg:grid-cols-3">
-    <section class="card p-5">
+    <section class="card self-start p-5">
       <dl class="space-y-2.5 text-sm">
         <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Course" %}</dt><dd class="text-right">{{ group.course.name }}</dd></div>
         <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Teacher" %}</dt><dd class="text-right">{{ group.teacher.full_name }}</dd></div>

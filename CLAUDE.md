@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **9 prepared** (Railway: config, guide in docs/deploy-railway.md). Waiting for the owner to create the Railway project and deploy. Update this line at the end of each phase.
+- Current phase: **9 prepared** (Railway: config, guide in docs/deploy-railway.md). Waiting for the owner to create the Railway project and deploy. UI refresh (themes, page pattern, list totals, global search) done on branch `claude/blissful-ritchie-4x3iji`, waiting for review. Update this line at the end of each phase.
 
 ## Ask the owner before
 
@@ -162,6 +162,14 @@ Inside a module:
 | Share phone number | Telefon raqamni yuborish |
 | Message to parents / message templates | Ota-onalarga xabar / Xabar shablonlari |
 | Preview / send | Ko'rib chiqish / Yuborish |
+| Search / search results | Qidirish / Qidiruv natijalari |
+| Theme: light / dark / system | Ko'rinish: Yorug' / Qorong'i / Tizim |
+| Total (list header sum) | Jami |
+| Clear filters | Filtrlarni tozalash |
+| More actions (overflow menu) | Boshqa amallar |
+| Calendar / choose a date | Taqvim / Sanani tanlang |
+| Just now / N minutes ago / N hours ago / yesterday / N days ago | hozirgina / N daqiqa oldin / N soat oldin / kecha / N kun oldin |
+| Saving… | Saqlanmoqda… |
 
 Add new terms here before using them in the UI.
 
@@ -211,6 +219,49 @@ Add new terms here before using them in the UI.
   `favicon-32.png`, `apple-touch-icon.png`, `icon-512.png` (e.g. the Telegram bot photo).
   The center name in the header: `templates/components/brand_name.html`.
 - URLs and slugs are Uzbek (`/sozlamalar/`, `/kirish/`); code identifiers stay English.
+
+### UI kit (every screen uses these; see `assets/app.css` and `templates/base.html`)
+
+- **Page pattern** (`base.html` blocks): `breadcrumbs` (plain `<a>` links; separators are CSS),
+  `heading` (the page title, an `h1`), `count` (defaults to the list count from `totals`;
+  detail pages put a status badge here), `menu` (secondary actions as
+  `<a class="menu-item" role="menuitem">`; the "…" button appears only when it has items),
+  `primary` (ONE `btn-primary` with icon + `<span>label</span>`; on phones it floats above the
+  bottom bar in thumb reach). Don't render page titles or back links inside `content`.
+- **List totals**: `core.listing.totals(everything, shown, amount=..)` → pass as `totals`;
+  the header shows `248`, or `25 / 248` when a filter hides rows, and `Jami: … so'm` for money
+  lists (sum of all shown rows, every page). `listing.paginate(request, qs)` → `page, query`
+  for `components/pagination.html` ("1–25 / 248", 25 per page). `listing.sort_queryset()` /
+  `sort_rows()` + `{% include "components/sort_th.html" with key=.. label=_("..") %}` for
+  sortable columns (`?tartib=-key`). `listing.active_filters(request, [...])` says whether the
+  user filtered. Every new list gets a totals test (see `tests/test_list_totals.py`).
+- **Themes**: never write `dark:` classes, `bg-white` or `text-white`. Use `bg-canvas` (page),
+  `bg-surface` (cards), `bg-surface-2` (table heads, hover), `border-line`, `text-fg`,
+  `text-muted`, and the slate/sky/rose/emerald/amber/violet scales, which are mirrored for dark
+  mode. Solid fills with white text only through `.btn-primary`, `.btn-danger`, `.btn-success`,
+  `.chip[aria-current]`. Charts use `var(--color-chart-1/2)`. `tests/test_ui_tokens.py` fails
+  on other hues and on any text colour below WCAG AA in either theme.
+- **Components** (CSS classes): `btn-primary | btn-secondary | btn-ghost | btn-danger |
+  btn-danger-soft | btn-success` (+ `btn-icon` for square icon buttons; all ≥ 44 px), `input`,
+  `label`, `check`, `card`, `badge`, `chip` / `chip-row` (filters; mark the active one with
+  `aria-current="page"`), `seg` / `seg-item[aria-pressed]` (segmented control), `table-scroll`
+  + `table-head` / `table-cell` / `table-foot` (sticky header), `form-actions` (form buttons;
+  sticky above the bottom bar on phones), `count-pill`, `link`, `kbd`, `menu` / `menu-item`.
+- **Empty states**: `{% include "components/empty.html" with icon=".." title=_("..") text=_("..")
+  url=.. label=_("..") reset=.. %}` — always offer the next action (or "clear filters").
+- **Messages** are toasts automatically (`components/messages.html`); just use
+  `django.contrib.messages`. Inline form errors stay in the form.
+- **Forms**: every POST form disables its buttons and shows a spinner on submit (no double
+  payments); the pressed button's `name=value` is still sent. Opt out with `data-no-busy`.
+  `data-confirm` works on the `<form>` or on a single submit `<button>`. `data-autosubmit`
+  submits on change. Date inputs (`data-mask="date"`) get the calendar popover automatically.
+- **Time**: `{% relative_time dt %}` for activity feeds ("2 soat oldin", exact time on hover).
+  The top-bar clock and the calendar read their Uzbek names from `ui_i18n`
+  (`core.context_processors.ui_strings`); add JS strings there, never inline.
+- **Global search** (Ctrl+K, `/qidiruv/`): a module adds results with
+  `core.global_search.register_search_provider(SearchProvider(key, label, icon, permission,
+  search_fn, order))` in its `registry.py`; `search_fn(request, query, limit)` must start from
+  the module's scoped selectors and return `SearchHit`s.
 
 ## Security and permissions
 
