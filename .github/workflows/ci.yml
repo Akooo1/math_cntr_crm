@@ -38,5 +38,13 @@ jobs:
           source .venv/bin/activate
           scripts/i18n.sh --check
           python manage.py compilemessages -l uz --ignore=.venv
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Built CSS is up to date (static/dist/app.css is committed)
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build:css
+          git diff --exit-code static/dist/app.css || (echo "Run npm run build:css and commit static/dist/app.css" && exit 1)
       - name: Tests
         run: uv run pytest --cov=apps --cov-report=term-missing:skip-covered

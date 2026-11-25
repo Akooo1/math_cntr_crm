@@ -30,7 +30,7 @@ uv run python manage.py makemigrations --check --dry-run
 scripts/i18n.sh                                # extract UI strings into locale/uz/.../django.po + compile
 scripts/i18n.sh --check                        # CI: fail if strings changed and were not extracted
 uv run python manage.py seed_demo              # demo data (apps/demo), idempotent
-npm run build:css                              # Tailwind -> static/dist/app.css (dev compose runs a watcher)
+npm run build:css                              # Tailwind -> static/dist/app.css; COMMIT the result (a test and CI check it)
 ```
 
 ## Layout and module boundaries

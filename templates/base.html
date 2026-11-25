@@ -7,7 +7,7 @@
   <title>{% block title %}{{ center_name }}{% endblock %} — {{ center_name }}</title>
   {# Theme before first paint: "light" | "dark" | "system" (default), remembered per browser. #}
   <script>(function(){var t="system";try{t=localStorage.getItem("theme")||"system"}catch(e){}var d=t==="dark"||(t==="system"&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.setAttribute("data-theme",d?"dark":"light");document.documentElement.setAttribute("data-theme-choice",t)})()</script>
-  <link rel="stylesheet" href="{% static 'dist/app.css' %}">
+  <link rel="stylesheet" href="{% static 'dist/app.css' %}{% if asset_v %}?v={{ asset_v }}{% endif %}">
   <link rel="icon" href="{% static 'brand/mark.svg' %}" type="image/svg+xml">
   <link rel="icon" href="{% static 'brand/favicon-32.png' %}" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="{% static 'brand/apple-touch-icon.png' %}">
@@ -15,7 +15,7 @@
   <meta name="theme-color" content="#111a2c" media="(prefers-color-scheme: dark)">
   <script src="{% static 'vendor/htmx-2.0.4.min.js' %}" defer></script>
   <script src="{% static 'vendor/alpine-3.14.8.min.js' %}" defer></script>
-  <script src="{% static 'js/app.js' %}" defer></script>
+  <script src="{% static 'js/app.js' %}{% if asset_v %}?v={{ asset_v }}{% endif %}" defer></script>
   {% block extra_head %}{% endblock %}
 </head>
 <body class="min-h-screen bg-canvas text-fg antialiased">

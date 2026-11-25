@@ -82,6 +82,13 @@ uv run python manage.py makemigrations --check --dry-run
 scripts/i18n.sh --check
 ```
 
+## Styles
+
+`static/dist/app.css` is built from `assets/app.css` and the templates and is committed, so
+`git pull` always brings a matching stylesheet. After changing classes or `assets/app.css`, run
+`npm run build:css` and commit the file (the dev compose `css` service rebuilds it while you
+work). A test and CI fail when it is out of date.
+
 ## UI text
 
 All text lives in `locale/uz/LC_MESSAGES/django.po`. After adding or changing UI strings,

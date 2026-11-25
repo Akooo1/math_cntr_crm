@@ -75,10 +75,26 @@ def clock() -> dict:
     }
 
 
+def _asset_version() -> str:
+    """Development only: changes whenever app.css or app.js changes, so the browser never
+    keeps an old stylesheet. Production URLs are already hashed by the manifest storage."""
+    from django.conf import settings
+
+    if not settings.DEBUG:
+        return ""
+    stamps = []
+    for rel in ("static/dist/app.css", "static/js/app.js"):
+        try:
+            stamps.append(str(int((settings.BASE_DIR / rel).stat().st_mtime)))
+        except OSError:
+            stamps.append("0")
+    return "-".join(stamps)
+
+
 def layout(request):
     user = getattr(request, "user", None)
     if user is None or not user.is_authenticated:
-        return {"center_name": _center_name(), "ui_i18n": ui_strings()}
+        return {"center_name": _center_name(), "ui_i18n": ui_strings(), "asset_v": _asset_version()}
     items = sorted(
         (i for i in registry.nav.values() if has_perm(user, i.permission)),
         key=lambda i: i.order,
@@ -98,4 +114,5 @@ def layout(request):
         "branch_options": _branch_options(request),
         "clock": clock(),
         "ui_i18n": ui_strings(),
+        "asset_v": _asset_version(),
     }
