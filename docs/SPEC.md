@@ -1327,3 +1327,6 @@ New questions:
   so later cases in the same run aren't affected.
 - **Demo data:** five items and three books in every branch, deliveries (1,5 L suv without a
   cost), today's sales, three books on account and one paid per branch.
+- **Confirmed by the owner after the build:** frozen students are unticked by default in the
+  group give; a Kirim needs an active product (reactivate first); the Kassa subtotal is
+  "O'quvchilar to'lovlari".
