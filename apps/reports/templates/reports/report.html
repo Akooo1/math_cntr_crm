@@ -1,26 +1,24 @@
 {% extends "base.html" %}
 {% block title %}{{ report.title }}{% endblock %}
-{% block heading %}{% translate "Reports" %}{% endblock %}
+{% block heading %}{{ report.title }}{% endblock %}
+{% block count %}<span class="count-pill">{{ result.rows|length|raqam }}</span>{% endblock %}
+{% block menu %}<a href="{% url 'reports:excel' report.key %}?{{ query }}" class="menu-item" role="menuitem">{% icon "download" "w-4 h-4" %}{% translate "Export to Excel" %}</a>{% endblock %}
+{% block breadcrumbs %}<a href="{% url 'reports:index' %}">{% translate "Reports" %}</a>{% endblock %}
 {% block content %}
-  <div class="mb-4"><a href="{% url 'reports:index' %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{% translate "Reports" %}</a></div>
-  <div class="mb-4 flex flex-wrap items-start justify-between gap-3">
-    <div><h2 class="text-xl font-semibold">{{ report.title }}</h2>
-      <p class="text-sm text-slate-500">{% if report.uses_period %}{{ shown.dan|sana }} — {{ shown.gacha|sana }}{% endif %}{% if request.branch_filter %} · {% translate "one branch" %}{% endif %}</p></div>
-    <a href="{% url 'reports:excel' report.key %}?{{ query }}" class="btn-secondary">{% icon "download" "w-4 h-4" %}{% translate "Export to Excel" %}</a>
-  </div>
+  <p class="-mt-3 mb-4 text-sm text-slate-500">{% if report.uses_period %}{{ shown.dan|sana }} — {{ shown.gacha|sana }}{% endif %}{% if request.branch_filter %} · {% translate "one branch" %}{% endif %}</p>
   {% if report.uses_period %}
-    <form method="get" class="card mb-4 flex flex-wrap items-end gap-2 p-4">
-      <div><label class="label" for="dan">{% translate "From" %}</label><input id="dan" name="dan" value="{{ shown.dan|sana }}" data-mask="date" inputmode="numeric" class="w-32 rounded-lg border border-slate-300 px-3 py-2 text-base"></div>
-      <div><label class="label" for="gacha">{% translate "To" %}</label><input id="gacha" name="gacha" value="{{ shown.gacha|sana }}" data-mask="date" inputmode="numeric" class="w-32 rounded-lg border border-slate-300 px-3 py-2 text-base"></div>
-      <button class="btn-primary">{% translate "Show" %}</button>
+    <form method="get" class="card mb-4 flex flex-wrap items-end gap-3 p-4">
+      <div><label class="label" for="dan">{% translate "From" %}</label><input id="dan" name="dan" value="{{ shown.dan|sana }}" data-mask="date" inputmode="numeric" class="input w-40"></div>
+      <div><label class="label" for="gacha">{% translate "To" %}</label><input id="gacha" name="gacha" value="{{ shown.gacha|sana }}" data-mask="date" inputmode="numeric" class="input w-40"></div>
+      <button class="btn-secondary">{% icon "funnel" "w-4 h-4" %}{% translate "Show" %}</button>
       <div class="flex w-full flex-wrap gap-2 sm:w-auto">
-        {% for p in presets %}<a href="?dan={{ p.dan|sana }}&gacha={{ p.gacha|sana }}" class="rounded-full bg-slate-100 px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-200">{{ p.label }}</a>{% endfor %}
+        {% for p in presets %}<a href="?dan={{ p.dan|sana }}&gacha={{ p.gacha|sana }}" class="chip">{{ p.label }}</a>{% endfor %}
       </div>
     </form>
   {% endif %}
 
   {# Phone: one card per row #}
-  <div class="space-y-2 md:hidden">
+  <div class="space-y-2 {% if result.rows %}md:hidden{% endif %}">
     {% for row in result.rows %}
       <div class="card p-4 text-sm">
         {% for v in row %}{% with col=result.columns|get_item:forloop.counter0 %}
@@ -28,28 +26,30 @@
           {% else %}<p class="flex justify-between gap-3"><span class="text-slate-500">{{ col.label }}</span><span class="font-medium">{% include "reports/_cell.html" with kind=col.kind %}</span></p>{% endif %}
         {% endwith %}{% endfor %}
       </div>
-    {% empty %}<p class="card p-6 text-center text-sm text-slate-500">{% translate "Nothing found." %}</p>{% endfor %}
+    {% empty %}<div class="card">{% include "components/empty.html" with icon="chart" title=_("Nothing found.") text=_("Try a longer period.") %}</div>{% endfor %}
     {% if result.totals and result.rows %}
-      <div class="rounded-xl bg-slate-800 p-4 text-sm text-white">
+      <div class="card border-sky-300 bg-sky-50 p-4 text-sm">
         {% for v in result.totals %}{% with col=result.columns|get_item:forloop.counter0 %}
-          {% if forloop.first %}<p class="mb-1 font-semibold">{{ v }}</p>{% elif v != "" %}<p class="flex justify-between gap-3"><span class="text-slate-300">{{ col.label }}</span><span class="font-semibold">{% include "reports/_cell.html" with kind=col.kind %}</span></p>{% endif %}
+          {% if forloop.first %}<p class="mb-1 font-semibold">{{ v }}</p>{% elif v != "" %}<p class="flex justify-between gap-3"><span class="text-slate-600">{{ col.label }}</span><span class="font-semibold">{% include "reports/_cell.html" with kind=col.kind %}</span></p>{% endif %}
         {% endwith %}{% endfor %}
       </div>
     {% endif %}
   </div>
   {# Desktop: table #}
-  <div class="card hidden overflow-x-auto md:block">
-    <table class="min-w-full divide-y divide-slate-200">
-      <thead class="bg-slate-50"><tr>{% for c in result.columns %}<th class="table-head {% if c.kind != 'text' and c.kind != 'month' %}text-right{% endif %}">{{ c.label }}</th>{% endfor %}</tr></thead>
+  {% if result.rows %}
+  <div class="card table-scroll hidden md:block">
+    <table class="min-w-full">
+      <thead><tr>{% for c in result.columns %}<th class="table-head {% if c.kind != 'text' and c.kind != 'month' %}text-right{% endif %}">{{ c.label }}</th>{% endfor %}</tr></thead>
       <tbody class="divide-y divide-slate-100">
         {% for row in result.rows %}
-          <tr>{% for v in row %}{% with col=result.columns|get_item:forloop.counter0 %}<td class="table-cell {% if col.kind != 'text' and col.kind != 'month' %}text-right tabular-nums{% endif %}">{% include "reports/_cell.html" with kind=col.kind %}</td>{% endwith %}{% endfor %}</tr>
-        {% empty %}<tr><td colspan="{{ result.columns|length }}" class="table-cell text-center text-slate-500">{% translate "Nothing found." %}</td></tr>{% endfor %}
+          <tr class="hover:bg-surface-2">{% for v in row %}{% with col=result.columns|get_item:forloop.counter0 %}<td class="table-cell {% if col.kind != 'text' and col.kind != 'month' %}text-right tabular-nums{% endif %}">{% include "reports/_cell.html" with kind=col.kind %}</td>{% endwith %}{% endfor %}</tr>
+        {% endfor %}
       </tbody>
       {% if result.totals and result.rows %}
-        <tfoot class="bg-slate-50 font-semibold"><tr>{% for v in result.totals %}{% with col=result.columns|get_item:forloop.counter0 %}<td class="table-cell {% if not forloop.first %}text-right tabular-nums{% endif %}">{% if forloop.first %}{{ v }}{% else %}{% include "reports/_cell.html" with kind=col.kind %}{% endif %}</td>{% endwith %}{% endfor %}</tr></tfoot>
+        <tfoot class="table-foot"><tr>{% for v in result.totals %}{% with col=result.columns|get_item:forloop.counter0 %}<td class="table-cell {% if not forloop.first %}text-right tabular-nums{% endif %}">{% if forloop.first %}{{ v }}{% else %}{% include "reports/_cell.html" with kind=col.kind %}{% endif %}</td>{% endwith %}{% endfor %}</tr></tfoot>
       {% endif %}
     </table>
   </div>
+  {% endif %}
   {% if result.note %}<p class="mt-3 text-sm text-slate-500">{{ result.note }}</p>{% endif %}
 {% endblock %}

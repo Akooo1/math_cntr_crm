@@ -2,7 +2,6 @@ import datetime as dt
 
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.core.paginator import Paginator
 from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -10,7 +9,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_POST
 
-from apps.core import dates
+from apps.core import dates, listing
 from apps.core.permissions import (
     accessible_branch_ids,
     ensure_branch_access,
@@ -56,9 +55,9 @@ STATUS_FILTERS = {
 
 @perm_required("students.view")
 def student_list(request):
-    qs = selectors.students_for(request.user, request.branch_filter)
+    everyone = selectors.students_for(request.user, request.branch_filter)
     q = request.GET.get("q", "").strip()
-    qs = selectors.search_students(qs, q)
+    qs = selectors.search_students(everyone, q)
     group_id = request.GET.get("guruh")
     if group_id:
         qs = qs.filter(enrollments__group_id=group_id, enrollments__status__in=Enrollment.OPEN)
@@ -71,18 +70,26 @@ def student_list(request):
         qs = qs.filter(enrollments__isnull=False).exclude(enrollments__status__in=Enrollment.OPEN)
     elif status == "kutilmoqda":
         qs = qs.filter(enrollments__isnull=True)
-    qs = selectors.with_open_groups(qs.distinct().order_by("last_name", "first_name"))
-    page = Paginator(qs, 30).get_page(request.GET.get("page"))
+    qs = qs.distinct()
+    filtered = listing.active_filters(request, ["q", "guruh", "holat"])
+    totals = listing.totals(everyone, qs if filtered else None)
+    qs, sort = listing.sort_queryset(
+        request,
+        qs,
+        {"ism": ("last_name", "first_name", "id"), "qoshilgan": ("created_at", "id")},
+        default="ism",
+    )
+    page, query = listing.paginate(request, selectors.with_open_groups(qs))
     badges = {}
     for provider in extensions.list_badges():
         badges.update(provider(request.user, list(page.object_list)) or {})
-    query = request.GET.copy()
-    query.pop("page", None)
     return render(
         request,
         "students/student_list.html",
         {
             "page": page,
+            "totals": totals,
+            "sort": sort,
             "q": q,
             "status": status,
             "group_id": group_id,
@@ -91,7 +98,7 @@ def student_list(request):
                 status="finished"
             ),
             "badges": badges,
-            "query": query.urlencode(),
+            "query": query,
             "can_manage": has_perm(request.user, "students.manage"),
         },
     )
@@ -340,7 +347,8 @@ def leave(request, pk):
 
 @perm_required("groups.view")
 def group_list(request):
-    qs = selectors.groups_for(request.user, request.branch_filter)
+    everything = selectors.groups_for(request.user, request.branch_filter)
+    qs = everything
     show = request.GET.get("holat", "faol")
     if show == "faol":
         qs = qs.exclude(status=Group.Status.FINISHED)
@@ -358,6 +366,12 @@ def group_list(request):
         "students/group_list.html",
         {
             "groups": qs,
+            "totals": listing.totals(
+                everything,
+                qs,
+                filtered=show != "hammasi"
+                or listing.active_filters(request, ["kurs", "oqituvchi"]),
+            ),
             "show": show,
             "can_manage": has_perm(request.user, "groups.manage"),
         },
@@ -469,6 +483,7 @@ def attendance_day(request):
         {
             "day": day,
             "lessons": lessons,
+            "totals": listing.totals(len(lessons)),
             "prev": day - dt.timedelta(days=1),
             "next": day + dt.timedelta(days=1),
             "is_today": day == dates.today(),

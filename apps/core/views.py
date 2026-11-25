@@ -1,6 +1,5 @@
 from django import forms
 from django.contrib.auth import get_user_model
-from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
@@ -8,7 +7,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 
-from . import audit_display, excel
+from . import audit_display, excel, global_search, listing
 from .forms import StyledForm, UzDateField
 from .middleware import BRANCH_FILTER_SESSION_KEY
 from .models import AuditLog
@@ -31,6 +30,19 @@ def home(request):
         ctx = w.context(request) if w.context else {}
         rendered.append({"widget": w, "context": ctx})
     return render(request, "core/home.html", {"widgets": rendered})
+
+
+@login_required
+def search(request):
+    """Global search results: a partial for the Ctrl+K palette, a full page without JS."""
+    q = request.GET.get("q", "").strip()
+    groups = global_search.run(request, q)
+    template = (
+        "core/_search_results.html" if request.headers.get("HX-Request") else "core/search.html"
+    )
+    return render(
+        request, template, {"q": q, "groups": groups, "min_query": global_search.MIN_QUERY}
+    )
 
 
 @login_required
@@ -132,7 +144,11 @@ def audit_log(request):
         return excel.response(
             "harakatlar-jurnali", excel.workbook(_("Audit log"), headers, rows, ["text"] * 8)
         )
-    page = Paginator(qs, 50).get_page(request.GET.get("page"))
+    filtered = listing.active_filters(
+        request, ["actor", "branch", "entity_type", "date_from", "date_to"]
+    )
+    totals = listing.totals(AuditLog.objects.all(), qs if filtered else None)
+    page, query = listing.paginate(request, qs)
     entries = [
         {
             "obj": e,
@@ -143,12 +159,10 @@ def audit_log(request):
         }
         for e in page.object_list
     ]
-    query = request.GET.copy()
-    query.pop("page", None)
     return render(
         request,
         "core/audit_log.html",
-        {"form": form, "page": page, "entries": entries, "query": query.urlencode()},
+        {"form": form, "page": page, "entries": entries, "query": query, "totals": totals},
     )
 
 

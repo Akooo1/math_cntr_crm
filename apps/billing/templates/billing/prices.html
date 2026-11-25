@@ -1,12 +1,14 @@
 {% extends "base.html" %}
 {% block title %}{{ section.title }}{% endblock %}
-{% block heading %}{% translate "Settings" %}{% endblock %}
+{% block heading %}{{ section.title }}{% endblock %}
+{% block breadcrumbs %}<a href="{% url 'settings:index' %}">{% translate "Settings" %}</a>{% endblock %}
+{% block count %}<span class="count-pill">{{ rows|length }}</span>{% endblock %}
+{% block primary %}<a href="{% url 'settings:section_create' section.slug %}" class="btn-primary">{% icon "plus" %}<span>{% translate "New price" %}</span></a>{% endblock %}
 {% block content %}
   {% include "settings/_header.html" %}
   <div class="mb-4 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
     {% translate "A new price applies from the date you choose. Charges already issued never change. Every price stays in the history." %}
   </div>
-  <div class="mb-4 flex justify-end"><a href="{% url 'settings:section_create' section.slug %}" class="btn-primary">{% icon "plus" %}{% translate "New price" %}</a></div>
   <div class="space-y-4">
     {% for r in rows %}
       <div class="card p-4" x-data="{ open: false }">
@@ -28,22 +30,22 @@
           <p class="mt-2 text-sm text-sky-800">{% blocktranslate with a=u.amount|som d=u.effective_from|sana %}From {{ d }}: {{ a }}{% endblocktranslate %}</p>
         {% endif %}{% endfor %}
         <div class="mt-3 flex flex-wrap gap-2">
-          <a class="btn-secondary px-3 py-1.5" href="{% url 'settings:section_create' section.slug %}?kurs={{ r.course.pk }}">{% icon "plus" "w-4 h-4" %}{% translate "Change price" %}</a>
-          {% if r.history %}<button type="button" class="btn-ghost px-3 py-1.5" @click="open = !open">{% icon "list" "w-4 h-4" %}{% translate "History" %} ({{ r.history|length }})</button>{% endif %}
+          <a class="btn-secondary" href="{% url 'settings:section_create' section.slug %}?kurs={{ r.course.pk }}">{% icon "plus" "w-4 h-4" %}{% translate "Change price" %}</a>
+          {% if r.history %}<button type="button" class="btn-ghost" @click="open = !open" :aria-expanded="open">{% icon "list" "w-4 h-4" %}{% translate "History" %} ({{ r.history|length }})</button>{% endif %}
         </div>
         <div x-show="open" x-cloak class="mt-3 overflow-x-auto">
           <table class="min-w-full text-sm">
             <thead><tr class="text-left text-xs uppercase text-slate-500"><th class="py-2 pr-4">{% translate "Effective from" %}</th><th class="py-2 pr-4">{% translate "Amount" %}</th><th class="py-2 pr-4">{% translate "Branch" %}</th><th class="py-2 pr-4">{% translate "Note" %}</th><th class="py-2">{% translate "Created by" %}</th></tr></thead>
             <tbody class="divide-y divide-slate-100">
               {% for p in r.history %}
-                <tr><td class="py-2 pr-4">{{ p.effective_from|sana }}</td><td class="py-2 pr-4 font-medium">{{ p.amount|som }}</td><td class="py-2 pr-4">{% if p.group %}{{ p.group.name }}{% elif p.branch %}{{ p.branch.name }}{% else %}{% translate "All branches" %}{% endif %}</td><td class="py-2 pr-4">{{ p.note|default:"—" }}</td><td class="py-2">{{ p.created_by.full_name }}<br><span class="text-xs text-slate-500">{{ p.created_at|sana_vaqt }}</span></td></tr>
+                <tr><td class="py-2 pr-4">{{ p.effective_from|sana }}</td><td class="py-2 pr-4 font-medium">{{ p.amount|som }}</td><td class="py-2 pr-4">{% if p.group %}{{ p.group.name }}{% elif p.branch %}{{ p.branch.name }}{% else %}{% translate "All branches" %}{% endif %}</td><td class="py-2 pr-4">{{ p.note|default:"—" }}</td><td class="py-2">{{ p.created_by.full_name }}<br><span class="text-xs text-slate-500">{% relative_time p.created_at %}</span></td></tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
       </div>
     {% empty %}
-      <div class="card p-8 text-center text-sm text-slate-500">{% translate "Add courses first." %}</div>
+      <div class="card">{% url 'settings:section_list' 'kurslar' as courses_url %}{% include "components/empty.html" with icon="book" title=_("Add courses first.") url=courses_url label=_("Courses") action_icon="book" %}</div>
     {% endfor %}
   </div>
 {% endblock %}

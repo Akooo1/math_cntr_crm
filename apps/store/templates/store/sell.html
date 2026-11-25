@@ -31,7 +31,7 @@
   <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
     {% if branches|length > 1 %}
       <form method="get"><label class="sr-only" for="filial">{% translate "Branch" %}</label>
-        <select id="filial" name="filial" onchange="this.form.submit()" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-base">{% for b in branches %}<option value="{{ b.pk }}" {% if b.pk == branch.pk %}selected{% endif %}>{{ b.name }}</option>{% endfor %}</select>
+        <select id="filial" name="filial" data-autosubmit class="input w-auto">{% for b in branches %}<option value="{{ b.pk }}" {% if b.pk == branch.pk %}selected{% endif %}>{{ b.name }}</option>{% endfor %}</select>
       </form>
     {% else %}<p class="text-sm font-medium text-slate-600">{{ branch.name }}</p>{% endif %}
     <div class="flex flex-wrap gap-2 text-sm">
@@ -48,7 +48,7 @@
     <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
       {% for t in tiles %}{% with pk=t.product.pk %}
         <button type="button" @click="add({{ pk }})" :disabled="none({{ pk }})" {% if closed or t.on_hand <= 0 %}disabled{% endif %}
-                class="relative flex min-h-[7.5rem] flex-col rounded-xl border-2 bg-white p-3 text-left shadow-sm transition active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-50"
+                class="relative flex min-h-[7.5rem] flex-col rounded-xl border-2 bg-surface p-3 text-left shadow-sm transition active:scale-[.97] disabled:cursor-not-allowed disabled:opacity-50"
                 :class="qty({{ pk }}) ? 'border-sky-500 bg-sky-50' : 'border-slate-200'">
           <span class="text-base font-semibold leading-snug text-slate-900">{{ t.product.name }}</span>
           <span class="mt-auto pt-2 text-lg font-bold text-sky-800">{{ t.price.amount|som }}</span>
@@ -56,7 +56,7 @@
             <span class="text-slate-500">{% translate "On hand" %}: <span class="font-semibold text-slate-700" x-text="left({{ pk }})">{{ t.on_hand }}</span></span>
             {% if t.on_hand <= 0 %}<span class="badge bg-rose-100 text-rose-800">{% translate "Out of stock" %}</span>{% elif t.low %}<span class="badge bg-amber-100 text-amber-800">{% translate "Low stock" %}</span>{% endif %}
           </span>
-          <span x-show="qty({{ pk }})" x-cloak class="absolute -right-2 -top-2 flex h-8 min-w-8 items-center justify-center rounded-full bg-sky-800 px-2 text-sm font-bold text-white shadow" x-text="qty({{ pk }})"></span>
+          <span x-show="qty({{ pk }})" x-cloak class="absolute -right-2 -top-2 flex h-8 min-w-8 items-center justify-center rounded-full bg-sky-800 px-2 text-sm font-bold text-on-primary shadow" x-text="qty({{ pk }})"></span>
         </button>
       {% endwith %}{% endfor %}
     </div>
@@ -74,7 +74,7 @@
         <li><a href="{% url 'store:sale' s.pk %}" class="flex items-center justify-between gap-3 py-2.5 hover:text-sky-700">
           <span class="min-w-0"><span class="block truncate font-medium">{% for l in s.lines.all %}{{ l.product.name }} × {{ l.quantity }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
             <span class="block text-slate-500">{{ s.created_at|time:"H:i" }} · {% if s.method %}{{ s.method.name }}{% else %}{% translate "Pay later" %}{% endif %}{% if s.student %} · {{ s.student.full_name }}{% endif %}</span></span>
-          <span class="shrink-0 text-right font-medium {% if s.reversal %}text-slate-400 line-through{% endif %}">{{ s.total|som }}</span>
+          <span class="shrink-0 text-right font-medium {% if s.reversal %}text-muted line-through{% endif %}">{{ s.total|som }}</span>
         </a></li>
       {% empty %}<li class="py-2 text-slate-500">{% translate "No sales today yet." %}</li>{% endfor %}
     </ul>
@@ -84,7 +84,7 @@
   <div x-show="count()" class="h-64"></div>
 
   <form method="post" x-show="count()" x-cloak @submit="busy = true"
-        class="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-20 border-t border-slate-200 bg-white px-3 pb-3 pt-2 shadow-[0_-6px_16px_rgba(15,23,42,.08)] md:bottom-0 md:left-64 md:px-8">
+        class="fixed inset-x-0 bottom-[calc(4.25rem+env(safe-area-inset-bottom))] z-20 border-t border-slate-200 bg-surface px-3 pb-3 pt-2 shadow-[0_-6px_16px_rgba(15,23,42,.08)] md:bottom-0 md:left-64 md:px-8">
     {% csrf_token %}<input type="hidden" name="filial" value="{{ branch.pk }}">
     <div class="mx-auto max-w-6xl">
       <ul class="max-h-36 divide-y divide-slate-100 overflow-y-auto">
@@ -107,7 +107,7 @@
         {% for m in methods %}
           <label class="shrink-0 cursor-pointer">
             <input type="radio" name="method" value="{{ m.pk }}" class="peer sr-only" {% if m.pk == default_method.pk %}checked{% endif %}>
-            <span class="inline-flex min-h-10 items-center whitespace-nowrap rounded-full border border-slate-300 px-4 text-sm font-medium peer-checked:border-sky-800 peer-checked:bg-sky-800 peer-checked:text-white">{{ m.name }}</span>
+            <span class="inline-flex min-h-10 items-center whitespace-nowrap rounded-full border border-slate-300 px-4 text-sm font-medium peer-checked:border-sky-800 peer-checked:bg-sky-800 peer-checked:text-on-primary">{{ m.name }}</span>
           </label>
         {% endfor %}
       </fieldset>

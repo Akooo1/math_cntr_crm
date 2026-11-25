@@ -8,7 +8,7 @@
       <li><a href="{% url 'store:sale' b.sale.pk %}" class="flex items-start justify-between gap-3 py-2.5 hover:text-sky-700">
         <span class="min-w-0"><span class="block font-medium">{{ b.line.product.name }} × {{ b.line.quantity }}</span>
           <span class="block text-slate-500">{{ b.sale.sold_on|sana }} · {% if b.sale.method %}{% translate "Paid now" %} ({{ b.sale.method.name }}){% else %}{% translate "Pay later" %}{% endif %}</span></span>
-        <span class="shrink-0 text-right"><span class="block font-medium {% if b.status == 'cancelled' %}text-slate-400 line-through{% endif %}">{{ b.sale.total|som }}</span>
+        <span class="shrink-0 text-right"><span class="block font-medium {% if b.status == 'cancelled' %}text-muted line-through{% endif %}">{{ b.sale.total|som }}</span>
           {% if b.status == "open" %}<span class="badge bg-amber-100 text-amber-800">{% translate "Unpaid" %}</span>{% elif b.status == "cancelled" %}<span class="badge bg-slate-100 text-slate-600">{% translate "Cancelled" %}</span>{% else %}<span class="badge bg-emerald-100 text-emerald-800">{% translate "Paid" %}</span>{% endif %}</span>
       </a></li>
     {% empty %}<li class="py-2 text-slate-500">{% translate "No books given yet." %}</li>{% endfor %}

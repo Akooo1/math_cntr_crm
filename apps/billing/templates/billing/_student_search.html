@@ -1,8 +1,8 @@
 <ul class="divide-y divide-slate-100">
   {% for s in results %}
-    <li><a href="{% url 'billing:payment_create' %}?oquvchi={{ s.pk }}" class="flex items-center justify-between gap-3 py-2.5 hover:text-sky-700">
+    <li><a href="{% url 'billing:payment_create' %}?oquvchi={{ s.pk }}" class="-mx-2 flex min-h-12 items-center justify-between gap-3 rounded-lg px-2 py-2.5 hover:bg-surface-2">
       <span><span class="font-medium">{{ s.full_name }}</span><span class="block text-sm text-slate-500">{{ s.phone|default:s.parent_phone|telefon }}</span></span>
-      {% with b=balances|get_item:s.pk %}<span class="text-sm font-medium {% if b < 0 %}text-rose-700{% elif b > 0 %}text-emerald-700{% endif %}">{{ b|som }}</span>{% endwith %}
+      {% with b=balances|get_item:s.pk %}<span class="shrink-0 text-sm font-medium tabular-nums {% if b < 0 %}text-rose-700{% elif b > 0 %}text-emerald-700{% endif %}">{{ b|som }}</span>{% endwith %}
     </a></li>
   {% empty %}{% if q %}<li class="py-2 text-sm text-slate-500">{% translate "Nothing found." %}</li>{% endif %}{% endfor %}
 </ul>

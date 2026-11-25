@@ -8,7 +8,7 @@
       <div class="flex items-start justify-between gap-3">
         <div>
           <p class="text-sm text-slate-500">{{ sale.sold_on|sana }} {{ sale.created_at|time:"H:i" }} · {{ sale.branch.name }}</p>
-          <p class="text-2xl font-semibold {% if sale.reversal %}text-slate-400 line-through{% endif %}">{{ sale.total|som }}</p>
+          <p class="text-2xl font-semibold {% if sale.reversal %}text-muted line-through{% endif %}">{{ sale.total|som }}</p>
           <p class="text-sm text-slate-600">{% if sale.method %}{{ sale.method.name }}{% else %}{% translate "Pay later" %}{% endif %} · {{ sale.sold_by.full_name }}</p>
           {% if sale.student %}<p class="mt-1 text-sm"><a class="font-medium text-sky-700 hover:underline" href="{% url 'students:detail' sale.student.pk %}">{{ sale.student.full_name }}</a></p>{% endif %}
         </div>

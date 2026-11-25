@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 {% block title %}{% if group %}{{ group.name }}{% else %}{% translate "New group" %}{% endif %}{% endblock %}
-{% block heading %}{% translate "Groups" %}{% endblock %}
+{% block heading %}{% if group %}{% translate "Edit group" %}{% else %}{% translate "New group" %}{% endif %}{% endblock %}
+{% block breadcrumbs %}<a href="{% if group %}{% url 'students:group' group.pk %}{% else %}{% url 'students:groups' %}{% endif %}">{% if group %}{{ group.name }}{% else %}{% translate "Groups" %}{% endif %}</a>{% endblock %}
 {% block content %}
-  <div class="mb-4"><a href="{% if group %}{% url 'students:group' group.pk %}{% else %}{% url 'students:groups' %}{% endif %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{% if group %}{{ group.name }}{% else %}{% translate "Groups" %}{% endif %}</a></div>
-  <form method="post" class="mx-auto max-w-3xl space-y-4" novalidate>{% csrf_token %}
-    <h2 class="text-xl font-semibold">{% if group %}{% translate "Edit group" %}{% else %}{% translate "New group" %}{% endif %}</h2>
+  <form method="post" class="max-w-3xl space-y-4" novalidate>{% csrf_token %}
     {% include "components/form_errors.html" %}
     {% include "components/form_errors.html" with form=schedule %}
     <div class="card grid gap-4 p-5 sm:grid-cols-2">
@@ -25,9 +24,9 @@
         {% endfor %}
       </div>
     </div>
-    <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+    <div class="form-actions justify-end pt-2">
       <a href="{% if group %}{% url 'students:group' group.pk %}{% else %}{% url 'students:groups' %}{% endif %}" class="btn-secondary">{% translate "Cancel" %}</a>
-      <button class="btn-primary">{% translate "Save" %}</button>
+      <button class="btn-primary">{% icon "check" %}{% translate "Save" %}</button>
     </div>
   </form>
 {% endblock %}

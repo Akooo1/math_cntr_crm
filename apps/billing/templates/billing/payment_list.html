@@ -1,24 +1,53 @@
 {% extends "base.html" %}
 {% block title %}{% translate "Payments" %}{% endblock %}
 {% block heading %}{% translate "Payments" %}{% endblock %}
+{% block menu %}<a class="menu-item" role="menuitem" href="?{% if query %}{{ query }}&{% endif %}excel=1">{% icon "download" "w-4 h-4" %}{% translate "Export to Excel" %}</a>{% endblock %}
+{% block primary %}{% if user|can:"billing.payment.create" %}<a href="{% url 'billing:payment_create' %}" class="btn-primary">{% icon "plus" %}<span>{% translate "Take payment" %}</span></a>{% endif %}{% endblock %}
 {% block content %}
-  <div class="mb-4 flex flex-wrap items-end justify-between gap-2">
-    <form method="get" class="flex flex-wrap items-end gap-2">
-      <div><label class="label" for="dan">{% translate "From" %}</label><input id="dan" name="dan" value="{{ start|sana }}" data-mask="date" inputmode="numeric" class="w-32 rounded-lg border border-slate-300 bg-white px-3 py-2 text-base"></div>
-      <div><label class="label" for="gacha">{% translate "To" %}</label><input id="gacha" name="gacha" value="{{ end|sana }}" data-mask="date" inputmode="numeric" class="w-32 rounded-lg border border-slate-300 bg-white px-3 py-2 text-base"></div>
-      <div><label class="label" for="usul">{% translate "Payment method" %}</label><select id="usul" name="usul" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-base"><option value="">{% translate "All" %}</option>{% for m in methods %}<option value="{{ m.pk }}" {% if request.GET.usul == m.pk|stringformat:"s" %}selected{% endif %}>{{ m.name }}</option>{% endfor %}</select></div>
-      <button class="btn-secondary">{% translate "Filter" %}</button>
-      <a class="btn-ghost" href="?{{ request.GET.urlencode }}&excel=1">{% icon "download" "w-4 h-4" %}{% translate "Export to Excel" %}</a>
-    </form>
-    {% if user|can:"billing.payment.create" %}<a href="{% url 'billing:payment_create' %}" class="btn-primary">{% icon "plus" %}{% translate "Take payment" %}</a>{% endif %}
-  </div>
-  <ul class="space-y-2">
+  <form method="get" class="card mb-4 grid grid-cols-2 items-end gap-3 p-4 sm:flex sm:flex-wrap">
+    <div><label class="label" for="dan">{% translate "From" %}</label><input id="dan" name="dan" value="{{ start|sana }}" data-mask="date" inputmode="numeric" class="input w-full sm:w-40"></div>
+    <div><label class="label" for="gacha">{% translate "To" %}</label><input id="gacha" name="gacha" value="{{ end|sana }}" data-mask="date" inputmode="numeric" class="input w-full sm:w-40"></div>
+    <div class="col-span-2 min-w-0 sm:flex-[1_1_10rem]"><label class="label" for="usul">{% translate "Payment method" %}</label><select id="usul" name="usul" class="input"><option value="">{% translate "All" %}</option>{% for m in methods %}<option value="{{ m.pk }}" {% if request.GET.usul == m.pk|stringformat:"s" %}selected{% endif %}>{{ m.name }}</option>{% endfor %}</select></div>
+    {% if request.GET.tartib %}<input type="hidden" name="tartib" value="{{ request.GET.tartib }}">{% endif %}
+    <button class="btn-secondary col-span-2">{% icon "funnel" "w-4 h-4" %}{% translate "Filter" %}</button>
+  </form>
+
+  {% if not page.object_list %}
+    <div class="card">{% url 'billing:payments' as reset %}{% include "components/empty.html" with icon="card" title=_("No payments in this period.") text=_("Change the dates or the payment method.") reset=reset %}</div>
+  {% else %}
+  <ul class="space-y-2 md:hidden">
     {% for p in page %}
-      <li><a href="{% url 'billing:payment' p.pk %}" class="card flex items-center justify-between gap-3 p-3 hover:border-sky-300">
-        <div class="min-w-0"><p class="font-medium">{{ p.student.full_name }}</p><p class="text-sm text-slate-500">{{ p.receipt_number }} · {{ p.paid_on|sana }} · {{ p.method.name }}{% if p.kind != 'payment' %} · {{ p.get_kind_display }}{% endif %}</p></div>
-        <span class="font-semibold {% if p.kind != 'payment' %}text-rose-700{% endif %}">{% if p.kind != 'payment' %}−{% endif %}{{ p.amount|som }}</span>
+      <li><a href="{% url 'billing:payment' p.pk %}" class="card flex items-center justify-between gap-3 p-3">
+        <div class="min-w-0"><p class="truncate font-medium">{{ p.student.full_name }}</p><p class="text-sm text-slate-500">{{ p.receipt_number }} · {{ p.paid_on|sana }} · {{ p.method.name }}{% if p.kind != 'payment' %} · {{ p.get_kind_display }}{% endif %}</p></div>
+        <span class="shrink-0 font-semibold tabular-nums {% if p.kind != 'payment' %}text-rose-700{% endif %}">{% if p.kind != 'payment' %}−{% endif %}{{ p.amount|som }}</span>
       </a></li>
-    {% empty %}<li class="card p-6 text-center text-sm text-slate-500">{% translate "Nothing found." %}</li>{% endfor %}
+    {% endfor %}
   </ul>
+  <div class="card table-scroll hidden md:block">
+    <table class="min-w-full">
+      <thead><tr>
+        {% include "components/sort_th.html" with key="sana" label=_("Date") %}
+        <th class="table-head">{% translate "Receipt" %}</th>
+        {% include "components/sort_th.html" with key="oquvchi" label=_("Student") %}
+        <th class="table-head">{% translate "Payment method" %}</th>
+        <th class="table-head">{% translate "Received by" %}</th>
+        {% include "components/sort_th.html" with key="summa" label=_("Amount") cls="text-right" %}
+      </tr></thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for p in page %}
+          <tr class="hover:bg-surface-2">
+            <td class="table-cell tabular-nums">{{ p.paid_on|sana }}</td>
+            <td class="table-cell"><a class="link" href="{% url 'billing:payment' p.pk %}">{{ p.receipt_number }}</a>{% if p.kind != 'payment' %} <span class="badge bg-rose-100 text-rose-800">{{ p.get_kind_display }}</span>{% endif %}</td>
+            <td class="table-cell font-medium">{{ p.student.full_name }}{% if user.is_director and not request.branch_filter %}<p class="text-xs font-normal text-slate-500">{{ p.branch.name }}</p>{% endif %}</td>
+            <td class="table-cell">{{ p.method.name }}</td>
+            <td class="table-cell text-slate-600">{{ p.received_by.full_name }}</td>
+            <td class="table-cell text-right font-semibold tabular-nums {% if p.kind != 'payment' %}text-rose-700{% endif %}">{% if p.kind != 'payment' %}−{% endif %}{{ p.amount|som }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+      <tfoot><tr class="table-foot"><td class="table-cell" colspan="5">{% translate "Total" %} <span class="font-normal text-slate-500">({{ totals.shown|raqam }})</span></td><td class="table-cell text-right tabular-nums">{{ totals.amount|som }}</td></tr></tfoot>
+    </table>
+  </div>
+  {% endif %}
   {% include "components/pagination.html" %}
 {% endblock %}

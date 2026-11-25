@@ -1,0 +1,13 @@
+{% comment %}Empty state with the next action. include with: icon, title, text (optional),
+url + label + action_icon (optional primary action), reset (optional URL: "clear the filters").{% endcomment %}
+<div class="empty">
+  <span class="empty-icon">{% icon icon|default:"inbox" "w-6 h-6" %}</span>
+  <p class="empty-title">{{ title }}</p>
+  {% if text %}<p class="empty-text">{{ text }}</p>{% endif %}
+  {% if url or reset %}
+    <div class="mt-2 flex flex-wrap justify-center gap-2">
+      {% if reset %}<a href="{{ reset }}" class="btn-secondary">{% icon "filter-x" "w-4 h-4" %}{% translate "Clear filters" %}</a>{% endif %}
+      {% if url %}<a href="{{ url }}" class="btn-primary">{% icon action_icon|default:"plus" %}{{ label }}</a>{% endif %}
+    </div>
+  {% endif %}
+</div>

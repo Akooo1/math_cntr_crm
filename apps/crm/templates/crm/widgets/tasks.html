@@ -1,8 +1,8 @@
-<a href="{% url 'crm:tasks' %}" class="card block p-5 hover:border-sky-300">
+<a href="{% url 'crm:tasks' %}" class="card block p-5">
   <p class="text-sm font-medium text-slate-500">{% translate "My tasks" %}</p>
   <div class="mt-3 flex items-end gap-6">
     <div><p class="text-3xl font-semibold {% if ctx.counts.overdue %}text-rose-700{% endif %}">{{ ctx.counts.overdue }}</p><p class="text-sm text-slate-500">{% translate "Overdue" %}</p></div>
     <div><p class="text-3xl font-semibold">{{ ctx.counts.today }}</p><p class="text-sm text-slate-500">{% translate "Today" %}</p></div>
-    <div><p class="text-3xl font-semibold text-slate-400">{{ ctx.counts.upcoming }}</p><p class="text-sm text-slate-500">{% translate "Upcoming" %}</p></div>
+    <div><p class="text-3xl font-semibold text-slate-500">{{ ctx.counts.upcoming }}</p><p class="text-sm text-slate-500">{% translate "Upcoming" %}</p></div>
   </div>
 </a>

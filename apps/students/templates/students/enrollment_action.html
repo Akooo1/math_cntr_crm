@@ -1,28 +1,27 @@
 {% extends "base.html" %}
 {% block title %}{{ student.full_name }}{% endblock %}
-{% block heading %}{% translate "Students" %}{% endblock %}
+{% block heading %}{{ title }}{% endblock %}
+{% block breadcrumbs %}<a href="{{ back }}">{{ student.full_name }}</a>{% endblock %}
 {% block content %}
-  <div class="mb-4"><a href="{{ back }}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{{ student.full_name }}</a></div>
-  <div class="mx-auto max-w-xl">
-    <h2 class="mb-4 text-xl font-semibold">{{ title }}</h2>
+  <div class="max-w-2xl">
     {% if confirm %}
       <form method="post" class="space-y-4" novalidate>{% csrf_token %}
         {% include "components/form_errors.html" %}
         {% for k, v in hidden %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
         {% for ext, ctx in confirm %}{% include ext.template %}{% endfor %}
-        <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <div class="form-actions justify-end pt-2">
           <a href="{{ back }}" class="btn-secondary">{% translate "Cancel" %}</a>
           <button name="qayta" value="1" class="btn-secondary">{% icon "refresh" "w-4 h-4" %}{% translate "Recalculate" %}</button>
-          <button name="tasdiq" value="1" class="btn-primary">{% translate "Confirm" %}</button>
+          <button name="tasdiq" value="1" class="btn-primary">{% icon "check" %}{% translate "Confirm" %}</button>
         </div>
       </form>
     {% else %}
       <form method="post" class="card space-y-4 p-5" novalidate>{% csrf_token %}
         {% include "components/form_errors.html" %}
         {% for f in form %}{% field f %}{% endfor %}
-        <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+        <div class="form-actions justify-end pt-2">
           <a href="{{ back }}" class="btn-secondary">{% translate "Cancel" %}</a>
-          <button class="btn-primary">{% translate "Continue" %}</button>
+          <button class="btn-primary">{% translate "Continue" %}{% icon "arrow-right" %}</button>
         </div>
       </form>
     {% endif %}

@@ -2,5 +2,5 @@
 {% elif r.status == "late" %}<span class="badge bg-amber-100 text-amber-900">{% blocktranslate count m=r.checkin.late_minutes %}Late {{ m }} min{% plural %}Late {{ m }} min{% endblocktranslate %}</span>
 {% elif r.status == "not_yet" %}<span class="badge bg-slate-100 text-slate-700">{% translate "Not arrived yet" %}</span>
 {% elif r.status == "absent" %}<span class="badge bg-rose-100 text-rose-800">{% translate "Didn't come" %}</span>
-{% elif r.status == "day_off" %}<span class="badge bg-slate-50 text-slate-500">{% translate "Day off" %}</span>
-{% else %}<span class="badge bg-slate-50 text-slate-500">{% translate "No work hours" %}</span>{% endif %}
+{% elif r.status == "day_off" %}<span class="badge bg-slate-100 text-slate-600">{% translate "Day off" %}</span>
+{% else %}<span class="badge bg-slate-100 text-slate-600">{% translate "No work hours" %}</span>{% endif %}

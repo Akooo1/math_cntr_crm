@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 {% block title %}{% if lead %}{{ lead.full_name }}{% else %}{% translate "New lead" %}{% endif %}{% endblock %}
-{% block heading %}{% translate "Leads" %}{% endblock %}
+{% block heading %}{% if lead %}{% translate "Edit lead" %}{% else %}{% translate "New lead" %}{% endif %}{% endblock %}
+{% block breadcrumbs %}<a href="{% url 'crm:board' %}">{% translate "Leads" %}</a>{% if lead %}<a href="{% url 'crm:lead' lead.pk %}">{{ lead.full_name }}</a>{% endif %}{% endblock %}
 {% block content %}
-  <div class="mb-4"><a href="{% if lead %}{% url 'crm:lead' lead.pk %}{% else %}{% url 'crm:board' %}{% endif %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{% if lead %}{{ lead.full_name }}{% else %}{% translate "Leads" %}{% endif %}</a></div>
-  <div class="mx-auto max-w-xl">
-    <h2 class="mb-4 text-xl font-semibold">{% if lead %}{% translate "Edit lead" %}{% else %}{% translate "New lead" %}{% endif %}</h2>
+  <div class="max-w-2xl">
     <form method="post" class="card space-y-4 p-5" novalidate>{% csrf_token %}
       {% include "components/form_errors.html" %}
       {% field form.full_name %}
@@ -23,9 +22,9 @@
       {% field form.manager %}
       {% if form.follow_up_date %}{% field form.follow_up_date %}{% endif %}
       {% field form.notes %}
-      <div class="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
+      <div class="form-actions justify-end pt-2">
         <a href="{% if lead %}{% url 'crm:lead' lead.pk %}{% else %}{% url 'crm:board' %}{% endif %}" class="btn-secondary">{% translate "Cancel" %}</a>
-        <button class="btn-primary">{% translate "Save" %}</button>
+        <button class="btn-primary">{% icon "check" %}{% translate "Save" %}</button>
       </div>
     </form>
   </div>

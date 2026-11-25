@@ -6,8 +6,10 @@
     <h2 class="mb-3 mt-6 first:mt-0 text-sm font-semibold uppercase tracking-wide text-slate-500">{{ group }}</h2>
     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
       {% for r in items %}
-        <a href="{% url 'reports:report' r.key %}" class="card block p-4 hover:border-sky-300">
-          <p class="font-semibold">{{ r.title }}</p><p class="mt-1 text-sm text-slate-500">{{ r.description }}</p>
+        <a href="{% url 'reports:report' r.key %}" class="card group flex items-start gap-3 p-4">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-sky-50 text-sky-700">{% icon "chart" %}</span>
+          <span class="min-w-0 flex-1"><span class="block font-semibold">{{ r.title }}</span><span class="mt-1 block text-sm text-slate-500">{{ r.description }}</span></span>
+          <span class="self-center text-slate-500 transition group-hover:translate-x-0.5 group-hover:text-sky-600">{% icon "chevron-right" "w-4 h-4" %}</span>
         </a>
       {% endfor %}
     </div>

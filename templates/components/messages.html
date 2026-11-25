@@ -1,7 +1,12 @@
-{% if messages %}
-  <div class="mb-4 space-y-2">
-    {% for m in messages %}
-      <div class="rounded-lg border px-4 py-3 text-sm {% if m.tags == 'error' %}border-rose-200 bg-rose-50 text-rose-800{% elif m.tags == 'warning' %}border-amber-200 bg-amber-50 text-amber-900{% else %}border-emerald-200 bg-emerald-50 text-emerald-800{% endif %}">{{ m }}</div>
-    {% endfor %}
-  </div>
-{% endif %}
+{# Django messages as toasts: they disappear on their own (static/js/app.js), errors last longer. #}
+<div class="toast-stack" data-toasts aria-live="polite">
+  {% for m in messages %}
+    {% with kind=m.level_tag|default:"info" %}
+    <div class="toast" role="{% if kind == 'error' %}alert{% else %}status{% endif %}" data-toast data-kind="{{ kind }}">
+      <span class="toast-icon mt-0.5">{% if kind == 'error' %}{% icon "x-circle" %}{% elif kind == 'warning' %}{% icon "alert" %}{% elif kind == 'success' %}{% icon "check-circle" %}{% else %}{% icon "info" %}{% endif %}</span>
+      <p class="min-w-0 flex-1 pt-0.5">{{ m }}</p>
+      <button type="button" class="-my-1.5 -mr-1.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg text-muted hover:bg-surface-2" data-toast-close aria-label="{% translate 'Close' %}">{% icon "x" "w-4 h-4" %}</button>
+    </div>
+    {% endwith %}
+  {% endfor %}
+</div>

@@ -1,11 +1,11 @@
-<li id="att-{{ row.enrollment.student_id }}" class="card flex items-center justify-between gap-3 p-3">
+<li id="att-{{ row.enrollment.student_id }}" class="card flex flex-wrap items-center justify-between gap-2 p-3">
   <span class="min-w-0 font-medium">{{ row.enrollment.student.full_name }}</span>
   {% if editable %}
-    <form method="post" action="{% url 'students:attendance_mark' lesson.pk %}" class="flex shrink-0 gap-1"
+    <form method="post" action="{% url 'students:attendance_mark' lesson.pk %}" class="flex shrink-0 gap-1.5"
           hx-post="{% url 'students:attendance_mark' lesson.pk %}" hx-target="#att-{{ row.enrollment.student_id }}" hx-swap="outerHTML">{% csrf_token %}
       <input type="hidden" name="student" value="{{ row.enrollment.student_id }}">
-      <button name="status" value="present" class="rounded-lg px-4 py-2.5 text-sm font-semibold {% if row.status == 'present' %}bg-emerald-600 text-white{% else %}border border-slate-300 bg-white text-slate-700{% endif %}">{% translate "Came" %}</button>
-      <button name="status" value="absent" class="rounded-lg px-4 py-2.5 text-sm font-semibold {% if row.status == 'absent' %}bg-rose-600 text-white{% else %}border border-slate-300 bg-white text-slate-700{% endif %}">{% translate "Did not come" %}</button>
+      <button name="status" value="present" class="{% if row.status == 'present' %}btn-success{% else %}btn-secondary{% endif %} px-3" aria-pressed="{% if row.status == 'present' %}true{% else %}false{% endif %}">{% icon "check" "w-4 h-4" %}{% translate "Came" %}</button>
+      <button name="status" value="absent" class="{% if row.status == 'absent' %}btn-danger{% else %}btn-secondary{% endif %} px-3" aria-pressed="{% if row.status == 'absent' %}true{% else %}false{% endif %}">{% icon "x" "w-4 h-4" %}{% translate "Did not come" %}</button>
     </form>
   {% else %}
     {% if row.status == 'present' %}<span class="badge bg-emerald-100 text-emerald-800">{% translate "Came" %}</span>{% elif row.status == 'absent' %}<span class="badge bg-rose-100 text-rose-800">{% translate "Did not come" %}</span>{% else %}<span class="badge bg-slate-100 text-slate-600">—</span>{% endif %}

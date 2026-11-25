@@ -6,7 +6,7 @@
     <form method="get" class="mb-4 flex flex-wrap items-end gap-2">
       <div class="min-w-0 flex-1">
         <label for="guruh" class="mb-1 block text-sm font-medium text-slate-700">{% translate "Group" %}</label>
-        <select id="guruh" name="guruh" onchange="this.form.submit()" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base">
+        <select id="guruh" name="guruh" data-autosubmit class="input">
           <option value="">{% translate "Choose" %}</option>
           {% for g in groups %}<option value="{{ g.pk }}" {% if group and g.pk == group.pk %}selected{% endif %}>{{ g.name }} · {{ g.branch.name }}</option>{% endfor %}
         </select>

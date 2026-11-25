@@ -1,8 +1,13 @@
 """Template helpers available in every template (registered as a builtin)."""
 
+import datetime as dt
+
 from django import template
+from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext as _
+from django.utils.translation import ngettext
 
 from .. import dates, money, phone
 from ..icons import ICONS
@@ -97,3 +102,49 @@ def field(bound_field, hint=""):
 @register.simple_tag
 def column_value(column, obj):
     return column.value(obj)
+
+
+def relative_label(value: dt.datetime, now: dt.datetime | None = None) -> str:
+    """'hozirgina', '5 daqiqa oldin', '2 soat oldin', 'kecha 14:30', '3 kun oldin', 'in 2 hours'
+    for the future, and the plain date after a week."""
+    now = now or dates.now()
+    value = timezone.localtime(value) if timezone.is_aware(value) else value
+    seconds = int((now - value).total_seconds())
+    future = seconds < 0
+    seconds = abs(seconds)
+    if seconds < 60:
+        return _("just now")
+    minutes, hours = seconds // 60, seconds // 3600
+    days = (now.date() - value.date()).days
+    if future:
+        if minutes < 60:
+            return ngettext("in %(n)s minute", "in %(n)s minutes", minutes) % {"n": minutes}
+        if hours < 24:
+            return ngettext("in %(n)s hour", "in %(n)s hours", hours) % {"n": hours}
+        return dates.format_datetime(value)
+    if minutes < 60:
+        return ngettext("%(n)s minute ago", "%(n)s minutes ago", minutes) % {"n": minutes}
+    if days == 0:
+        return ngettext("%(n)s hour ago", "%(n)s hours ago", hours) % {"n": hours}
+    if days == 1:
+        return _("yesterday %(time)s") % {"time": value.strftime("%H:%M")}
+    if days < 7:
+        return ngettext("%(n)s day ago", "%(n)s days ago", days) % {"n": days}
+    return dates.format_date(value)
+
+
+@register.simple_tag
+def relative_time(value):
+    """<time> with a relative label ("2 soat oldin") and the exact time on hover."""
+    if not value:
+        return ""
+    if not isinstance(value, dt.datetime):
+        return dates.format_date(value)
+    exact = dates.format_datetime(value)
+    local = timezone.localtime(value) if timezone.is_aware(value) else value
+    return format_html(
+        '<time datetime="{}" title="{}">{}</time>',
+        local.isoformat(timespec="minutes"),
+        exact,
+        relative_label(value),
+    )

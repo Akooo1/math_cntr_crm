@@ -1,6 +1,8 @@
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.audit_display import register_labels as register_audit_labels
+from apps.core.global_search import SearchHit, SearchProvider, register_search_provider
 from apps.core.permissions import register_permission
 from apps.core.registry import DashboardWidget, NavItem, registry
 from apps.core.roles import Role
@@ -236,4 +238,43 @@ registry.add_widget(
 )
 registry.add_widget(
     DashboardWidget("billing_debt", "billing/widgets/debt.html", "billing.debtors.view", 2, _debt)
+)
+
+
+# --- Global search (Ctrl+K) -----------------------------------------------------------
+
+
+def _search_payments(request, query, limit):
+    """By receipt number, or by the student's name or phone."""
+    from django.db.models import Q
+
+    from apps.core.dates import format_date
+    from apps.core.money import format_som
+    from apps.core.search import text_search
+
+    from . import selectors
+
+    qs = selectors.payments_for(request.user, request.branch_filter)
+    by_receipt = qs.filter(receipt_number__icontains=query.replace(" ", ""))
+    by_student = text_search(
+        qs, query, ["student__last_name", "student__first_name"], ["student__phone"]
+    )
+    ids = list(by_receipt.values_list("pk", flat=True)[:limit]) + list(
+        by_student.values_list("pk", flat=True)[:limit]
+    )
+    hits = []
+    for p in qs.filter(Q(pk__in=ids))[:limit]:
+        amount = format_som(p.signed_amount)
+        hits.append(
+            SearchHit(
+                title=f"{p.receipt_number} · {p.student.full_name}",
+                url=reverse("billing:payment", args=[p.pk]),
+                subtitle=" · ".join((format_date(p.paid_on), amount, p.method.name)),
+            )
+        )
+    return hits
+
+
+register_search_provider(
+    SearchProvider("payments", _("Payments"), "card", "billing.view", _search_payments, 40)
 )

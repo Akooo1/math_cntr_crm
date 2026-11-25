@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 16:39+0500\n"
+"POT-Creation-Date: 2026-11-25 19:53+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -787,6 +787,15 @@ msgstr "Hech narsa topilmadi."
 msgid "Cash report"
 msgstr "Kassa hisoboti"
 
+msgid "Closed"
+msgstr "Yopildi"
+
+msgid "Open"
+msgstr "Ochiq"
+
+msgid "Export to Excel"
+msgstr "Excel'ga yuklash"
+
 msgid "Previous day"
 msgstr "Oldingi kun"
 
@@ -803,9 +812,6 @@ msgstr "To'lov usullari bo'yicha jami"
 msgid "Closed by %(who)s, %(at)s"
 msgstr "Yopgan: %(who)s, %(at)s"
 
-msgid "Open"
-msgstr "Ochiq"
-
 msgid "Total"
 msgstr "Jami"
 
@@ -820,9 +826,6 @@ msgstr "Kunni yopish"
 
 msgid "Transactions"
 msgstr "Operatsiyalar"
-
-msgid "Export to Excel"
-msgstr "Excel'ga yuklash"
 
 msgid "No payments on this day."
 msgstr "Bu kuni to'lov yo'q."
@@ -840,12 +843,6 @@ msgid "Filter"
 msgstr "Saralash"
 
 #, python-format
-msgid "%(n)s debtor"
-msgid_plural "%(n)s debtors"
-msgstr[0] "%(n)s ta qarzdor"
-msgstr[1] "%(n)s ta qarzdor"
-
-#, python-format
 msgid "%(d)s day overdue"
 msgid_plural "%(d)s days overdue"
 msgstr[0] "%(d)s kun kechikkan"
@@ -853,6 +850,9 @@ msgstr[1] "%(d)s kun kechikkan"
 
 msgid "No debtors."
 msgstr "Qarzdorlar yo'q."
+
+msgid "Everyone has paid what is due."
+msgstr "Hamma muddati kelgan to'lovlarni to'lagan."
 
 msgid "Parent's phone"
 msgstr "Ota-onasining telefoni"
@@ -934,15 +934,15 @@ msgstr "Bo'lib to'lash rejasi: %(g)s"
 msgid "No charges yet"
 msgstr "Hali hisob yo'q"
 
-#, python-format
-msgid "Reversed on %(d)s (%(n)s)."
-msgstr "%(d)s da bekor qilingan (%(n)s)."
+msgid "Reverse"
+msgstr "Bekor qilish"
 
 msgid "Print receipt"
 msgstr "Chekni chop etish"
 
-msgid "Reverse"
-msgstr "Bekor qilish"
+#, python-format
+msgid "Reversed on %(d)s (%(n)s)."
+msgstr "%(d)s da bekor qilingan (%(n)s)."
 
 msgid "Paid charges"
 msgstr "To'langan hisoblar"
@@ -953,6 +953,9 @@ msgstr "O'quvchini toping"
 msgid "Name or phone"
 msgstr "Ism yoki telefon"
 
+msgid "Another student"
+msgstr "Boshqa o'quvchi"
+
 msgid ""
 "The money pays the oldest unpaid charges first. Anything extra stays as "
 "credit."
@@ -960,14 +963,17 @@ msgstr ""
 "Pul avval eng eski to'lanmagan hisoblarga tushadi. Ortiqchasi avans bo'lib "
 "qoladi."
 
-msgid "Another student"
-msgstr "Boshqa o'quvchi"
-
 msgid "Save and print receipt"
 msgstr "Saqlash va chek chiqarish"
 
 msgid "All"
 msgstr "Hammasi"
+
+msgid "No payments in this period."
+msgstr "Bu davrda to'lovlar yo'q."
+
+msgid "Change the dates or the payment method."
+msgstr "Sanalarni yoki to'lov usulini o'zgartiring."
 
 #, python-format
 msgid "Course price %(p)s · template %(t)s"
@@ -999,15 +1005,15 @@ msgstr ""
 msgid "Settings"
 msgstr "Sozlamalar"
 
+msgid "New price"
+msgstr "Yangi narx"
+
 msgid ""
 "A new price applies from the date you choose. Charges already issued never "
 "change. Every price stays in the history."
 msgstr ""
 "Yangi narx siz tanlagan sanadan amal qiladi. Avval hisoblangan to'lovlar "
 "o'zgarmaydi. Har bir narx tarixda saqlanadi."
-
-msgid "New price"
-msgstr "Yangi narx"
 
 #, python-format
 msgid "since %(d)s"
@@ -1025,6 +1031,9 @@ msgstr "Narxni o'zgartirish"
 
 msgid "Add courses first."
 msgstr "Avval kurs qo'shing."
+
+msgid "Courses"
+msgstr "Kurslar"
 
 msgid "Tax ID (STIR)"
 msgstr "STIR"
@@ -1046,6 +1055,12 @@ msgstr "Bekor qilish"
 
 msgid "Overdue debt"
 msgstr "Muddati o'tgan qarz"
+
+#, python-format
+msgid "%(n)s debtor"
+msgid_plural "%(n)s debtors"
+msgstr[0] "%(n)s ta qarzdor"
+msgstr[1] "%(n)s ta qarzdor"
 
 msgid "Collected today"
 msgstr "Bugun yig'ilgan"
@@ -1183,9 +1198,6 @@ msgstr "To'lov bekor qilindi"
 msgid "Money refunded"
 msgstr "Pul qaytarildi"
 
-msgid "Closed"
-msgstr "Yopildi"
-
 msgid "Converted to a student"
 msgstr "O'quvchiga aylantirildi"
 
@@ -1236,6 +1248,69 @@ msgstr "Ha"
 
 msgid "No"
 msgstr "Yo'q"
+
+msgid "Monday"
+msgstr "Dushanba"
+
+msgid "Tuesday"
+msgstr "Seshanba"
+
+msgid "Wednesday"
+msgstr "Chorshanba"
+
+msgid "Thursday"
+msgstr "Payshanba"
+
+msgid "Friday"
+msgstr "Juma"
+
+msgid "Saturday"
+msgstr "Shanba"
+
+msgid "Sunday"
+msgstr "Yakshanba"
+
+msgid "Mon"
+msgstr "Du"
+
+msgid "Tue"
+msgstr "Se"
+
+msgid "Wed"
+msgstr "Ch"
+
+msgid "Thu"
+msgstr "Pa"
+
+msgid "Fri"
+msgstr "Ju"
+
+msgid "Sat"
+msgstr "Sh"
+
+msgid "Sun"
+msgstr "Ya"
+
+msgid "Today"
+msgstr "Bugun"
+
+msgid "Close"
+msgstr "Yopish"
+
+msgid "Calendar"
+msgstr "Taqvim"
+
+msgid "Choose a date"
+msgstr "Sanani tanlang"
+
+msgid "Previous month"
+msgstr "Oldingi oy"
+
+msgid "Next month"
+msgstr "Keyingi oy"
+
+msgid "Saving…"
+msgstr "Saqlanmoqda…"
 
 #, python-format
 msgid "Constraint “%(name)s” is violated."
@@ -1338,6 +1413,43 @@ msgstr "Filial administratori"
 
 msgid "Sales manager"
 msgstr "Sotuv menejeri"
+
+msgid "just now"
+msgstr "hozirgina"
+
+#, python-format
+msgid "in %(n)s minute"
+msgid_plural "in %(n)s minutes"
+msgstr[0] "%(n)s daqiqadan so'ng"
+msgstr[1] "%(n)s daqiqadan so'ng"
+
+#, python-format
+msgid "in %(n)s hour"
+msgid_plural "in %(n)s hours"
+msgstr[0] "%(n)s soatdan so'ng"
+msgstr[1] "%(n)s soatdan so'ng"
+
+#, python-format
+msgid "%(n)s minute ago"
+msgid_plural "%(n)s minutes ago"
+msgstr[0] "%(n)s daqiqa oldin"
+msgstr[1] "%(n)s daqiqa oldin"
+
+#, python-format
+msgid "%(n)s hour ago"
+msgid_plural "%(n)s hours ago"
+msgstr[0] "%(n)s soat oldin"
+msgstr[1] "%(n)s soat oldin"
+
+#, python-format
+msgid "yesterday %(time)s"
+msgstr "kecha %(time)s"
+
+#, python-format
+msgid "%(n)s day ago"
+msgid_plural "%(n)s days ago"
+msgstr[0] "%(n)s kun oldin"
+msgstr[1] "%(n)s kun oldin"
 
 msgid "All users"
 msgstr "Barcha foydalanuvchilar"
@@ -1626,23 +1738,20 @@ msgstr "Bu raqam boshqa filialda mavjud: %(name)s"
 msgid "My tasks"
 msgstr "Mening vazifalarim"
 
-msgid "Today"
-msgstr "Bugun"
-
 msgid "Upcoming"
 msgstr "Keyingi"
 
 msgid "Came"
 msgstr "Keldi"
 
+msgid "New lead"
+msgstr "Yangi lid"
+
 msgid "Search"
 msgstr "Qidirish"
 
 msgid "Filters"
 msgstr "Saralash"
-
-msgid "New lead"
-msgstr "Yangi lid"
 
 msgid "All sources"
 msgstr "Barcha manbalar"
@@ -1676,6 +1785,12 @@ msgstr ""
 msgid "Create student"
 msgstr "O'quvchi yaratish"
 
+msgid "Edit"
+msgstr "Tahrirlash"
+
+msgid "Reopen"
+msgstr "Qayta ochish"
+
 #, python-format
 msgid "Converted to student %(name)s on %(d)s."
 msgstr "%(d)s da %(name)s o'quvchiga aylantirildi."
@@ -1685,12 +1800,6 @@ msgstr "O'quvchi sahifasini ochish"
 
 msgid "Move"
 msgstr "O'tkazish"
-
-msgid "Edit"
-msgstr "Tahrirlash"
-
-msgid "Reopen"
-msgstr "Qayta ochish"
 
 msgid "Add"
 msgstr "Qo'shish"
@@ -1722,11 +1831,17 @@ msgstr "Meniki"
 msgid "Everyone's"
 msgstr "Barchaniki"
 
+msgid "Follow-up tasks are created from a lead's card."
+msgstr "Vazifalar lid kartasidan yaratiladi."
+
 msgid "Result not marked"
 msgstr "Natija belgilanmagan"
 
 msgid "No upcoming trial lessons."
 msgstr "Yaqin kunlarda sinov darsi yo'q."
+
+msgid "Book a trial lesson from a lead's card."
+msgstr "Sinov darsiga lid kartasidan yozing."
 
 msgid "Recent results"
 msgstr "So'nggi natijalar"
@@ -1866,6 +1981,9 @@ msgstr "bitta filial"
 
 msgid "Show"
 msgstr "Ko'rsatish"
+
+msgid "Try a longer period."
+msgstr "Uzunroq davrni tanlang."
 
 msgid "Collected this month"
 msgstr "Shu oydagi tushum"
@@ -2109,6 +2227,9 @@ msgstr "Hali berilmagan"
 msgid "No salary months yet."
 msgstr "Hali maosh oylari yo'q."
 
+msgid "New rate"
+msgstr "Yangi stavka"
+
 msgid ""
 "A teacher gets this share of the money students paid for the teacher's "
 "groups. Teachers without their own rate get the default rate from General "
@@ -2119,9 +2240,6 @@ msgstr ""
 "oladi. Shaxsiy stavkasi yo'q o'qituvchilarga Umumiy sozlamalardagi standart "
 "stavka qo'llanadi. Yangi stavka siz tanlagan oydan boshlab amal qiladi; "
 "yopilgan oylar o'zgarmaydi."
-
-msgid "New rate"
-msgstr "Yangi stavka"
 
 msgid "Own rate"
 msgstr "Shaxsiy stavka"
@@ -2156,6 +2274,9 @@ msgstr "%(a)s maoshni berish"
 msgid "Cancel the payout"
 msgstr "Berilgan maoshni bekor qilish"
 
+msgid "Cancel the payout?"
+msgstr "Berilgan maosh bekor qilinsinmi?"
+
 #, python-format
 msgid "%(p)s × %(r)s%%"
 msgstr "%(p)s × %(r)s%%"
@@ -2166,6 +2287,9 @@ msgstr "%(m)s uchun tuzatish"
 
 msgid "Bonuses and deductions"
 msgstr "Mukofotlar va ushlab qolishlar"
+
+msgid "Delete this line?"
+msgstr "Bu qator o'chirilsinmi?"
 
 msgid "Delete"
 msgstr "O'chirish"
@@ -2252,9 +2376,6 @@ msgstr "To'lov modeli"
 
 msgid "Duration (months)"
 msgstr "Davomiyligi (oy)"
-
-msgid "Courses"
-msgstr "Kurslar"
 
 msgid "Center name"
 msgstr "Markaz nomi"
@@ -3111,27 +3232,6 @@ msgstr "Tugagan"
 msgid "This branch already has a group with this name."
 msgstr "Bu filialda shu nomli guruh allaqachon bor."
 
-msgid "Monday"
-msgstr "Dushanba"
-
-msgid "Tuesday"
-msgstr "Seshanba"
-
-msgid "Wednesday"
-msgstr "Chorshanba"
-
-msgid "Thursday"
-msgstr "Payshanba"
-
-msgid "Friday"
-msgstr "Juma"
-
-msgid "Saturday"
-msgstr "Shanba"
-
-msgid "Sunday"
-msgstr "Yakshanba"
-
 msgid "Day"
 msgstr "Kun"
 
@@ -3413,6 +3513,10 @@ msgstr "Joriy"
 msgid "No groups yet."
 msgstr "Hali guruh yo'q."
 
+msgid "Create a group, set its schedule, then enroll students."
+msgstr ""
+"Guruh yarating, dars jadvalini belgilang, so'ng o'quvchilarni qo'shing."
+
 msgid "Upload a file"
 msgstr "Fayl yuklash"
 
@@ -3462,11 +3566,14 @@ msgstr "Faylni tuzatib, qayta yuklang. Hech narsa saqlanmadi."
 msgid "Row %(n)s"
 msgstr "%(n)s-qator"
 
-msgid "Parent"
-msgstr "Ota-onasi"
-
 msgid "Enroll into a group"
 msgstr "Guruhga qo'shish"
+
+msgid "Contacts"
+msgstr "Aloqa"
+
+msgid "Parent"
+msgstr "Ota-onasi"
 
 msgid "now"
 msgstr "hozirgacha"
@@ -3488,6 +3595,15 @@ msgstr "Yangi o'quvchi"
 
 msgid "Edit student"
 msgstr "O'quvchini tahrirlash"
+
+msgid "No student matches these filters."
+msgstr "Bu filtrlarga mos o'quvchi yo'q."
+
+msgid "No students yet"
+msgstr "Hali o'quvchilar yo'q"
+
+msgid "Add the first student or import a list from Excel."
+msgstr "Birinchi o'quvchini qo'shing yoki ro'yxatni Excel'dan import qiling."
 
 msgid "No lessons today."
 msgstr "Bugun dars yo'q."
@@ -3781,6 +3897,9 @@ msgstr ""
 "{sana} sana, {filial} filial, {telefon} filial telefoni, {markaz} markaz "
 "nomi."
 
+msgid "Send this message to the parents now?"
+msgstr "Xabar ota-onalarga hozir yuborilsinmi?"
+
 msgid "Preview"
 msgstr "Ko'rib chiqish"
 
@@ -3801,6 +3920,9 @@ msgid ""
 "is empty."
 msgstr ""
 "Hech kim topilmadi: bu guruhda shu kuni kelmaganlar yo'q yoki guruh bo'sh."
+
+msgid "Connected"
+msgstr "Ulangan"
 
 msgid "The bot is off: no token on the server."
 msgstr "Bot o'chiq: serverda token yo'q."
@@ -3899,24 +4021,75 @@ msgstr "Davom etishdan oldin o'z parolingizni o'rnating."
 msgid "Profile"
 msgstr "Profil"
 
+msgid "Theme"
+msgstr "Ko'rinish"
+
 msgid "Log out"
 msgstr "Chiqish"
+
+msgid "Skip to content"
+msgstr "Asosiy qismga o'tish"
+
+msgid "Main menu"
+msgstr "Asosiy menyu"
+
+msgid "Search…"
+msgstr "Qidirish…"
 
 msgid "All my branches"
 msgstr "Barcha filiallarim"
 
+msgid "Breadcrumbs"
+msgstr "Sahifa yo'li"
+
+msgid "More actions"
+msgstr "Boshqa amallar"
+
 msgid "More"
 msgstr "Yana"
+
+#, python-format
+msgid "%(shown)s of %(total)s"
+msgstr "%(total)s tadan %(shown)s ta"
+
+msgid "Clear filters"
+msgstr "Filtrlarni tozalash"
+
+msgid "Pages"
+msgstr "Sahifalar"
 
 msgid "Previous"
 msgstr "Oldingi"
 
-#, python-format
-msgid "Page %(n)s of %(total)s"
-msgstr "%(n)s / %(total)s sahifa"
-
 msgid "Next"
 msgstr "Keyingi"
+
+msgid "Student, lead, group or receipt number"
+msgstr "O'quvchi, lid, guruh yoki chek raqami"
+
+msgid "Search results"
+msgstr "Qidiruv natijalari"
+
+msgid "move"
+msgstr "tanlash"
+
+msgid "open"
+msgstr "ochish"
+
+msgid "close"
+msgstr "yopish"
+
+msgid "Light"
+msgstr "Yorug'"
+
+msgid "Dark"
+msgstr "Qorong'i"
+
+msgid "Try a phone number, a surname or a receipt number."
+msgstr "Telefon raqami, familiya yoki chek raqamini kiriting."
+
+msgid "Type at least 2 letters or digits."
+msgstr "Kamida 2 ta harf yoki raqam kiriting."
 
 msgid "Reset"
 msgstr "Tozalash"

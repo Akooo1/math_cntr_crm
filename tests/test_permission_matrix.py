@@ -608,6 +608,8 @@ def cases(objects) -> dict[str, list[Case]]:
             Case("/filial/", "get", {**only({}, 405), "anon": 302}),
         ],
         "core:audit_log": [Case("/jurnal/", expect={**DIRECTOR_ONLY, "anon": 302})],
+        # Global search: everyone signed in; each result group is scoped by its module.
+        "core:search": [Case("/qidiruv/?q=Karimov", expect={**EVERYONE, "anon": 302})],
         "accounts:login": [Case("/kirish/", expect={**only({}, 302), "anon": 200})],
         "accounts:logout": [Case("/chiqish/", "post", {**only({}, 302), "anon": 302})],
         "accounts:profile": [Case("/profil/", expect={**EVERYONE, "anon": 302})],

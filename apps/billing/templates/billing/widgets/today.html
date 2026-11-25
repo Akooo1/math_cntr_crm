@@ -1,4 +1,4 @@
-<a href="{% url 'billing:cash' %}" class="card block p-5 hover:border-sky-300">
+<a href="{% url 'billing:cash' %}" class="card block p-5">
   <p class="text-sm font-medium text-slate-500">{% translate "Collected today" %}</p>
   <p class="mt-2 text-3xl font-semibold">{{ ctx.total|som }}</p>
   <ul class="mt-2 space-y-1 text-sm text-slate-600">{% for r in ctx.rows %}<li class="flex justify-between"><span>{{ r.method }}</span><span>{{ r.net|som }}</span></li>{% endfor %}</ul>

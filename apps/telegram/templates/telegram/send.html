@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% block title %}{% translate "Message to parents" %}{% endblock %}
 {% block heading %}{% translate "Message to parents" %}{% endblock %}
+{% block breadcrumbs %}{% if student %}<a href="{% url 'students:detail' student.pk %}">{{ student.full_name }}</a>{% endif %}{% endblock %}
 {% block content %}
-  <div class="mx-auto max-w-3xl space-y-4">
+  <div class="max-w-3xl space-y-4">
     {% if result %}
       <div class="card space-y-2 p-4">
         <p class="font-semibold">{% blocktranslate with s=result.sent f=result.failed %}Sent: {{ s }}. Not sent: {{ f }}.{% endblocktranslate %}</p>
@@ -14,16 +15,16 @@
       </div>
     {% endif %}
 
-    <form method="post" class="card space-y-4 p-4" novalidate>{% csrf_token %}
+    <form method="post" class="card space-y-4 p-5" novalidate>{% csrf_token %}
       {% include "components/form_errors.html" %}
       {% if student %}<p class="text-sm">{% blocktranslate with n=student.full_name %}To the parents of {{ n }}{% endblocktranslate %}</p>{% endif %}
-      <label class="block">
-        <span class="mb-1 block text-sm font-medium text-slate-700">{% translate "Template" %}</span>
-        <select name="template" data-fill-target="id_text" class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base">
+      <div>
+        <label for="tg-template" class="label">{% translate "Template" %}</label>
+        <select id="tg-template" name="template" data-fill-target="id_text" class="input">
           <option value="">{% translate "Choose" %}</option>
           {% for t in templates %}<option value="{{ t.pk }}" data-text="{{ t.text }}" {% if form.template.value|stringformat:"s" == t.pk|stringformat:"s" %}selected{% endif %}>{{ t.title }}</option>{% endfor %}
         </select>
-      </label>
+      </div>
       {% field form.text %}
       <p class="-mt-2 text-xs text-slate-500">{% translate "Filled in for each student: {oquvchi} student, {guruh} group, {sana} date, {filial} branch, {telefon} branch phone, {markaz} center name." %}</p>
       {% if student %}
@@ -32,9 +33,10 @@
         {% field form.mode %}
         <div class="grid gap-3 sm:grid-cols-2">{% field form.group %}{% field form.day %}</div>
       {% endif %}
-      <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-        <button name="action" value="preview" class="btn-secondary">{% translate "Preview" %}</button>
-        <button name="action" value="send" class="btn-primary" {% if preview %}formnovalidate{% endif %}>{% icon "send" %}{% translate "Send" %}</button>
+      {% translate "Send this message to the parents now?" as send_q %}
+      <div class="form-actions justify-end pt-2">
+        <button name="action" value="preview" class="btn-secondary">{% icon "list" "w-4 h-4" %}{% translate "Preview" %}</button>
+        <button name="action" value="send" class="btn-primary" data-confirm="{{ send_q }}" {% if preview %}formnovalidate{% endif %}>{% icon "send" %}{% translate "Send" %}</button>
       </div>
     </form>
 
@@ -49,7 +51,7 @@
             {% endfor %}
           </ul>
           <p class="mb-1 mt-4 text-sm font-medium">{% translate "The first message will look like this:" %}</p>
-          <p class="whitespace-pre-line rounded-lg bg-slate-50 p-3 text-sm">{{ preview.0.text }}</p>
+          <p class="whitespace-pre-line rounded-lg bg-surface-2 p-3 text-sm">{{ preview.0.text }}</p>
         {% else %}
           <p class="text-sm text-slate-500">{% translate "Nobody matches: no students absent on that date in this group, or the group is empty." %}</p>
         {% endif %}

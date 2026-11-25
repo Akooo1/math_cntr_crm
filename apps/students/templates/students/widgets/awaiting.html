@@ -1,4 +1,4 @@
-<a href="{% url 'students:list' %}?holat=kutilmoqda" class="card block p-5 hover:border-sky-300">
+<a href="{% url 'students:list' %}?holat=kutilmoqda" class="card block p-5">
   <p class="text-sm font-medium text-slate-500">{% translate "Awaiting enrollment" %}</p>
   <p class="mt-2 text-3xl font-semibold {% if ctx.count %}text-amber-700{% endif %}">{{ ctx.count }}</p>
   <ul class="mt-2 space-y-1 text-sm text-slate-600">{% for s in ctx.students %}<li>{{ s.full_name }}</li>{% endfor %}</ul>

@@ -1,6 +1,9 @@
 from django.conf import settings as dj_settings
 from django.urls import reverse
+from django.utils.dates import MONTHS
+from django.utils.translation import gettext as _
 
+from . import dates
 from .permissions import accessible_branch_ids, has_perm
 from .registry import registry
 
@@ -25,10 +28,57 @@ def _branch_options(request):
     return {"branches": branches, "current": getattr(request, "branch_filter", None)}
 
 
+def weekday_names() -> list[str]:
+    """Monday first, like dt.date.weekday()."""
+    return [
+        _("Monday"),
+        _("Tuesday"),
+        _("Wednesday"),
+        _("Thursday"),
+        _("Friday"),
+        _("Saturday"),
+        _("Sunday"),
+    ]
+
+
+def ui_strings() -> dict:
+    """Translated strings for static/js/app.js, rendered with json_script in base.html."""
+    return {
+        "days": weekday_names(),
+        "days_short": [
+            _("Mon"),
+            _("Tue"),
+            _("Wed"),
+            _("Thu"),
+            _("Fri"),
+            _("Sat"),
+            _("Sun"),
+        ],
+        "months": [str(MONTHS[i]) for i in range(1, 13)],
+        "today": _("Today"),
+        "close": _("Close"),
+        "calendar": _("Calendar"),
+        "choose_date": _("Choose a date"),
+        "prev_month": _("Previous month"),
+        "next_month": _("Next month"),
+        "saving": _("Saving…"),
+    }
+
+
+def clock() -> dict:
+    """The top bar's "Seshanba, 25.11.2026 · 14:32" (Asia/Tashkent). JS keeps it current."""
+    now = dates.now()
+    return {
+        "iso": now.strftime("%Y-%m-%dT%H:%M"),
+        "weekday": weekday_names()[now.weekday()],
+        "rest": f"{dates.format_date(now)} · {now:%H:%M}",
+    }
+
+
 def layout(request):
     user = getattr(request, "user", None)
     if user is None or not user.is_authenticated:
-        return {"center_name": _center_name()}
+        return {"center_name": _center_name(), "ui_i18n": ui_strings()}
     items = sorted(
         (i for i in registry.nav.values() if has_perm(user, i.permission)),
         key=lambda i: i.order,
@@ -46,4 +96,6 @@ def layout(request):
         "nav_mobile": mobile[:4],
         "nav_mobile_more": mobile[4:],
         "branch_options": _branch_options(request),
+        "clock": clock(),
+        "ui_i18n": ui_strings(),
     }

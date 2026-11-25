@@ -1,56 +1,76 @@
 {% extends "base.html" %}
 {% block title %}{% translate "Students" %}{% endblock %}
 {% block heading %}{% translate "Students" %}{% endblock %}
+{% block menu %}
+  {% if user|can:"students.manage" %}<a class="menu-item" role="menuitem" href="{% url 'students:import' %}">{% icon "list" %}{% translate "Import" %}</a>{% endif %}
+{% endblock %}
+{% block primary %}{% if can_manage %}<a href="{% url 'students:create' %}" class="btn-primary">{% icon "plus" %}<span>{% translate "New student" %}</span></a>{% endif %}{% endblock %}
 {% block content %}
-  <form method="get" class="mb-3 flex flex-wrap items-end gap-2">
-    <div class="min-w-0 flex-1">
+  <form method="get" class="mb-3 flex flex-wrap items-center gap-2">
+    <div class="relative min-w-0 flex-[1_1_14rem]">
       <label for="q" class="sr-only">{% translate "Search" %}</label>
-      <input id="q" type="search" name="q" value="{{ q }}" placeholder="{% translate 'Name or phone' %}" class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base">
+      <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted">{% icon "search" "w-4 h-4" %}</span>
+      <input id="q" type="search" name="q" value="{{ q }}" placeholder="{% translate 'Name or phone' %}" class="input pl-9">
     </div>
-    <select name="guruh" class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base max-w-[12rem]" aria-label="{% translate 'Group' %}" onchange="this.form.submit()">
+    <select name="guruh" class="input w-auto max-w-[12rem] flex-[0_1_auto]" aria-label="{% translate 'Group' %}" data-autosubmit>
       <option value="">{% translate "All groups" %}</option>
       {% for g in groups %}<option value="{{ g.pk }}" {% if group_id == g.pk|stringformat:"s" %}selected{% endif %}>{{ g.name }}</option>{% endfor %}
     </select>
     {% if status %}<input type="hidden" name="holat" value="{{ status }}">{% endif %}
-    <button class="btn-secondary px-3" aria-label="{% translate 'Search' %}">{% icon "search" %}</button>
-    {% if can_manage %}<a href="{% url 'students:create' %}" class="btn-primary">{% icon "plus" %}<span class="hidden sm:inline">{% translate "New student" %}</span></a>{% endif %}
+    {% if request.GET.tartib %}<input type="hidden" name="tartib" value="{{ request.GET.tartib }}">{% endif %}
+    <button class="btn-secondary btn-icon" aria-label="{% translate 'Search' %}">{% icon "search" %}</button>
   </form>
-  <div class="-mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1 md:mx-0 md:px-0">
-    <a href="?{% if q %}q={{ q|urlencode }}{% endif %}" class="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium {% if not status %}bg-sky-700 text-white{% else %}bg-white ring-1 ring-slate-200{% endif %}">{% translate "All" %}</a>
+  <div class="chip-row mb-4">
+    <a href="?{% if q %}q={{ q|urlencode }}{% endif %}{% if group_id %}&guruh={{ group_id }}{% endif %}" class="chip" {% if not status %}aria-current="page"{% endif %}>{% translate "All" %}</a>
     {% for key, label in statuses %}
-      <a href="?holat={{ key }}{% if q %}&q={{ q|urlencode }}{% endif %}" class="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium {% if status == key %}bg-sky-700 text-white{% else %}bg-white ring-1 ring-slate-200{% endif %}">{{ label }}</a>
+      <a href="?holat={{ key }}{% if q %}&q={{ q|urlencode }}{% endif %}{% if group_id %}&guruh={{ group_id }}{% endif %}" class="chip" {% if status == key %}aria-current="page"{% endif %}>{{ label }}</a>
     {% endfor %}
   </div>
 
+  {% if not page.object_list %}
+    <div class="card">
+      {% if totals.filtered %}
+        {% url 'students:list' as reset %}
+        {% include "components/empty.html" with icon="search" title=_("Nothing found.") text=_("No student matches these filters.") reset=reset %}
+      {% elif can_manage %}
+        {% url 'students:create' as add %}
+        {% include "components/empty.html" with icon="users" title=_("No students yet") text=_("Add the first student or import a list from Excel.") url=add label=_("New student") %}
+      {% else %}
+        {% include "components/empty.html" with icon="users" title=_("No students yet") %}
+      {% endif %}
+    </div>
+  {% else %}
   <div class="space-y-2 md:hidden">
     {% for s in page %}
       <a href="{% url 'students:detail' s.pk %}" class="card block p-4">
         <div class="flex items-start justify-between gap-2">
-          <p class="font-medium">{{ s.full_name }}</p>
+          <p class="min-w-0 font-medium">{{ s.full_name }}</p>
           {% with b=badges|get_item:s.pk %}{% if b %}<span class="badge {{ b.1 }}">{{ b.0 }}</span>{% endif %}{% endwith %}
         </div>
         <p class="text-sm text-slate-600">{{ s.phone|default:s.parent_phone|telefon }}</p>
         <p class="mt-1 text-sm text-slate-500">{% for e in s.open_enrollments %}{{ e.group.name }}{% if e.status == 'frozen' %} ({% translate "Frozen" %}){% endif %}{% if not forloop.last %}, {% endif %}{% empty %}{% translate "Awaiting enrollment" %}{% endfor %}</p>
       </a>
-    {% empty %}<p class="card p-6 text-center text-sm text-slate-500">{% translate "Nothing found." %}</p>{% endfor %}
+    {% endfor %}
   </div>
-  <div class="card hidden overflow-x-auto md:block">
-    <table class="min-w-full divide-y divide-slate-200">
-      <thead class="bg-slate-50"><tr>
-        <th class="table-head">{% translate "Student" %}</th><th class="table-head">{% translate "Phone" %}</th><th class="table-head">{% translate "Parent" %}</th><th class="table-head">{% translate "Groups" %}</th><th class="table-head"></th>
+  <div class="card table-scroll hidden md:block">
+    <table class="min-w-full">
+      <thead><tr>
+        {% include "components/sort_th.html" with key="ism" label=_("Student") %}
+        <th class="table-head">{% translate "Phone" %}</th><th class="table-head">{% translate "Parent" %}</th><th class="table-head">{% translate "Groups" %}</th><th class="table-head"><span class="sr-only">{% translate "Payment" %}</span></th>
       </tr></thead>
       <tbody class="divide-y divide-slate-100">
         {% for s in page %}
-          <tr class="hover:bg-slate-50">
-            <td class="table-cell font-medium"><a class="hover:text-sky-700" href="{% url 'students:detail' s.pk %}">{{ s.full_name }}</a>{% if user.is_director and not request.branch_filter %}<p class="text-xs text-slate-500">{{ s.branch.name }}</p>{% endif %}</td>
-            <td class="table-cell">{{ s.phone|telefon|default:"—" }}</td>
-            <td class="table-cell">{{ s.parent_name|default:"" }}<p class="text-slate-500">{{ s.parent_phone|telefon }}</p></td>
+          <tr class="hover:bg-surface-2">
+            <td class="table-cell font-medium"><a class="hover:text-sky-700" href="{% url 'students:detail' s.pk %}">{{ s.full_name }}</a>{% if user.is_director and not request.branch_filter %}<p class="text-xs font-normal text-slate-500">{{ s.branch.name }}</p>{% endif %}</td>
+            <td class="table-cell tabular-nums">{{ s.phone|telefon|default:"—" }}</td>
+            <td class="table-cell">{{ s.parent_name|default:"" }}<p class="tabular-nums text-slate-500">{{ s.parent_phone|telefon }}</p></td>
             <td class="table-cell">{% for e in s.open_enrollments %}<span class="badge {% if e.status == 'frozen' %}bg-sky-100 text-sky-800{% else %}bg-slate-100 text-slate-700{% endif %} mr-1">{{ e.group.name }}</span>{% empty %}<span class="badge bg-amber-100 text-amber-900">{% translate "Awaiting enrollment" %}</span>{% endfor %}</td>
-            <td class="table-cell">{% with b=badges|get_item:s.pk %}{% if b %}<span class="badge {{ b.1 }}">{{ b.0 }}</span>{% endif %}{% endwith %}</td>
+            <td class="table-cell text-right">{% with b=badges|get_item:s.pk %}{% if b %}<span class="badge {{ b.1 }}">{{ b.0 }}</span>{% endif %}{% endwith %}</td>
           </tr>
-        {% empty %}<tr><td colspan="5" class="table-cell text-center text-slate-500">{% translate "Nothing found." %}</td></tr>{% endfor %}
+        {% endfor %}
       </tbody>
     </table>
   </div>
+  {% endif %}
   {% include "components/pagination.html" %}
 {% endblock %}

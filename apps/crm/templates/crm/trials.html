@@ -9,7 +9,7 @@
   {% endif %}
   <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">{% translate "Upcoming" %}</h2>
   <ul class="mb-5 space-y-2">
-    {% for tr in upcoming %}{% include "crm/_trial_row.html" %}{% empty %}<li class="card p-6 text-center text-sm text-slate-500">{% translate "No upcoming trial lessons." %}</li>{% endfor %}
+    {% for tr in upcoming %}{% include "crm/_trial_row.html" %}{% empty %}<li class="card">{% include "components/empty.html" with icon="calendar" title=_("No upcoming trial lessons.") text=_("Book a trial lesson from a lead's card.") %}</li>{% endfor %}
   </ul>
   {% if recent %}
     <h2 class="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">{% translate "Recent results" %}</h2>

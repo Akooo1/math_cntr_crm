@@ -3,24 +3,25 @@
 {% block title %}{% translate "Leads" %}{% endblock %}
 {% block heading %}{% translate "Leads" %}{% endblock %}
 {% block extra_head %}<script src="{% static 'vendor/sortable-1.15.6.min.js' %}" defer></script>{% endblock %}
+{% block primary %}<a href="{% url 'crm:lead_create' %}" class="btn-primary">{% icon "plus" %}<span>{% translate "New lead" %}</span></a>{% endblock %}
 {% block content %}
   {% include "crm/_tabs.html" with tab="board" %}
 
   <form method="get" class="mb-4 flex flex-wrap items-end gap-2" x-data="{ more: {% if filters.source or filters.manager or filters.course %}true{% else %}false{% endif %} }">
     {% if selected %}<input type="hidden" name="bosqich" value="{{ selected.stage.pk }}">{% endif %}
-    <div class="min-w-0 flex-1">
+    <div class="relative min-w-0 flex-1">
       <label for="q" class="sr-only">{% translate "Search" %}</label>
-      <input id="q" type="search" name="q" value="{{ q }}" placeholder="{% translate 'Name or phone' %}" class="block w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base">
+      <span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted">{% icon "search" "w-4 h-4" %}</span>
+      <input id="q" type="search" name="q" value="{{ q }}" placeholder="{% translate 'Name or phone' %}" class="input pl-9">
     </div>
-    <button class="btn-secondary px-3" aria-label="{% translate 'Search' %}">{% icon "search" %}</button>
-    <button type="button" class="btn-ghost px-3" @click="more = !more">{% translate "Filters" %}</button>
-    <a href="{% url 'crm:lead_create' %}" class="btn-primary">{% icon "plus" %}<span class="hidden sm:inline">{% translate "New lead" %}</span></a>
+    <button class="btn-secondary btn-icon" aria-label="{% translate 'Search' %}">{% icon "search" %}</button>
+    <button type="button" class="btn-secondary" @click="more = !more" :aria-expanded="more">{% icon "sliders" "w-4 h-4" %}<span class="hidden sm:inline">{% translate "Filters" %}</span>{% if filters.source or filters.manager or filters.course %}<span class="h-2 w-2 rounded-full bg-sky-500"></span>{% endif %}</button>
     <div class="grid w-full gap-2 sm:grid-cols-3" x-show="more" x-cloak>
-      <select name="manba" class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base" aria-label="{% translate 'Source' %}">
+      <select name="manba" class="input" aria-label="{% translate 'Source' %}">
         <option value="">{% translate "All sources" %}</option>
         {% for s in sources %}<option value="{{ s.pk }}" {% if filters.source == s.pk|stringformat:"s" %}selected{% endif %}>{{ s.name }}</option>{% endfor %}
       </select>
-      <select name="menejer" class="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base" aria-label="{% translate 'Manager' %}">
+      <select name="menejer" class="input" aria-label="{% translate 'Manager' %}">
         <option value="">{% translate "All managers" %}</option>
         {% for m in managers %}<option value="{{ m.pk }}" {% if filters.manager == m.pk|stringformat:"s" %}selected{% endif %}>{{ m.full_name }}</option>{% endfor %}
       </select>
@@ -29,11 +30,11 @@
   </form>
 
   {# Stage chips: always on phones; on desktop only in list mode #}
-  <div class="-mx-4 mb-3 flex gap-2 overflow-x-auto px-4 pb-1 {% if not selected %}md:hidden{% endif %} md:mx-0 md:px-0">
-    {% if selected %}<a href="?{{ query_no_stage }}" class="hidden shrink-0 items-center gap-1 rounded-full bg-white px-3 py-1.5 text-sm ring-1 ring-slate-200 md:inline-flex">{% icon "board" "w-4 h-4" %}{% translate "Board" %}</a>{% endif %}
+  <div class="chip-row mb-3 {% if not selected %}md:hidden{% endif %}">
+    {% if selected %}<a href="?{{ query_no_stage }}" class="chip hidden md:inline-flex">{% icon "board" "w-4 h-4" %}{% translate "Board" %}</a>{% endif %}
     {% for c in columns %}
-      <a href="?{% if query_no_stage %}{{ query_no_stage }}&{% endif %}bosqich={{ c.stage.pk }}"
-         class="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium {% if phone_column.stage.pk == c.stage.pk %}ring-2 ring-sky-600 {% endif %}{{ c.stage.badge_css }}">
+      <a href="?{% if query_no_stage %}{{ query_no_stage }}&{% endif %}bosqich={{ c.stage.pk }}" {% if phone_column.stage.pk == c.stage.pk %}aria-current="true"{% endif %}
+         class="inline-flex min-h-9 shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-sm font-medium {% if phone_column.stage.pk == c.stage.pk %}ring-2 ring-sky-600 {% endif %}{{ c.stage.badge_css }}">
         {{ c.stage.name }} <span class="opacity-70">{{ c.count }}</span>
       </a>
     {% endfor %}
@@ -43,7 +44,7 @@
     {# List mode: one stage, paginated (phone and desktop) #}
     <div class="space-y-2 md:grid md:grid-cols-2 md:gap-3 md:space-y-0 xl:grid-cols-3">
       {% for lead in list_page %}{% include "crm/_lead_card.html" %}{% empty %}
-        <p class="card p-6 text-center text-sm text-slate-500 md:col-span-3">{% translate "No leads in this stage." %}</p>
+        <div class="card md:col-span-3">{% include "components/empty.html" with icon="funnel" title=_("No leads in this stage.") %}</div>
       {% endfor %}
     </div>
     {% include "components/pagination.html" with page=list_page %}
@@ -51,7 +52,7 @@
     {# Phone: first stage as a list #}
     <div class="space-y-2 md:hidden">
       {% for lead in phone_column.leads %}{% include "crm/_lead_card.html" %}{% empty %}
-        <p class="card p-6 text-center text-sm text-slate-500">{% translate "No leads in this stage." %}</p>
+        <div class="card">{% include "components/empty.html" with icon="funnel" title=_("No leads in this stage.") %}</div>
       {% endfor %}
       {% if phone_column.count > phone_column.leads|length %}<a class="btn-secondary w-full" href="?bosqich={{ phone_column.stage.pk }}">{% translate "Show all" %}</a>{% endif %}
     </div>
@@ -59,10 +60,10 @@
     {# Desktop: board with drag and drop #}
     <div class="hidden md:flex md:gap-3 md:overflow-x-auto md:pb-4" id="board" data-move-url="{% url 'crm:move' 0 %}">
       {% for c in columns %}
-        <section class="flex w-72 shrink-0 flex-col rounded-xl bg-slate-100 p-2">
+        <section class="flex w-72 shrink-0 flex-col rounded-xl border border-line bg-surface-2 p-2">
           <header class="mb-2 flex items-center justify-between px-1">
             <span class="badge {{ c.stage.badge_css }}">{{ c.stage.name }}</span>
-            <a href="?bosqich={{ c.stage.pk }}" class="text-xs font-medium text-slate-500 hover:text-sky-700">{{ c.count }}</a>
+            <a href="?bosqich={{ c.stage.pk }}" class="count-pill text-xs hover:text-sky-700">{{ c.count }}</a>
           </header>
           <div class="kanban-col flex min-h-24 flex-1 flex-col gap-2" data-stage="{{ c.stage.pk }}" data-kind="{{ c.stage.kind }}">
             {% for lead in c.leads %}{% include "crm/_lead_card.html" %}{% endfor %}

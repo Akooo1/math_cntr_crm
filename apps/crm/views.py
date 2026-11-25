@@ -9,7 +9,7 @@ from django.urls import reverse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from apps.core import dates, phone
+from apps.core import dates, listing, phone
 from apps.core.permissions import accessible_branch_ids, has_perm, perm_required
 
 from . import selectors, services
@@ -63,9 +63,15 @@ def board(request):
         ):
             if filters[key]:
                 qs = qs.filter(**{field: filters[key]})
-        list_page = Paginator(qs.order_by("-updated_at"), 30).get_page(request.GET.get("page"))
+        list_page = Paginator(qs.order_by("-updated_at"), listing.PER_PAGE).get_page(
+            request.GET.get("page")
+        )
     query = request.GET.copy()
     query.pop("page", None)
+    filtered = bool(q or selected or any(filters.values()))
+    everything = selectors.leads_for(request.user, request.branch_filter).count()
+    shown = selected["count"] if selected else sum(c["count"] for c in columns)
+    totals = listing.totals(everything, shown, filtered=filtered)
     no_stage = query.copy()
     no_stage.pop("bosqich", None)
     branch_ids = accessible_branch_ids(request.user)
@@ -76,6 +82,7 @@ def board(request):
         "crm/board.html",
         {
             "columns": columns,
+            "totals": totals,
             "selected": selected,
             "phone_column": phone_column,
             "list_page": list_page,
@@ -375,6 +382,7 @@ def tasks(request):
             "everyone": everyone,
             "can_view_all": has_perm(request.user, "crm.tasks.view_all"),
             "total": sum(len(v) for v in groups.values()),
+            "totals": listing.totals(sum(len(v) for v in groups.values())),
         },
     )
 
@@ -395,5 +403,11 @@ def trials(request):
     return render(
         request,
         "crm/trials.html",
-        {"upcoming": upcoming, "past_open": past_open, "recent": recent, "today": today},
+        {
+            "upcoming": upcoming,
+            "past_open": past_open,
+            "recent": recent,
+            "today": today,
+            "totals": listing.totals(len(upcoming) + len(past_open)),
+        },
     )

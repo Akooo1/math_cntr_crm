@@ -300,3 +300,13 @@ def collections_by_method(user, branch_filter, day: dt.date) -> list[dict]:
     return [
         {"method": r["method__name"], "net": (r["inflow"] or 0) - (r["outflow"] or 0)} for r in rows
     ]
+
+
+def net_amount(payments) -> int:
+    """Sum of a payments queryset as it affects accounts: payments in, reversals and refunds
+    out (the same total as the payments Excel export)."""
+    agg = payments.aggregate(
+        inflow=Sum("amount", filter=Q(kind="payment")),
+        outflow=Sum("amount", filter=~Q(kind="payment")),
+    )
+    return (agg["inflow"] or 0) - (agg["outflow"] or 0)

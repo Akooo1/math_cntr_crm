@@ -28,31 +28,31 @@
     <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
       <h3 class="text-sm font-semibold">{% translate "Last 6 months" %}</h3>
       <div class="flex gap-4 text-xs text-slate-600">
-        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background:#4968d7"></span>{% translate "Charged" %}</span>
-        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background:#eb6834"></span>{% translate "Collected" %}</span>
+        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background: var(--color-chart-1)"></span>{% translate "Charged" %}</span>
+        <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background: var(--color-chart-2)"></span>{% translate "Collected" %}</span>
       </div>
     </div>
     <div class="relative flex h-48 gap-2 pl-14" role="img" aria-label="{% translate 'Charged and collected for the last 6 months' %}">
       {# recessive grid and axis labels #}
       {% for t in ctx.chart.ticks %}
         <div class="pointer-events-none absolute left-14 right-0 border-t border-slate-100" style="bottom: {{ t.pct|unlocalize }}%"></div>
-        <span class="pointer-events-none absolute left-0 w-13 -translate-y-1/2 whitespace-nowrap pr-1.5 text-right text-[10px] tabular-nums text-slate-400" style="top: calc(100% - {{ t.pct|unlocalize }}%)">{{ t.label }}</span>
+        <span class="pointer-events-none absolute left-0 w-13 -translate-y-1/2 whitespace-nowrap pr-1.5 text-right text-[10px] tabular-nums text-slate-500" style="top: calc(100% - {{ t.pct|unlocalize }}%)">{{ t.label }}</span>
       {% endfor %}
       {% for m in ctx.chart.months %}
-        <div class="relative z-10 flex h-full flex-1 cursor-default items-end justify-center gap-[2px] rounded-md" :class="i === {{ forloop.counter0 }} ? 'bg-slate-50' : ''"
+        <div class="relative z-10 flex h-full flex-1 cursor-default items-end justify-center gap-[2px] rounded-md" :class="i === {{ forloop.counter0 }} ? 'bg-surface-2' : ''"
              @mouseenter="i = {{ forloop.counter0 }}" @mouseleave="i = null" @click="i = (i === {{ forloop.counter0 }} ? null : {{ forloop.counter0 }})">
-          <div class="w-1/3 max-w-6 rounded-t" style="height: {{ m.charged_pct|unlocalize }}%; background:#4968d7"></div>
-          <div class="w-1/3 max-w-6 rounded-t" style="height: {{ m.collected_pct|unlocalize }}%; background:#eb6834"></div>
-          <div x-show="i === {{ forloop.counter0 }}" x-cloak class="absolute bottom-full z-20 mb-1 w-44 rounded-lg border border-slate-200 bg-white p-2 text-xs shadow-lg {% if forloop.last or forloop.revcounter == 2 %}right-0{% else %}left-0{% endif %}">
+          <div class="w-1/3 max-w-6 rounded-t" style="height: {{ m.charged_pct|unlocalize }}%; background: var(--color-chart-1)"></div>
+          <div class="w-1/3 max-w-6 rounded-t" style="height: {{ m.collected_pct|unlocalize }}%; background: var(--color-chart-2)"></div>
+          <div x-show="i === {{ forloop.counter0 }}" x-cloak class="absolute bottom-full z-20 mb-1 w-44 rounded-lg border border-line bg-surface p-2 text-xs shadow-lg {% if forloop.last or forloop.revcounter == 2 %}right-0{% else %}left-0{% endif %}">
             <p class="font-semibold text-slate-800">{{ m.month|date:"F Y" }}</p>
-            <p class="flex justify-between gap-2 text-slate-600"><span class="flex items-center gap-1"><span class="inline-block h-2 w-2 rounded-sm" style="background:#4968d7"></span>{% translate "Charged" %}</span><span class="tabular-nums">{{ m.charged|som }}</span></p>
-            <p class="flex justify-between gap-2 text-slate-600"><span class="flex items-center gap-1"><span class="inline-block h-2 w-2 rounded-sm" style="background:#eb6834"></span>{% translate "Collected" %}</span><span class="tabular-nums">{{ m.collected|som }}</span></p>
+            <p class="flex justify-between gap-2 text-slate-600"><span class="flex items-center gap-1"><span class="inline-block h-2 w-2 rounded-sm" style="background: var(--color-chart-1)"></span>{% translate "Charged" %}</span><span class="tabular-nums">{{ m.charged|som }}</span></p>
+            <p class="flex justify-between gap-2 text-slate-600"><span class="flex items-center gap-1"><span class="inline-block h-2 w-2 rounded-sm" style="background: var(--color-chart-2)"></span>{% translate "Collected" %}</span><span class="tabular-nums">{{ m.collected|som }}</span></p>
           </div>
         </div>
       {% endfor %}
     </div>
     <div class="flex gap-2 pl-14 pt-1">{% for m in ctx.chart.months %}<span class="flex-1 text-center text-[11px] text-slate-500">{{ m.month|date:"M" }}</span>{% endfor %}</div>
-    <a href="{% url 'reports:report' 'oylar' %}" class="mt-2 inline-block text-sm font-medium text-sky-700">{% translate "As a table" %}</a>
+    <a href="{% url 'reports:report' 'oylar' %}" class="link mt-2 inline-flex min-h-9 items-center text-sm">{% translate "As a table" %}</a>
   </div>
 
   {% if ctx.branches|length > 1 %}

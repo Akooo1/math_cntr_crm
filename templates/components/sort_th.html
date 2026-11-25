@@ -1,0 +1,4 @@
+{# Sortable column header. include with: key, label, sort (core.listing.Sort), cls #}
+<th class="table-head {{ cls }}" {% if sort.key == key %}aria-sort="{% if sort.desc %}descending{% else %}ascending{% endif %}"{% endif %}>
+  <a class="sort-link" href="?{{ sort.url|get_item:key }}">{{ label }}{% if sort.key == key %}{% if sort.desc %}{% icon "arrow-down" "w-3.5 h-3.5" %}{% else %}{% icon "arrow-up" "w-3.5 h-3.5" %}{% endif %}{% else %}<span class="opacity-40">{% icon "sort" "w-3.5 h-3.5" %}</span>{% endif %}</a>
+</th>

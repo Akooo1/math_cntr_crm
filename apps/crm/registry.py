@@ -1,6 +1,8 @@
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.audit_display import register_labels as register_audit_labels
+from apps.core.global_search import SearchHit, SearchProvider, register_search_provider
 from apps.core.permissions import register_permission
 from apps.core.registry import DashboardWidget, NavItem, registry
 from apps.core.roles import Role
@@ -75,4 +77,28 @@ registry.add_widget(
         order=20,
         context=_pipeline_widget,
     )
+)
+
+
+# --- Global search (Ctrl+K) -----------------------------------------------------------
+
+
+def _search_leads(request, query, limit):
+    from apps.core.phone import format_phone
+
+    from . import selectors
+
+    qs = selectors.search(selectors.leads_for(request.user, request.branch_filter), query)
+    return [
+        SearchHit(
+            title=lead.full_name,
+            url=reverse("crm:lead", args=[lead.pk]),
+            subtitle=" · ".join(x for x in (lead.stage.name, format_phone(lead.phone)) if x),
+        )
+        for lead in qs.order_by("-updated_at")[:limit]
+    ]
+
+
+register_search_provider(
+    SearchProvider("leads", _("Leads"), "funnel", "crm.leads.view", _search_leads, 20)
 )

@@ -1,18 +1,17 @@
 {% extends "base.html" %}
 {% block title %}{{ lead.full_name }}{% endblock %}
-{% block heading %}{% translate "Leads" %}{% endblock %}
+{% block heading %}{% translate "Mark as refused" %}{% endblock %}
+{% block breadcrumbs %}<a href="{% url 'crm:board' %}">{% translate "Leads" %}</a><a href="{% url 'crm:lead' lead.pk %}">{{ lead.full_name }}</a>{% endblock %}
 {% block content %}
-  <div class="mb-4"><a href="{% url 'crm:lead' lead.pk %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{{ lead.full_name }}</a></div>
-  <div class="mx-auto max-w-md">
-    <h2 class="mb-4 text-xl font-semibold">{% translate "Mark as refused" %}</h2>
+  <div class="max-w-xl">
     <form method="post" class="card space-y-4 p-5" novalidate>{% csrf_token %}
       {% include "components/form_errors.html" %}
       {% field form.reason %}
       {% field form.note %}
       <p class="text-sm text-slate-500">{% translate "Open tasks of this lead will be closed." %}</p>
-      <div class="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+      <div class="form-actions justify-end pt-2">
         <a href="{% url 'crm:lead' lead.pk %}" class="btn-secondary">{% translate "Cancel" %}</a>
-        <button class="btn-danger">{% translate "Save" %}</button>
+        <button class="btn-danger">{% icon "x-circle" %}{% translate "Mark as refused" %}</button>
       </div>
     </form>
   </div>

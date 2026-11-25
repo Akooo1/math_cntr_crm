@@ -4,12 +4,12 @@
 {% block content %}
   {% include "crm/_tabs.html" with tab="tasks" %}
   {% if can_view_all %}
-    <div class="mb-4 flex gap-1 rounded-lg bg-slate-100 p-1 text-sm w-fit">
-      <a href="?" class="rounded-md px-3 py-1.5 {% if not everyone %}bg-white font-medium shadow-sm{% else %}text-slate-600{% endif %}">{% translate "Mine" %}</a>
-      <a href="?hammasi=1" class="rounded-md px-3 py-1.5 {% if everyone %}bg-white font-medium shadow-sm{% else %}text-slate-600{% endif %}">{% translate "Everyone's" %}</a>
+    <div class="seg mb-4">
+      <a href="?" class="seg-item" aria-pressed="{% if not everyone %}true{% else %}false{% endif %}">{% translate "Mine" %}</a>
+      <a href="?hammasi=1" class="seg-item" aria-pressed="{% if everyone %}true{% else %}false{% endif %}">{% translate "Everyone's" %}</a>
     </div>
   {% endif %}
-  {% if not total %}<div class="card p-8 text-center text-sm text-slate-500">{% translate "No open tasks." %}</div>{% endif %}
+  {% if not total %}{% url 'crm:board' as leads_url %}<div class="card">{% include "components/empty.html" with icon="check-circle" title=_("No open tasks.") text=_("Follow-up tasks are created from a lead's card.") url=leads_url label=_("Leads") action_icon="funnel" %}</div>{% endif %}
   {% include "crm/_task_group.html" with items=groups.overdue title_key="overdue" %}
   {% include "crm/_task_group.html" with items=groups.today title_key="today" %}
   {% include "crm/_task_group.html" with items=groups.upcoming title_key="upcoming" %}

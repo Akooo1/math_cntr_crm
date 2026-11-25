@@ -1,15 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{{ group.name }}{% endblock %}
-{% block heading %}{% translate "Group" %}{% endblock %}
+{% block heading %}{{ group.name }}{% endblock %}
+{% block count %}<span class="badge bg-slate-100 text-slate-700">{{ group.get_status_display }}</span>{% endblock %}
+{% block primary %}{% if can_manage %}<a href="{% url 'students:group_edit' group.pk %}" class="btn-primary">{% icon "pencil" %}<span>{% translate "Edit" %}</span></a>{% endif %}{% endblock %}
+{% block breadcrumbs %}<a href="{% url 'students:groups' %}">{% translate "Groups" %}</a>{% endblock %}
 {% block content %}
-  <div class="mb-4"><a href="{% url 'students:groups' %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{% translate "Groups" %}</a></div>
   <div class="grid gap-4 lg:grid-cols-3">
-    <section class="card p-5">
-      <div class="flex items-start justify-between gap-2">
-        <h2 class="text-xl font-semibold">{{ group.name }}</h2>
-        <span class="badge bg-slate-100 text-slate-700">{{ group.get_status_display }}</span>
-      </div>
-      <dl class="mt-4 space-y-2 text-sm">
+    <section class="card self-start p-5">
+      <dl class="space-y-2.5 text-sm">
         <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Course" %}</dt><dd class="text-right">{{ group.course.name }}</dd></div>
         <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Teacher" %}</dt><dd class="text-right">{{ group.teacher.full_name }}</dd></div>
         <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Room" %}</dt><dd class="text-right">{{ group.room.name|default:"—" }}</dd></div>
@@ -18,11 +16,10 @@
         <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Seats" %}</dt><dd class="text-right {% if seats <= 0 %}font-semibold text-rose-700{% endif %}">{% blocktranslate with taken=group.open_count cap=group.capacity %}{{ taken }} of {{ cap }} taken{% endblocktranslate %}</dd></div>
         <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Branch" %}</dt><dd class="text-right">{{ group.branch.name }}</dd></div>
       </dl>
-      {% if can_manage %}<a href="{% url 'students:group_edit' group.pk %}" class="btn-secondary mt-5 w-full">{% icon "pencil" "w-4 h-4" %}{% translate "Edit" %}</a>{% endif %}
     </section>
-    <div class="space-y-4 lg:col-span-2">
+    <div class="min-w-0 space-y-4 lg:col-span-2">
       <section class="card p-5">
-        <h3 class="font-semibold">{% translate "Students" %} <span class="text-slate-400">{{ members|length }}</span></h3>
+        <h3 class="font-semibold">{% translate "Students" %} <span class="count-pill ml-1 align-middle">{{ members|length }}</span></h3>
         <ul class="mt-3 divide-y divide-slate-100">
           {% for e in members %}
             <li class="flex items-center justify-between gap-3 py-2">
@@ -37,20 +34,20 @@
         <ul class="mt-3 divide-y divide-slate-100">
           {% for l in upcoming %}
             <li class="flex flex-wrap items-center justify-between gap-2 py-2" x-data="{ c: false }">
-              <span class="{% if l.status == 'cancelled' %}text-slate-400 line-through{% endif %}">{{ l.date|sana }} · {{ l.start_time|time:"H:i" }}–{{ l.end_time|time:"H:i" }}</span>
+              <span class="{% if l.status == 'cancelled' %}text-slate-500 line-through{% endif %}">{{ l.date|sana }} · {{ l.start_time|time:"H:i" }}–{{ l.end_time|time:"H:i" }}</span>
               <span class="flex items-center gap-2">
                 {% if l.status == 'cancelled' %}
                   <span class="badge bg-slate-100 text-slate-600" title="{{ l.cancel_reason }}">{% translate "Cancelled" %}</span>
-                  {% if can_manage %}<form method="post" action="{% url 'students:lesson_restore' l.pk %}">{% csrf_token %}<button class="btn-ghost px-2 py-1 text-sm">{% translate "Restore" %}</button></form>{% endif %}
+                  {% if can_manage %}<form method="post" action="{% url 'students:lesson_restore' l.pk %}">{% csrf_token %}<button class="btn-ghost">{% icon "refresh" "w-4 h-4" %}{% translate "Restore" %}</button></form>{% endif %}
                 {% elif can_manage %}
-                  <button type="button" class="btn-ghost px-2 py-1 text-sm" @click="c = !c">{% translate "Cancel the lesson" %}</button>
+                  <button type="button" class="btn-ghost text-rose-700" @click="c = !c" :aria-expanded="c">{% translate "Cancel the lesson" %}</button>
                 {% endif %}
               </span>
               {% if can_manage and l.status != 'cancelled' %}
-                <form method="post" action="{% url 'students:lesson_cancel' l.pk %}" x-show="c" x-cloak class="flex w-full gap-2">{% csrf_token %}
+                <form method="post" action="{% url 'students:lesson_cancel' l.pk %}" x-show="c" x-cloak class="flex w-full flex-wrap gap-2">{% csrf_token %}
                   <label class="sr-only" for="r{{ l.pk }}">{% translate "Reason" %}</label>
-                  <input id="r{{ l.pk }}" name="reason" required placeholder="{% translate 'Reason, e.g. holiday' %}" class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm">
-                  <button class="btn-danger px-3 py-2">{% translate "Save" %}</button>
+                  <input id="r{{ l.pk }}" name="reason" required placeholder="{% translate 'Reason, e.g. holiday' %}" class="input min-w-0 flex-[1_1_12rem]">
+                  <button class="btn-danger">{% icon "x" "w-4 h-4" %}{% translate "Cancel the lesson" %}</button>
                 </form>
               {% endif %}
             </li>
@@ -62,7 +59,7 @@
         <ul class="mt-3 divide-y divide-slate-100">
           {% for l in recent %}
             <li class="flex items-center justify-between gap-2 py-2">
-              {% if can_mark and l.status != 'cancelled' %}<a href="{% url 'students:attendance_lesson' l.pk %}" class="hover:text-sky-700">{{ l.date|sana }} · {{ l.start_time|time:"H:i" }}</a>{% else %}<span class="{% if l.status == 'cancelled' %}text-slate-400 line-through{% endif %}">{{ l.date|sana }} · {{ l.start_time|time:"H:i" }}</span>{% endif %}
+              {% if can_mark and l.status != 'cancelled' %}<a href="{% url 'students:attendance_lesson' l.pk %}" class="hover:text-sky-700">{{ l.date|sana }} · {{ l.start_time|time:"H:i" }}</a>{% else %}<span class="{% if l.status == 'cancelled' %}text-slate-500 line-through{% endif %}">{{ l.date|sana }} · {{ l.start_time|time:"H:i" }}</span>{% endif %}
               {% if l.status == 'cancelled' %}<span class="badge bg-slate-100 text-slate-600">{% translate "Cancelled" %}</span>{% elif l.marked %}<span class="badge bg-emerald-100 text-emerald-800">{% blocktranslate with p=l.present m=l.marked %}{{ p }} of {{ m }} came{% endblocktranslate %}</span>{% else %}<span class="badge bg-amber-100 text-amber-900">{% translate "Not marked" %}</span>{% endif %}
             </li>
           {% empty %}<li class="py-2 text-sm text-slate-500">{% translate "No past lessons." %}</li>{% endfor %}
