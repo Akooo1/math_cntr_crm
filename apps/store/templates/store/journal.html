@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{% translate "Sales journal" %}{% endblock %}
+{% block heading %}{% translate "Sales journal" %}{% endblock %}
+{% block content %}
+  <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
+    <div class="flex items-center gap-2">
+      <a href="?dan={{ prev|sana }}" class="btn-secondary px-3" aria-label="{% translate 'Previous day' %}">{% icon "chevron-left" %}</a>
+      <p class="font-semibold">{{ start|sana }}{% if end != start %} – {{ end|sana }}{% endif %}</p>
+      <a href="?dan={{ next|sana }}" class="btn-secondary px-3" aria-label="{% translate 'Next day' %}">{% icon "chevron-right" %}</a>
+    </div>
+    <form method="get" class="flex flex-wrap items-center gap-2 text-sm">
+      <label class="sr-only" for="dan">{% translate "From" %}</label><input id="dan" name="dan" value="{{ start|sana }}" inputmode="numeric" class="w-32 rounded-lg border border-slate-300 px-3 py-2">
+      <label class="sr-only" for="gacha">{% translate "To" %}</label><input id="gacha" name="gacha" value="{{ end|sana }}" inputmode="numeric" class="w-32 rounded-lg border border-slate-300 px-3 py-2">
+      <button class="btn-secondary">{% translate "Show" %}</button>
+    </form>
+  </div>
+  <section class="card p-4 md:p-5">
+    <div class="flex items-center justify-between"><h2 class="font-semibold">{% translate "Sales" %}</h2><p class="font-semibold">{{ total|som }}</p></div>
+    <ul class="mt-2 divide-y divide-slate-100 text-sm">
+      {% for s in sales %}
+        <li><a href="{% url 'store:sale' s.pk %}" class="flex items-center justify-between gap-3 py-2.5 hover:text-sky-700">
+          <span class="min-w-0"><span class="block truncate font-medium">{% for l in s.lines.all %}{{ l.product.name }} × {{ l.quantity }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+            <span class="block text-slate-500">{{ s.sold_on|sana }} {{ s.created_at|time:"H:i" }} · {{ s.branch.name }} · {% if s.method %}{{ s.method.name }}{% else %}{% translate "Pay later" %}{% endif %}{% if s.student %} · {{ s.student.full_name }}{% endif %}{% if s.reversal %} · <span class="text-rose-700">{% translate "Cancelled" %}</span>{% endif %}</span></span>
+          <span class="shrink-0 font-medium {% if s.reversal %}text-slate-400 line-through{% endif %}">{{ s.total|som }}</span>
+        </a></li>
+      {% empty %}<li class="py-2 text-slate-500">{% translate "No sales in this period." %}</li>{% endfor %}
+    </ul>
+  </section>
+{% endblock %}

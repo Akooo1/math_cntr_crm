@@ -149,12 +149,88 @@ class Command(BaseCommand):
             with transaction.atomic():
                 self._seed_staff(User)
             created = True
+        from apps.store.models import Product
+
+        if not Product.objects.exists():
+            with transaction.atomic():
+                self._seed_store(User)
+            created = True
         if not created:
             self.stdout.write("Demo data already present.")
             return
         self.stdout.write(self.style.SUCCESS("Demo data created."))
         for phone, name, role, _b in USERS:
             self.stdout.write(f"  {phone}  {DEMO_PASSWORD}  {role}  {name}")
+
+    def _seed_store(self, User):
+        """Books and counter items in both branches: deliveries over the last weeks (one
+        without a cost, so the margin shows "—"), sales today, a few books given on account
+        and one paid at the desk. 1,5 L water is low in every branch."""
+        from apps.store import services as store
+
+        rnd = random.Random(17)
+        today = dates.today()
+        director = User.objects.get(phone=USERS[0][0])
+        catalog = [
+            # kind, name, price, threshold, (quantity, cost per unit or None)
+            ("item", "0,5 L suv", 3_000, 10, (48, 1_800)),
+            ("item", "1 L suv", 5_000, 6, (24, 3_100)),
+            ("item", "1,5 L suv", 7_000, 5, (6, None)),
+            ("item", "Ruchka", 2_000, 10, (60, 900)),
+            ("item", "Daftar 48 varaq", 6_000, 10, (40, 3_500)),
+            ("book", "Algebra 7-sinf", 65_000, 5, (30, 42_000)),
+            ("book", "Geometriya 7-sinf", 60_000, 5, (25, 39_000)),
+            ("book", "DTM matematika to'plami", 120_000, 3, (15, 80_000)),
+        ]
+        cash = PaymentMethod.objects.get(name="Naqd")
+        card = PaymentMethod.objects.get(name="Terminal (karta)")
+        products = {}
+        for i, (kind, name, price, threshold, (qty, unit)) in enumerate(catalog):
+            product = store.create_product(
+                actor=director,
+                kind=kind,
+                name=name,
+                price=price,
+                effective_from=today - dt.timedelta(days=60),
+                low_stock_threshold=threshold,
+                sort_order=(i + 1) * 10,
+            )
+            products[name] = product
+            for branch in Branch.objects.filter(is_active=True):
+                store.receive_stock(
+                    actor=director,
+                    branch=branch,
+                    product=product,
+                    quantity=qty,
+                    received_on=today - dt.timedelta(days=rnd.randint(3, 20)),
+                    purchase_cost=qty * unit if unit is not None else None,
+                    note="Yetkazib beruvchi",
+                )
+        items = [p for p in products.values() if p.kind == "item"]
+        for branch in Branch.objects.filter(is_active=True):
+            admin = User.objects.filter(role="branch_admin", branch_links__branch=branch).first()
+            seller = admin or director
+            for _ in range(6):
+                picked = rnd.sample(items, rnd.randint(1, 3))
+                lines = [(p, rnd.randint(1, 2)) for p in picked if p.name != "1,5 L suv"]
+                if lines:
+                    store.sell_items(
+                        actor=seller,
+                        branch=branch,
+                        lines=lines,
+                        method=cash if rnd.random() < 0.8 else card,
+                    )
+            students = list(Student.objects.filter(branch=branch).order_by("pk")[:4])
+            book = products["Algebra 7-sinf"]
+            for st in students[:3]:
+                store.give_book(actor=seller, student=st, product=book)
+            if len(students) > 3:
+                store.give_book(
+                    actor=seller,
+                    student=students[3],
+                    product=products["Geometriya 7-sinf"],
+                    method=cash,
+                )
 
     def _seed_staff(self, User):
         """Branch locations, work hours, and arrivals for the past two weeks (made-up

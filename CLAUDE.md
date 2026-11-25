@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **9 prepared** (Railway: config, guide in docs/deploy-railway.md). **Module 5 (store, SPEC §17) proposed**: waiting for the owner's answers in §17.9 before building. Update this line at the end of each phase.
+- Current phase: **Module 5 (store, SPEC §17) built**; waiting for the owner's review. Update this line at the end of each phase.
 
 ## Ask the owner before
 
@@ -36,7 +36,7 @@ npm run build:css                              # Tailwind -> static/dist/app.css
 ## Layout and module boundaries
 
 ```
-config/   apps/{core,accounts,settings,crm,students,staff,billing,reports,salaries,telegram,demo}/   templates/   static/   locale/   scripts/   docs/   tests/
+config/   apps/{core,accounts,settings,crm,students,staff,billing,reports,salaries,telegram,store,demo}/   templates/   static/   locale/   scripts/   docs/   tests/
 ```
 
 `apps/demo` holds the demo seed command only; it sits above every module and nothing imports it.
@@ -44,7 +44,7 @@ config/   apps/{core,accounts,settings,crm,students,staff,billing,reports,salari
 Dependency direction (enforced by `.importlinter`; CI fails on violations):
 
 ```
-core ← accounts ← settings ← crm, students, staff ;  students ← billing ← reports, salaries, telegram ;  staff ← telegram ;  crm → students
+core ← accounts ← settings ← crm, students, staff ;  students ← billing ← reports, salaries, telegram, store ;  staff ← telegram ;  crm → students
 ```
 
 - Import another module only through `services`, `selectors`, `events`, or `models` (models only for FK targets and types).
@@ -162,6 +162,19 @@ Inside a module:
 | Share phone number | Telefon raqamni yuborish |
 | Message to parents / message templates | Ota-onalarga xabar / Xabar shablonlari |
 | Preview / send | Ko'rib chiqish / Yuborish |
+| Sales / sell screen / sell (button) | Savdo / Savdo / Sotish |
+| Today's sales / sales journal | Bugungi savdo / Savdo jurnali |
+| Product / products | Mahsulot / Mahsulotlar |
+| Book / give a book / give books to a group | Kitob / Kitob berish / Guruhga kitob berish |
+| Stock (warehouse) / stock received / on hand / sold | Ombor / Kirim / Qoldiq / Sotildi |
+| Stock correction | Tuzatish |
+| Low stock / out of stock / low-stock threshold | Kam qoldi / Tugagan / Minimal qoldiq |
+| Quantity | Soni |
+| Purchase cost / margin | Xarid narxi / Foyda |
+| Sales amount (store revenue) | Savdo summasi |
+| Pay now / pay later | Hozir to'lash / Keyin to'lash |
+| Book payment deadline (days) | Kitob uchun to'lov muddati (kun) |
+| Students' payments (Kassa subtotal) | O'quvchilar to'lovlari |
 
 Add new terms here before using them in the UI.
 
@@ -193,7 +206,12 @@ Add new terms here before using them in the UI.
   fails if a model field would show up in the audit log without an Uzbek label.
 - Template builtins (no `{% load %}` needed): `i18n`, `|som`, `|raqam`, `|sana`, `|sana_vaqt`,
   `|telefon`, `user|can:"perm.code"`, `{% icon "name" %}`, `{% field form.x %}`.
-- `billing.domain.rounding.round_amount` — the only money rounding function.
+- `billing.domain.rounding.round_amount` — the only money rounding function (other modules:
+  `billing.services.round_amount`).
+- `billing.services.cash.register_cash_source(CashSource(...))`: money that isn't a student
+  payment (e.g. store sales) in Kassa hisoboti and Kunni yopish. Cash writes call
+  `billing.services.cash.lock_day(branch_id, day)` before checking
+  `billing.selectors.is_day_closed`. See `docs/modules/store.md`.
 - `core.reports.register_report(ReportDef(...))`: a report with period and branch filters,
   phone cards, desktop table and Excel export for free. See `docs/modules/reports.md`.
 - `billing.services.percent_of(amount, basis_points)`: a share of an amount, rounded with the

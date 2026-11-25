@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "apps.reports",
     "apps.salaries",
     "apps.telegram",
+    "apps.store",
     "apps.demo",
 ]
 

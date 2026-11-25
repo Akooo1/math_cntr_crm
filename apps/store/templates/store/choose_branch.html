@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block heading %}{{ title }}{% endblock %}
+{% block content %}
+  <div class="mx-auto max-w-xl">
+    <h2 class="mb-3 text-lg font-semibold">{% translate "Choose the branch" %}</h2>
+    <ul class="space-y-2">
+      {% for b in branches %}
+        <li><a href="{{ path }}?filial={{ b.pk }}" class="card flex items-center justify-between p-4 text-base font-medium hover:border-sky-300">{{ b.name }}{% icon "chevron-right" %}</a></li>
+      {% empty %}<li class="card p-6 text-center text-sm text-slate-500">{% translate "Nothing here yet." %}</li>{% endfor %}
+    </ul>
+  </div>
+{% endblock %}

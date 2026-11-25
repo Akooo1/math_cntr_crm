@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-23 18:16+0500\n"
+"POT-Creation-Date: 2026-11-25 16:39+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -642,6 +642,9 @@ msgstr "Foizli yoki belgilangan chegirmalar, masalan aka-uka yoki promo."
 msgid "Cash, card terminal, bank transfer. Online methods come later."
 msgstr "Naqd, terminal, bank o'tkazmasi. Onlayn usullar keyinroq qo'shiladi."
 
+msgid "Students' payments"
+msgstr "O'quvchilar to'lovlari"
+
 msgid "A future day can't be closed."
 msgstr "Kelajakdagi kunni yopib bo'lmaydi."
 
@@ -805,6 +808,9 @@ msgstr "Ochiq"
 
 msgid "Total"
 msgstr "Jami"
+
+msgid "By source"
+msgstr "Manbalar bo'yicha"
 
 msgid "Close the day? Its payments will be locked."
 msgstr "Kun yopilsinmi? Uning to'lovlari qulflanadi."
@@ -2150,9 +2156,6 @@ msgstr "%(a)s maoshni berish"
 msgid "Cancel the payout"
 msgstr "Berilgan maoshni bekor qilish"
 
-msgid "Students' payments"
-msgstr "O'quvchilar to'lovlari"
-
 #, python-format
 msgid "%(p)s × %(r)s%%"
 msgstr "%(p)s × %(r)s%%"
@@ -2594,6 +2597,349 @@ msgstr "Kelish yozildi. Kuningiz xayrli o'tsin!"
 
 msgid "Arrival recorded."
 msgstr "Kelish yozildi."
+
+msgid "Sales"
+msgstr "Savdo"
+
+msgid "Product"
+msgstr "Mahsulot"
+
+msgid "Quantity"
+msgstr "Soni"
+
+msgid "Purchase cost (total)"
+msgstr "Xarid narxi (jami)"
+
+msgid "What the whole delivery cost. Optional; needed for the margin."
+msgstr ""
+"Butun yetkazib berish qanchaga tushgani. Majburiy emas; foydani hisoblash "
+"uchun kerak."
+
+msgid "Counted quantity"
+msgstr "Sanalgan soni"
+
+msgid "How many are actually on the shelf now."
+msgstr "Hozir javonda aslida nechta bor."
+
+msgctxt "product"
+msgid "Book"
+msgstr "Kitob"
+
+msgid "Item"
+msgstr "Mahsulot"
+
+msgid "Low-stock threshold"
+msgstr "Minimal qoldiq"
+
+msgid "Warn when this many or fewer are left in a branch. 0 = no warning."
+msgstr ""
+"Filialda shuncha yoki undan kam qolsa, ogohlantiriladi. 0 = "
+"ogohlantirilmaydi."
+
+msgid "Products"
+msgstr "Mahsulotlar"
+
+msgid "A product with this name already exists."
+msgstr "Bunday nomli mahsulot allaqachon bor."
+
+msgid "Paid now"
+msgstr "Hozir to'langan"
+
+msgid "Pay later"
+msgstr "Keyin to'lash"
+
+msgid "Sold by"
+msgstr "Sotgan"
+
+msgid "Sale"
+msgstr "Savdo"
+
+msgid "Reversed by"
+msgstr "Bekor qilgan"
+
+msgid "Stock received"
+msgstr "Kirim"
+
+msgid "Sold"
+msgstr "Sotildi"
+
+msgid "Sale cancelled"
+msgstr "Savdo bekor qilindi"
+
+msgid "Stock correction"
+msgstr "Tuzatish"
+
+msgid "Purchase cost"
+msgstr "Xarid narxi"
+
+msgid "Stock movement"
+msgstr "Ombor harakati"
+
+msgid "Stock movements"
+msgstr "Ombor harakatlari"
+
+msgid "Manage products and prices"
+msgstr "Mahsulotlar va narxlarni boshqarish"
+
+msgid "Record stock received"
+msgstr "Kirimni kiritish"
+
+msgid "Correct stock"
+msgstr "Qoldiqni tuzatish"
+
+msgid "Sell items and give books"
+msgstr "Mahsulot sotish va kitob berish"
+
+msgid "Cancel sales"
+msgstr "Savdoni bekor qilish"
+
+msgid "See stock and sales"
+msgstr "Ombor va savdoni ko'rish"
+
+msgid "See purchase cost and margin"
+msgstr "Xarid narxi va foydani ko'rish"
+
+msgid "Stock"
+msgstr "Ombor"
+
+msgid "Book payment deadline (days)"
+msgstr "Kitob uchun to'lov muddati (kun)"
+
+msgid "A book given without payment is due this many days after it was given."
+msgstr ""
+"To'lovsiz berilgan kitob uchun to'lov berilgan kundan shuncha kun ichida "
+"qilinishi kerak."
+
+msgid "Sale line"
+msgstr "Savdo qatori"
+
+msgid "On hand"
+msgstr "Qoldiq"
+
+msgid "Stock and sales"
+msgstr "Ombor va savdo"
+
+msgid "Per product: received, sold, on hand, sales amount and margin."
+msgstr ""
+"Har bir mahsulot bo'yicha: kirim, sotildi, qoldiq, savdo summasi va foyda."
+
+msgid "Books and items sold at the desk: names, prices, low stock."
+msgstr ""
+"Markazda sotiladigan kitoblar va mahsulotlar: nomlari, narxlari, minimal "
+"qoldiq."
+
+msgid "Sales amount"
+msgstr "Savdo summasi"
+
+msgid "Of which pay later"
+msgstr "Shundan keyin to'lanadigan"
+
+msgid "Margin"
+msgstr "Foyda"
+
+msgid "Low stock"
+msgstr "Kam qoldi"
+
+msgid ""
+"Sold and sales amount are net of cancelled sales. On hand is at the end of "
+"the period. Purchase cost is the weighted average cost of the units sold; it "
+"is empty when a delivery was received without a cost."
+msgstr ""
+"Sotildi va savdo summasi bekor qilingan savdolarsiz hisoblanadi. Qoldiq davr "
+"oxiridagi holat. Xarid narxi sotilgan donalarning o'rtacha tannarxi; biror "
+"kirim narxsiz kiritilgan bo'lsa, bo'sh qoladi."
+
+#, python-format
+msgid "%(product)s has no price yet. The director sets it in Settings."
+msgstr ""
+"%(product)s uchun hali narx yo'q. Narxni direktor Sozlamalarda belgilaydi."
+
+#, python-format
+msgid "Not enough %(product)s in stock: %(have)d left, %(wanted)d asked."
+msgstr ""
+"Omborda %(product)s yetarli emas: %(have)d ta qolgan, %(wanted)d ta so'raldi."
+
+msgid "Choose the type."
+msgstr "Turini tanlang."
+
+msgid "Write the name."
+msgstr "Nomini yozing."
+
+msgid "Add at least one item."
+msgstr "Kamida bitta mahsulot qo'shing."
+
+msgid "The quantity must be at least 1."
+msgstr "Soni kamida 1 bo'lishi kerak."
+
+msgid "Only active items can be sold here."
+msgstr "Bu yerda faqat faol mahsulotlar sotiladi."
+
+#, python-format
+msgid "Book: %(name)s × %(qty)d"
+msgstr "Kitob: %(name)s × %(qty)d"
+
+msgid "Choose an active book."
+msgstr "Faol kitobni tanlang."
+
+msgid "Tick at least one student."
+msgstr "Kamida bitta o'quvchini belgilang."
+
+msgid "Only students of this group can be chosen."
+msgstr "Faqat shu guruh o'quvchilarini tanlash mumkin."
+
+msgid "This sale is already cancelled."
+msgstr "Bu savdo allaqachon bekor qilingan."
+
+msgid "The quantity can't be negative."
+msgstr "Soni manfiy bo'lishi mumkin emas."
+
+msgid "The count matches the stock. Nothing to correct."
+msgstr "Sanalgan son qoldiqqa teng. Tuzatadigan narsa yo'q."
+
+msgid "Choose the branch"
+msgstr "Filialni tanlang"
+
+msgid "Nothing here yet."
+msgstr "Hozircha bo'sh."
+
+msgid "Give a book"
+msgstr "Kitob berish"
+
+msgid "No books yet. The director adds them in Settings → Products."
+msgstr ""
+"Hali kitoblar yo'q. Direktor ularni Sozlamalar → Mahsulotlar bo'limida "
+"qo'shadi."
+
+msgid "Out of stock"
+msgstr "Tugagan"
+
+msgid "One less"
+msgstr "Bittaga kamaytirish"
+
+msgid "One more"
+msgstr "Bittaga ko'paytirish"
+
+msgid "Pay now"
+msgstr "Hozir to'lash"
+
+#, python-format
+msgid ""
+"The book is added to the student's charges, due %(d)s. The student pays it "
+"at the desk with Take payment."
+msgstr ""
+"Kitob o'quvchining hisoblanganlariga qo'shiladi, to'lov muddati %(d)s. "
+"O'quvchi uni kassada to'laydi (To'lov qabul qilish)."
+
+msgid "Give books to a group"
+msgstr "Guruhga kitob berish"
+
+msgid "This group has no students."
+msgstr "Bu guruhda o'quvchilar yo'q."
+
+msgid "Students who take a book"
+msgstr "Kitob oladigan o'quvchilar"
+
+#, python-format
+msgid ""
+"Each ticked student gets one book, added to their charges and due %(d)s. "
+"They pay it at the desk with Take payment."
+msgstr ""
+"Belgilangan har bir o'quvchiga bitta kitob beriladi va hisoblanganlariga "
+"qo'shiladi, to'lov muddati %(d)s. Ular kassada to'laydi (To'lov qabul "
+"qilish)."
+
+msgid "Give books"
+msgstr "Kitoblarni berish"
+
+msgid "Sales journal"
+msgstr "Savdo jurnali"
+
+msgid "No sales in this period."
+msgstr "Bu davrda savdo bo'lmagan."
+
+msgid "Books"
+msgstr "Kitoblar"
+
+msgid "Unpaid"
+msgstr "To'lanmagan"
+
+msgid "No books given yet."
+msgstr "Hali kitob berilmagan."
+
+msgid "A sold book or item keeps the price it was sold at."
+msgstr "Sotilgan kitob yoki mahsulot sotilgan narxida qoladi."
+
+msgid "Price history"
+msgstr "Narxlar tarixi"
+
+#, python-format
+msgid "Cancelled by %(who)s on %(day)s"
+msgstr "%(day)s kuni %(who)s bekor qilgan"
+
+msgid "Cancel the sale"
+msgstr "Savdoni bekor qilish"
+
+msgid "Today's cash day is closed. No more sales can be made today."
+msgstr "Bugungi kassa kuni yopilgan. Bugun boshqa savdo qilib bo'lmaydi."
+
+msgid "No items to sell yet. The director adds them in Settings → Products."
+msgstr ""
+"Sotish uchun hali mahsulot yo'q. Direktor ularni Sozlamalar → Mahsulotlar "
+"bo'limida qo'shadi."
+
+msgid "Today's sales"
+msgstr "Bugungi savdo"
+
+msgid "No sales today yet."
+msgstr "Bugun hali savdo bo'lmagan."
+
+msgid "Clear"
+msgstr "Tozalash"
+
+msgid "Sell"
+msgstr "Sotish"
+
+msgid "No products yet. The director adds them in Settings → Products."
+msgstr ""
+"Hali mahsulotlar yo'q. Direktor ularni Sozlamalar → Mahsulotlar bo'limida "
+"qo'shadi."
+
+msgid "Actions"
+msgstr "Amallar"
+
+msgid "Choose the payment method."
+msgstr "To'lov usulini tanlang."
+
+#, python-format
+msgid "Sold: %(total)s."
+msgstr "Sotildi: %(total)s."
+
+msgid "The sale is cancelled."
+msgstr "Savdo bekor qilindi."
+
+msgid ""
+"The whole sale is cancelled today and the stock comes back. Money paid now "
+"is shown as paid out in today's cash report; a book on account is removed "
+"from the student's charges."
+msgstr ""
+"Butun savdo bugungi sana bilan bekor qilinadi va mahsulot omborga qaytadi. "
+"Hozir to'langan pul bugungi kassa hisobotida chiqim bo'lib ko'rinadi; keyin "
+"to'lanadigan kitob o'quvchining hisoblanganlaridan olib tashlanadi."
+
+msgid "Record what arrived at this branch."
+msgstr "Shu filialga nima kelganini kiriting."
+
+msgid ""
+"Enter what you counted on the shelf. The difference is recorded with the "
+"reason."
+msgstr "Javonda sanaganingizni kiriting. Farq sababi bilan yoziladi."
+
+msgid "The book is given."
+msgstr "Kitob berildi."
+
+#, python-format
+msgid "Books given: %(n)d."
+msgstr "Berilgan kitoblar: %(n)d ta."
 
 msgid "Students"
 msgstr "O'quvchilar"
@@ -3092,9 +3438,6 @@ msgstr ""
 
 msgid "Recent imports"
 msgstr "So'nggi importlar"
-
-msgid "Nothing here yet."
-msgstr "Hozircha bo'sh."
 
 #, python-format
 msgid "Rows in the file: %(n)s"
@@ -3666,9 +4009,6 @@ msgstr ""
 
 msgid "Own details"
 msgstr "Alohida ma'lumotlar"
-
-msgid "Actions"
-msgstr "Amallar"
 
 msgid "Inactive"
 msgstr "Faol emas"

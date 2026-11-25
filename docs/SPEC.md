@@ -1030,9 +1030,9 @@ pass). Files in `static/brand/`.
 
 ---
 
-## 17. Module 5: books and counter sales (`apps/store`) — PROPOSAL, not approved
+## 17. Module 5: books and counter sales (`apps/store`)
 
-Status: **waiting for the owner's answers to 17.9.** Nothing below is built yet.
+Status: **approved by the owner** (answers in 17.11; they override anything above them).
 
 Owner's brief:
 
@@ -1289,4 +1289,41 @@ New questions:
 | Sales amount (store revenue) | Savdo summasi |
 | Pay now / pay later (on account) | Hozir to'lash / Keyin to'lash (hisobga) |
 | Book payment deadline (days) | Kitob uchun to'lov muddati (kun) |
-| Students' payments (Kassa subtotal) | O'quvchi to'lovlari |
+| Students' payments (Kassa subtotal) | O'quvchilar to'lovlari |
+
+### 17.11 Owner's answers (approved)
+
+- All six proposed rules: accepted, with Kirim also open to admins (Q-S2).
+- Q-S1 global prices. Q-S2 admins record Kirim for their own branch; corrections Direktor only.
+  Q-S4 the existing `manual` charge kind. Q-S5 purchase cost and margin: Direktor only.
+  Q-S6 a tap adds 1 to the basket, any number of items, one "Sotish" confirms. Q-S7 sales
+  dated today only; Kirim may be backdated. Q-S8 weighted average cost, "—" when a delivery
+  has no cost. Q-S9 no receipts for store sales. Q-S10 store sales stay out of Tushum.
+  Q-S11 glossary accepted as proposed (in CLAUDE.md). The Kassa extension point (17.4) is
+  approved, including `lock_day`.
+- **Book flow (Q-S3):** the teacher carries books to class, but the system records nothing
+  for the teacher. The admin gives books to students, and students pay at the desk:
+  - From the student card: pay now (store sale, Kassa in, outside the ledger) or pay later
+    (charge due in `store.book_due_days`).
+  - **For a whole group at once** ("Guruhga kitob berish"): pick the group and the book,
+    untick students who don't take one, confirm. Each ticked active student gets one book
+    and one charge (always pay later). Stock is checked for the whole group up front: if the
+    branch doesn't have enough, nothing is given.
+
+### Phase notes (module 5, store)
+- Built as approved. Module notes: [docs/modules/store.md](modules/store.md).
+- **Billing changes (approved in 17.4):** cash sources in `billing.services.cash`
+  (`register_cash_source`, `CashLine`, `lock_day`); Kassa page, Excel and close snapshot show
+  a per-source breakdown; `unclosed_days()` also flags days with only store sales; payments,
+  reversals and refunds take `lock_day` before the closed-day check; public helpers
+  `billing.selectors.is_day_closed` / `cash_methods_for_entry`; `billing.services.round_amount`
+  re-exported (one line, like `percent_of`). No billing table or charge kind changed.
+- **Reports app:** an empty report cell (None) now shows "—" instead of nothing.
+- **Decisions taken while building:**
+  - A Kirim needs an active product.
+  - The low-stock flag only looks at branches that ever had the product.
+  - The group give lists active and frozen students; frozen students are unticked by default.
+- **Test fixture:** the permission matrix toggles a dedicated third branch instead of branch A,
+  so later cases in the same run aren't affected.
+- **Demo data:** five items and three books in every branch, deliveries (1,5 L suv without a
+  cost), today's sales, three books on account and one paid per branch.
