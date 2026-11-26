@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-25 20:36+0500\n"
+"POT-Creation-Date: 2026-11-26 12:37+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -1985,12 +1985,12 @@ msgstr "Ko'rsatish"
 msgid "Try a longer period."
 msgstr "Uzunroq davrni tanlang."
 
-msgid "Collected this month"
-msgstr "Shu oydagi tushum"
-
 #, python-format
 msgid "%(d)s vs the same days of last month"
 msgstr "o'tgan oyning shu kunlariga nisbatan %(d)s"
+
+msgid "Collected this month"
+msgstr "Shu oydagi tushum"
 
 msgid "Charged this month"
 msgstr "Shu oyda hisoblangan"
@@ -4051,6 +4051,9 @@ msgstr "Asosiy qismga o'tish"
 
 msgid "Main menu"
 msgstr "Asosiy menyu"
+
+msgid "Collapse menu"
+msgstr "Menyuni yig'ish"
 
 msgid "Search…"
 msgstr "Qidirish…"

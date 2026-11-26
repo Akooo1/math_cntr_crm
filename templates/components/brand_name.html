@@ -1,2 +1,2 @@
-{# The center name in the logo's style: first word navy, the rest blue (MATEMATIKA / MARKAZI). #}
-{% with parts=center_name.split %}<span class="font-display text-sm font-bold uppercase leading-tight tracking-wide"><span class="block text-sky-800">{{ parts.0 }}</span>{% if parts|length > 1 %}<span class="block text-sky-500">{{ parts|slice:"1:"|join:" " }}</span>{% endif %}</span>{% endwith %}
+{# The center name in the logo's style: first word navy, the rest blue (MATEMATIKA / MARKAZI). on_dark=True: light colours for the dark sidebar. #}
+{% with parts=center_name.split %}<span class="brand-name font-brand text-sm font-bold uppercase leading-tight tracking-wide{% if on_dark %} on-dark{% endif %}"><span class="brand-1 block">{{ parts.0 }}</span>{% if parts|length > 1 %}<span class="brand-2 block">{{ parts|slice:"1:"|join:" " }}</span>{% endif %}</span>{% endwith %}

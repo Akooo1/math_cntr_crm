@@ -1,32 +1,41 @@
 {# Director / branch admin overview: KPI tiles and a 6-month charged-vs-collected chart. #}
 {# CSS numbers must not be localized: "37,5%" is invalid CSS in the uz locale. #}
 {% load l10n %}
-<section class="card min-w-0 p-5 md:col-span-2 xl:col-span-3">
-  <div class="grid grid-cols-2 gap-x-3 gap-y-4 lg:grid-cols-4">
-    <div class="min-w-0">
-      <p class="text-sm text-slate-500">{% translate "Collected this month" %}</p>
-      <p class="text-lg font-semibold tabular-nums sm:text-2xl">{{ ctx.collected_now|som }}</p>
-      {% with d=ctx.collected_now|change_pct:ctx.collected_prev_same %}{% if d %}<p class="text-xs text-slate-500">{% blocktranslate %}{{ d }} vs the same days of last month{% endblocktranslate %}</p>{% endif %}{% endwith %}
+<section class="card min-w-0 p-5 md:col-span-2 md:p-6 xl:col-span-3">
+  <div class="grid grid-cols-1 gap-x-4 gap-y-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="stat">
+      <span class="stat-icon">{% icon "wallet" "w-5 h-5" %}</span>
+      <div class="min-w-0">
+        <p class="flex flex-wrap items-center gap-2"><span class="stat-num">{{ ctx.collected_now|som }}</span>{% with d=ctx.collected_now|change_pct:ctx.collected_prev_same %}{% if d %}<span class="chip-yellow" title="{% blocktranslate %}{{ d }} vs the same days of last month{% endblocktranslate %}">{{ d }}</span>{% endif %}{% endwith %}</p>
+        <p class="stat-label">{% translate "Collected this month" %}</p>
+      </div>
     </div>
-    <div class="min-w-0">
-      <p class="text-sm text-slate-500">{% translate "Charged this month" %}</p>
-      <p class="text-lg font-semibold tabular-nums sm:text-2xl">{{ ctx.charged_now|som }}</p>
+    <div class="stat">
+      <span class="stat-icon">{% icon "receipt" "w-5 h-5" %}</span>
+      <div class="min-w-0">
+        <p class="stat-num">{{ ctx.charged_now|som }}</p>
+        <p class="stat-label">{% translate "Charged this month" %}</p>
+      </div>
     </div>
-    <div class="min-w-0">
-      <p class="text-sm text-slate-500">{% translate "Debt: overdue / total" %}</p>
-      <p class="text-lg font-semibold tabular-nums sm:text-2xl">{{ ctx.overdue|som }}</p>
-      <p class="text-xs text-slate-500">{% blocktranslate with t=ctx.open|som %}of {{ t }} unpaid{% endblocktranslate %}</p>
+    <div class="stat">
+      <span class="stat-icon">{% icon "alert" "w-5 h-5" %}</span>
+      <div class="min-w-0">
+        <p class="stat-num">{{ ctx.overdue|som }}</p>
+        <p class="stat-label">{% translate "Debt: overdue / total" %} · {% blocktranslate with t=ctx.open|som %}of {{ t }} unpaid{% endblocktranslate %}</p>
+      </div>
     </div>
-    <div class="min-w-0">
-      <p class="text-sm text-slate-500">{% translate "New leads this month" %}</p>
-      <p class="text-lg font-semibold tabular-nums sm:text-2xl">{{ ctx.new_leads }}</p>
-      <p class="text-xs text-slate-500">{% blocktranslate with c=ctx.converted %}{{ c }} became students{% endblocktranslate %}</p>
+    <div class="stat">
+      <span class="stat-icon">{% icon "user-plus" "w-5 h-5" %}</span>
+      <div class="min-w-0">
+        <p class="flex flex-wrap items-center gap-2"><span class="stat-num">{{ ctx.new_leads }}</span>{% if ctx.converted %}<span class="badge bg-sky-100 text-sky-800">+{{ ctx.converted }}</span>{% endif %}</p>
+        <p class="stat-label">{% translate "New leads this month" %} · {% blocktranslate with c=ctx.converted %}{{ c }} became students{% endblocktranslate %}</p>
+      </div>
     </div>
   </div>
 
-  <div class="mt-6" x-data="{ i: null }">
+  <div class="mt-7" x-data="{ i: null }">
     <div class="mb-2 flex flex-wrap items-center justify-between gap-2">
-      <h3 class="text-sm font-semibold">{% translate "Last 6 months" %}</h3>
+      <h3 class="card-title">{% translate "Last 6 months" %}</h3>
       <div class="flex gap-4 text-xs text-slate-600">
         <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background: var(--color-chart-1)"></span>{% translate "Charged" %}</span>
         <span class="flex items-center gap-1.5"><span class="inline-block h-2.5 w-2.5 rounded-sm" style="background: var(--color-chart-2)"></span>{% translate "Collected" %}</span>
@@ -41,9 +50,9 @@
       {% for m in ctx.chart.months %}
         <div class="relative z-10 flex h-full flex-1 cursor-default items-end justify-center gap-[2px] rounded-md" :class="i === {{ forloop.counter0 }} ? 'bg-surface-2' : ''"
              @mouseenter="i = {{ forloop.counter0 }}" @mouseleave="i = null" @click="i = (i === {{ forloop.counter0 }} ? null : {{ forloop.counter0 }})">
-          <div class="w-1/3 max-w-6 rounded-t" style="height: {{ m.charged_pct|unlocalize }}%; background: var(--color-chart-1)"></div>
-          <div class="w-1/3 max-w-6 rounded-t" style="height: {{ m.collected_pct|unlocalize }}%; background: var(--color-chart-2)"></div>
-          <div x-show="i === {{ forloop.counter0 }}" x-cloak class="absolute bottom-full z-20 mb-1 w-44 rounded-lg border border-line bg-surface p-2 text-xs shadow-lg {% if forloop.last or forloop.revcounter == 2 %}right-0{% else %}left-0{% endif %}">
+          <div class="w-1/3 max-w-6 rounded-t-md" style="height: {{ m.charged_pct|unlocalize }}%; background: var(--color-chart-1)"></div>
+          <div class="w-1/3 max-w-6 rounded-t-md" style="height: {{ m.collected_pct|unlocalize }}%; background: var(--color-chart-2)"></div>
+          <div x-show="i === {{ forloop.counter0 }}" x-cloak class="absolute bottom-full z-20 mb-1 w-44 rounded-2xl border border-line bg-surface p-2.5 text-xs shadow-lg {% if forloop.last or forloop.revcounter == 2 %}right-0{% else %}left-0{% endif %}">
             <p class="font-semibold text-slate-800">{{ m.month|date:"F Y" }}</p>
             <p class="flex justify-between gap-2 text-slate-600"><span class="flex items-center gap-1"><span class="inline-block h-2 w-2 rounded-sm" style="background: var(--color-chart-1)"></span>{% translate "Charged" %}</span><span class="tabular-nums">{{ m.charged|som }}</span></p>
             <p class="flex justify-between gap-2 text-slate-600"><span class="flex items-center gap-1"><span class="inline-block h-2 w-2 rounded-sm" style="background: var(--color-chart-2)"></span>{% translate "Collected" %}</span><span class="tabular-nums">{{ m.collected|som }}</span></p>

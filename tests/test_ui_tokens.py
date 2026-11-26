@@ -112,6 +112,22 @@ def test_buttons_and_charts(theme):
     assert contrast(t["focus"], t["surface"]) >= 3
 
 
+@pytest.mark.parametrize("theme", ["light", "dark"])
+def test_accent_tiles_and_sidebar(theme):
+    """Solid accent tiles (.tile-*) and the dark sidebar carry their own text colours."""
+    t = THEMES[theme]
+    pairs = [
+        ("on-accent-blue", "accent-blue"),
+        ("on-accent-yellow", "accent-yellow"),
+        ("on-accent-teal", "accent-teal"),
+        ("on-ink", "ink"),
+        ("rail-fg", "rail"),
+        ("on-rail-active", "rail-active"),
+    ]
+    for fg, bg in pairs:
+        assert contrast(t[fg], t[bg]) >= 4.5, (fg, bg, round(contrast(t[fg], t[bg]), 2))
+
+
 def test_templates_use_theme_tokens_only():
     """No per-template dark: classes, no hard white surfaces, no unmirrored hues."""
     other_hues = re.compile(

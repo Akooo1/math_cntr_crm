@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **Module 5 (store), the UI refresh and the process fix (web / worker / bot chosen by `PROCESS` or the Railway service name) are on `main`.** Waiting for the owner to confirm production: bot connected, backups arriving. Update this line at the end of each phase.
+- Current phase: **Design refresh after the owner's reference shots** (glass cards, dark sidebar, accent tiles, Plus Jakarta Sans) on the work branch; waiting for the owner's review before `main`. Update this line at the end of each phase.
 
 ## Ask the owner before
 
@@ -183,6 +183,7 @@ Inside a module:
 | Calendar / choose a date | Taqvim / Sanani tanlang |
 | Just now / N minutes ago / N hours ago / yesterday / N days ago | hozirgina / N daqiqa oldin / N soat oldin / kecha / N kun oldin |
 | Saving… | Saqlanmoqda… |
+| Collapse menu (sidebar) | Menyuni yig'ish |
 | Database backup (nightly / before an update) | Zaxira nusxa (kechki / yangilanishdan oldin) |
 
 Add new terms here before using them in the UI.
@@ -230,13 +231,17 @@ Add new terms here before using them in the UI.
 - `static/js/app.js`: `<form data-confirm="...">` asks before submitting; `[data-geolocate]`
   reads the phone's GPS. Never put translated text inside inline JavaScript: Uzbek
   apostrophes break the quotes. Pass it in a `data-` attribute instead.
-- **Brand** (from the center's logo): navy `#19199a` (= `sky-800`, primary buttons) and blue
-  `#4968d7` (= `sky-500`). `assets/app.css` redefines Tailwind's whole `sky` scale, so use
-  `sky-*` classes for brand color; never hard-code other blues. Headings (`h1`–`h3`) and the
-  center name use Montserrat (`font-display`, self-hosted in `static/vendor/fonts`). Logo
+- **Look and brand**: soft gradient canvas, light "glass" cards with large radii, pill
+  buttons, round icon buttons, a dark floating sidebar (collapsible to icons) and a floating
+  dark tab bar on phones. Accents: ink `#121721` (primary buttons in light theme; yellow in
+  dark), blue `#3462ee` (= `sky-500`; `assets/app.css` redefines the whole `sky` scale, so use
+  `sky-*` for blue and never hard-code other blues), yellow `#efe347`, teal `#357a90`. Use
+  the accents only through classes (`.btn-primary`, `.tile-*`, `.chip-yellow`,
+  `.count-pill`). Font: Plus Jakarta Sans (self-hosted, `static/vendor/fonts`; its U+202F is
+  patched to the space width so money stays readable). The center's name keeps the logo's
+  own colours and Montserrat (`templates/components/brand_name.html`, `.brand-name`). Logo
   files: `static/brand/mark.svg` (the symbol), `logo.png` (symbol + name),
   `favicon-32.png`, `apple-touch-icon.png`, `icon-512.png` (e.g. the Telegram bot photo).
-  The center name in the header: `templates/components/brand_name.html`.
 - URLs and slugs are Uzbek (`/sozlamalar/`, `/kirish/`); code identifiers stay English.
 
 ### UI kit (every screen uses these; see `assets/app.css` and `templates/base.html`)
@@ -265,7 +270,12 @@ Add new terms here before using them in the UI.
   `label`, `check`, `card`, `badge`, `chip` / `chip-row` (filters; mark the active one with
   `aria-current="page"`), `seg` / `seg-item[aria-pressed]` (segmented control), `table-scroll`
   + `table-head` / `table-cell` / `table-foot` (sticky header), `form-actions` (form buttons;
-  sticky above the bottom bar on phones), `count-pill`, `link`, `kbd`, `menu` / `menu-item`.
+  sticky above the bottom bar on phones), `count-pill`, `link`, `kbd`, `menu` / `menu-item`,
+  `card-head` + `card-title` + `arrow-dot` (card title with a round "open" arrow),
+  `tile tile-blue|tile-yellow|tile-teal|tile-ink` + `tile-num` / `tile-sub` / `tile-note`
+  (solid headline tiles; inside them never use slate/rose text classes), `stat` +
+  `stat-icon` / `stat-num` / `stat-label` (headline number with a round icon),
+  `chip-yellow` (change badge), `icon-dot` (round icon button).
 - **Empty states**: `{% include "components/empty.html" with icon=".." title=_("..") text=_("..")
   url=.. label=_("..") reset=.. %}` — always offer the next action (or "clear filters").
 - **Messages** are toasts automatically (`components/messages.html`); just use

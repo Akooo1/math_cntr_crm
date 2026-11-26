@@ -62,4 +62,7 @@ ICONS = {
     "inbox": '<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1.5 2.5h5L16 13h5"/>',
     "filter-x": '<path d="M3 4h18l-7 9v6l-4 2v-8z"/><path d="M16 16l5 5M21 16l-5 5"/>',
     "arrow-right": '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    "arrow-left": '<path d="M19 12H5M11 6l-6 6 6 6"/>',
+    "arrow-up-right": '<path d="M7 17L17 7M9 7h8v8"/>',
+    "sidebar": '<rect x="3" y="4" width="18" height="16" rx="3"/><path d="M9 4v16M15 10l-2 2 2 2"/>',
 }

@@ -6,13 +6,13 @@
   <meta name="csrf-token" content="{{ csrf_token }}">
   <title>{% block title %}{{ center_name }}{% endblock %} — {{ center_name }}</title>
   {# Theme before first paint: "light" | "dark" | "system" (default), remembered per browser. #}
-  <script>(function(){var t="system";try{t=localStorage.getItem("theme")||"system"}catch(e){}var d=t==="dark"||(t==="system"&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.setAttribute("data-theme",d?"dark":"light");document.documentElement.setAttribute("data-theme-choice",t)})()</script>
+  <script>(function(){var t="system";try{t=localStorage.getItem("theme")||"system"}catch(e){}var d=t==="dark"||(t==="system"&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches);document.documentElement.setAttribute("data-theme",d?"dark":"light");document.documentElement.setAttribute("data-theme-choice",t);try{if(localStorage.getItem("rail")==="collapsed")document.documentElement.setAttribute("data-rail","collapsed")}catch(e){}})()</script>
   <link rel="stylesheet" href="{% static 'dist/app.css' %}{% if asset_v %}?v={{ asset_v }}{% endif %}">
   <link rel="icon" href="{% static 'brand/mark.svg' %}" type="image/svg+xml">
   <link rel="icon" href="{% static 'brand/favicon-32.png' %}" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="{% static 'brand/apple-touch-icon.png' %}">
-  <meta name="theme-color" content="#19199a" media="(prefers-color-scheme: light)">
-  <meta name="theme-color" content="#111a2c" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#e8edf1" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0e1117" media="(prefers-color-scheme: dark)">
   <script src="{% static 'vendor/htmx-2.0.4.min.js' %}" defer></script>
   <script src="{% static 'vendor/alpine-3.14.8.min.js' %}" defer></script>
   <script src="{% static 'js/app.js' %}{% if asset_v %}?v={{ asset_v }}{% endif %}" defer></script>
@@ -23,83 +23,85 @@
 {{ ui_i18n|json_script:"ui-i18n" }}
 {% block body %}
 <a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:left-3 focus:top-3 focus:z-[90] btn-secondary">{% translate "Skip to content" %}</a>
-<div class="md:flex">
-  {# Desktop sidebar #}
-  <aside class="hidden md:fixed md:inset-y-0 md:flex md:w-64 md:flex-col border-r border-line bg-surface">
-    <a href="{% url 'core:home' %}" class="flex h-16 shrink-0 items-center gap-2.5 px-5">
-      <img src="{% static 'brand/mark.svg' %}" alt="" class="h-9 w-9 shrink-0">
-      {% include "components/brand_name.html" %}
+{# Desktop: dark floating sidebar; collapses to icons (remembered in this browser). #}
+<aside class="rail hidden md:flex" x-data>
+  <a href="{% url 'core:home' %}" class="rail-brand" title="{{ center_name }}">
+    <span class="rail-mark"><img src="{% static 'brand/mark.svg' %}" alt="" class="h-8 w-8"></span>
+    <span class="rail-label min-w-0">{% include "components/brand_name.html" with on_dark=True %}</span>
+  </a>
+  <nav class="rail-nav space-y-1" aria-label="{% translate 'Main menu' %}">
+    {% for n in nav %}
+      <a href="{{ n.url }}" class="nav-link" title="{{ n.item.label }}" {% if n.active %}aria-current="page"{% endif %}>{% icon n.item.icon "w-5 h-5" %}<span class="rail-label truncate">{{ n.item.label }}</span></a>
+    {% endfor %}
+  </nav>
+  <div class="rail-foot space-y-1">
+    <a href="{% url 'accounts:profile' %}" class="nav-link" title="{{ user.full_name }}" {% if request.path == '/profil/' %}aria-current="page"{% endif %}>
+      <span class="rail-avatar">{{ user.full_name|slice:":1" }}</span>
+      <span class="rail-label min-w-0"><span class="block truncate">{{ user.full_name }}</span><span class="rail-sub">{{ user.get_role_display }}</span></span>
     </a>
-    <nav class="flex-1 space-y-0.5 overflow-y-auto px-3 pb-3 pt-1" aria-label="{% translate 'Main menu' %}">
-      {% for n in nav %}
-        <a href="{{ n.url }}" class="nav-link" {% if n.active %}aria-current="page"{% endif %}>{% icon n.item.icon "w-5 h-5" %}<span class="truncate">{{ n.item.label }}</span></a>
-      {% endfor %}
-    </nav>
-    <div class="space-y-1 border-t border-line p-3">
-      {% include "components/theme_switch.html" with compact=True %}
-      <a href="{% url 'accounts:profile' %}" class="nav-link mt-2" {% if request.path == '/profil/' %}aria-current="page"{% endif %}>
-        <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-sky-100 text-xs font-bold text-sky-800">{{ user.full_name|slice:":1" }}</span>
-        <span class="min-w-0"><span class="block truncate">{{ user.full_name }}</span><span class="block text-xs font-normal text-muted">{{ user.get_role_display }}</span></span>
-      </a>
-      <form method="post" action="{% url 'accounts:logout' %}" data-no-busy>{% csrf_token %}
-        <button class="nav-link w-full">{% icon "logout" "w-5 h-5" %}{% translate "Log out" %}</button>
-      </form>
-    </div>
-  </aside>
-
-  <div class="min-w-0 flex-1 md:pl-64">
-    {# Top bar: today in Tashkent, global search, branch switcher #}
-    <header class="sticky top-0 z-30 flex h-14 items-center gap-2 border-b border-line bg-surface/90 px-3 backdrop-blur md:h-16 md:gap-4 md:px-8">
-      <a href="{% url 'core:home' %}" class="shrink-0 md:hidden" aria-label="{% translate 'Home' %}"><img src="{% static 'brand/mark.svg' %}" alt="" class="h-8 w-8"></a>
-      <time class="shrink-0 whitespace-nowrap text-xs leading-tight text-muted md:text-sm" data-clock datetime="{{ clock.iso }}">
-        <span class="block font-medium text-fg md:inline" data-clock-day>{{ clock.weekday }}</span><span class="hidden md:inline">, </span><span class="block tabular-nums md:inline" data-clock-rest>{{ clock.rest }}</span>
-      </time>
-      <button type="button" data-search-open class="ml-auto hidden h-10 w-full max-w-sm items-center gap-2 rounded-xl border border-line-strong bg-surface-2 px-3 text-sm text-slate-500 md:flex md:ml-6" aria-label="{% translate 'Search' %}">
-        {% icon "search" "w-4 h-4" %}<span class="flex-1 truncate text-left">{% translate "Search…" %}</span><span class="kbd">{{ "Ctrl K" }}</span>
-      </button>
-      <div class="ml-auto flex min-w-0 items-center gap-1 md:ml-0 md:gap-3">
-        <button type="button" data-search-open class="btn-ghost btn-icon md:hidden" aria-label="{% translate 'Search' %}">{% icon "search" "w-5 h-5" %}</button>
-        {% if branch_options %}
-          <form method="post" action="{% url 'core:switch_branch' %}" class="min-w-0" data-no-busy>{% csrf_token %}
-            <input type="hidden" name="next" value="{{ request.get_full_path }}">
-            <label class="sr-only" for="branch-switch">{% translate "Branch" %}</label>
-            <select id="branch-switch" name="branch" data-autosubmit class="input w-full max-w-[12rem] py-1.5 pl-2.5 text-sm">
-              <option value="">{% if user.is_director %}{% translate "All branches" %}{% else %}{% translate "All my branches" %}{% endif %}</option>
-              {% for b in branch_options.branches %}<option value="{{ b.id }}" {% if branch_options.current == b.id %}selected{% endif %}>{{ b.name }}</option>{% endfor %}
-            </select>
-          </form>
-        {% endif %}
-      </div>
-    </header>
-
-    <main id="main" class="mx-auto w-full max-w-6xl px-4 pb-28 pt-4 md:px-8 md:pb-12 md:pt-6">
-      {% block page_header %}
-      <div class="page-header">
-        <nav class="crumbs" aria-label="{% translate 'Breadcrumbs' %}">{% block breadcrumbs %}{% endblock %}</nav>
-        <div class="flex items-center gap-3">
-          <div class="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">
-            <h1 class="page-title">{% block heading %}{{ center_name }}{% endblock %}</h1>
-            {% block count %}{% if totals %}{% include "components/count.html" with t=totals %}{% endif %}{% endblock %}
-          </div>
-          <div class="flex shrink-0 items-center gap-2">
-            {% block actions %}{% endblock %}
-            <div class="relative" x-data="{ open: false, has: false }" x-init="has = !!$refs.items.firstElementChild" x-show="has" @keydown.escape.window="open = false" @click.outside="open = false">
-              <button type="button" class="btn-secondary btn-icon" @click="open = !open" :aria-expanded="open" aria-haspopup="menu" aria-label="{% translate 'More actions' %}">{% icon "dots" "w-5 h-5" %}</button>
-              <div class="menu" x-ref="items" x-show="open" x-cloak role="menu" @click="if ($event.target.closest('a')) open = false">{% block menu %}{% endblock %}</div>
-            </div>
-            <div class="primary-slot">{% block primary %}{% endblock %}</div>
-          </div>
-        </div>
-        {% if totals and totals.amount is not None %}<p class="page-sum">{{ totals.amount_label }}: <strong>{{ totals.amount|som }}</strong></p>{% endif %}
-      </div>
-      {% endblock %}
-      {% block content %}{% endblock %}
-    </main>
+    <form method="post" action="{% url 'accounts:logout' %}" data-no-busy>{% csrf_token %}
+      <button class="nav-link w-full" title="{% translate 'Log out' %}">{% icon "logout" "w-5 h-5" %}<span class="rail-label">{% translate "Log out" %}</span></button>
+    </form>
+    <button type="button" class="nav-link rail-toggle w-full" data-rail-toggle title="{% translate 'Collapse menu' %}" aria-label="{% translate 'Collapse menu' %}">{% icon "sidebar" "w-5 h-5" %}<span class="rail-label">{% translate "Collapse menu" %}</span></button>
   </div>
+</aside>
+
+<div class="main-col">
+  {# Top bar: today in Tashkent, global search, theme, branch switcher #}
+  <header class="topbar">
+    <a href="{% url 'core:home' %}" class="shrink-0 md:hidden" aria-label="{% translate 'Home' %}"><span class="rail-mark h-10 w-10 border border-line"><img src="{% static 'brand/mark.svg' %}" alt="" class="h-7 w-7"></span></a>
+    <time class="shrink-0 whitespace-nowrap text-xs leading-tight text-muted md:text-sm" data-clock datetime="{{ clock.iso }}">
+      <span class="block font-semibold text-fg md:inline" data-clock-day>{{ clock.weekday }}</span><span class="hidden md:inline">, </span><span class="block tabular-nums md:inline" data-clock-rest>{{ clock.rest }}</span>
+    </time>
+    <button type="button" data-search-open class="search-pill ml-auto hidden md:flex md:ml-6" aria-label="{% translate 'Search' %}">
+      {% icon "search" "w-4 h-4" %}<span class="flex-1 truncate text-left">{% translate "Search…" %}</span><span class="kbd">{{ "Ctrl K" }}</span>
+    </button>
+    <div class="ml-auto flex min-w-0 items-center gap-2 md:ml-0">
+      <button type="button" data-search-open class="icon-dot md:hidden" aria-label="{% translate 'Search' %}">{% icon "search" "w-5 h-5" %}</button>
+      <div class="hidden lg:block">{% include "components/theme_switch.html" with compact=True %}</div>
+      {% if branch_options %}
+        <form method="post" action="{% url 'core:switch_branch' %}" class="branch-pick min-w-0" data-no-busy {% if branch_options.current %}data-active{% endif %}>{% csrf_token %}
+          <span class="icon-dot" aria-hidden="true">{% icon "building" "w-5 h-5" %}</span>
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <label class="sr-only" for="branch-switch">{% translate "Branch" %}</label>
+          <select id="branch-switch" name="branch" data-autosubmit class="input branch-select w-full max-w-[12rem] py-1.5 text-sm">
+            <option value="">{% if user.is_director %}{% translate "All branches" %}{% else %}{% translate "All my branches" %}{% endif %}</option>
+            {% for b in branch_options.branches %}<option value="{{ b.id }}" {% if branch_options.current == b.id %}selected{% endif %}>{{ b.name }}</option>{% endfor %}
+          </select>
+        </form>
+      {% endif %}
+    </div>
+  </header>
+
+  <main id="main" class="mx-auto w-full max-w-7xl px-4 pb-32 pt-3 md:px-8 md:pb-12 md:pt-4">
+    {% block page_header %}
+    <div class="page-header">
+      <nav class="crumbs" aria-label="{% translate 'Breadcrumbs' %}">{% block breadcrumbs %}{% endblock %}</nav>
+      <div class="flex items-center gap-3">
+        {# Round back button: points at the last breadcrumb (static/js/app.js fills the href). #}
+        <a class="back-dot" data-back aria-label="{% translate 'Back' %}">{% icon "arrow-left" "w-5 h-5" %}</a>
+        <div class="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1">
+          <h1 class="page-title">{% block heading %}{{ center_name }}{% endblock %}</h1>
+          {% block count %}{% if totals %}{% include "components/count.html" with t=totals %}{% endif %}{% endblock %}
+        </div>
+        <div class="flex shrink-0 items-center gap-2">
+          {% block actions %}{% endblock %}
+          <div class="relative" x-data="{ open: false, has: false }" x-init="has = !!$refs.items.firstElementChild" x-show="has" @keydown.escape.window="open = false" @click.outside="open = false">
+            <button type="button" class="btn-secondary btn-icon" @click="open = !open" :aria-expanded="open" aria-haspopup="menu" aria-label="{% translate 'More actions' %}">{% icon "dots" "w-5 h-5" %}</button>
+            <div class="menu" x-ref="items" x-show="open" x-cloak role="menu" @click="if ($event.target.closest('a')) open = false">{% block menu %}{% endblock %}</div>
+          </div>
+          <div class="primary-slot">{% block primary %}{% endblock %}</div>
+        </div>
+      </div>
+      {% if totals and totals.amount is not None %}<p class="page-sum">{{ totals.amount_label }}: <strong>{{ totals.amount|som }}</strong></p>{% endif %}
+    </div>
+    {% endblock %}
+    {% block content %}{% endblock %}
+  </main>
 </div>
 
 {# Phone bottom navigation #}
-<nav class="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] md:hidden" x-data="{ more: false }" @keydown.escape.window="more = false" aria-label="{% translate 'Main menu' %}">
+<nav class="tabbar md:hidden" x-data="{ more: false }" @keydown.escape.window="more = false" aria-label="{% translate 'Main menu' %}">
   <div class="flex">
     {% for n in nav_mobile %}
       <a href="{{ n.url }}" class="tab-link" {% if n.active %}aria-current="page"{% endif %}>{% icon n.item.icon "w-6 h-6" %}<span class="max-w-[4.5rem] truncate">{{ n.item.label }}</span></a>
@@ -107,7 +109,7 @@
     <button type="button" @click="more = !more" :aria-expanded="more" class="tab-link">{% icon "dots" "w-6 h-6" %}<span>{% translate "More" %}</span></button>
   </div>
   <div x-show="more" x-cloak class="fixed inset-0 -z-10 bg-slate-950/40" @click="more = false"></div>
-  <div x-show="more" x-cloak class="absolute inset-x-2 bottom-[calc(100%+0.5rem)] max-h-[70dvh] overflow-y-auto rounded-2xl border border-line bg-surface p-2" style="box-shadow: var(--elev-pop)">
+  <div x-show="more" x-cloak class="absolute inset-x-0 bottom-[calc(100%+0.5rem)] max-h-[70dvh] overflow-y-auto rounded-[1.75rem] border border-line bg-surface p-2" style="box-shadow: var(--elev-pop)">
     {% for n in nav_mobile_more %}
       <a href="{{ n.url }}" class="menu-item" {% if n.active %}aria-current="page"{% endif %}>{% icon n.item.icon %}{{ n.item.label }}</a>
     {% endfor %}

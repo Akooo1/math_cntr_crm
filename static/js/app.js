@@ -66,6 +66,19 @@
   });
   if (media && media.addEventListener) media.addEventListener("change", function () { applyTheme(themeChoice()); });
 
+  // Sidebar: full or icons only, remembered per browser (the <head> script applies it).
+  on("click", "[data-rail-toggle]", function () {
+    var collapsed = root.getAttribute("data-rail") !== "collapsed";
+    if (collapsed) root.setAttribute("data-rail", "collapsed"); else root.removeAttribute("data-rail");
+    try { localStorage.setItem("rail", collapsed ? "collapsed" : "full"); } catch (err) { /* private mode */ }
+  });
+
+  // Page header: the round back button goes to the last breadcrumb (hidden without one).
+  document.querySelectorAll("[data-back]").forEach(function (btn) {
+    var crumbs = document.querySelectorAll(".crumbs a[href]");
+    if (crumbs.length) btn.setAttribute("href", crumbs[crumbs.length - 1].getAttribute("href"));
+  });
+
   // ---------------------------------------------------------------------------------
   // Top-bar clock: "Seshanba, 25.11.2026 · 14:32" in Asia/Tashkent, every minute.
   var tzParts = null;
