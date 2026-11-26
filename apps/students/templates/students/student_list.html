@@ -42,14 +42,20 @@
   {% else %}
   <div class="space-y-2 md:hidden">
     {% for s in page %}
-      <a href="{% url 'students:detail' s.pk %}" class="card block p-4">
+      <div class="card relative p-4">
         <div class="flex items-start justify-between gap-2">
-          <p class="min-w-0 font-medium">{{ s.full_name }}</p>
+          {# The name's link covers the whole card; the action buttons sit above it. #}
+          <a href="{% url 'students:detail' s.pk %}" class="min-w-0 font-medium after:absolute after:inset-0 after:rounded-[inherit] after:content-['']">{{ s.full_name }}</a>
           {% with b=badges|get_item:s.pk %}{% if b %}<span class="badge {{ b.1 }}">{{ b.0 }}</span>{% endif %}{% endwith %}
         </div>
         <p class="text-sm text-slate-600">{{ s.phone|default:s.parent_phone|telefon }}</p>
         <p class="mt-1 text-sm text-slate-500">{% for e in s.open_enrollments %}{{ e.group.name }}{% if e.status == 'frozen' %} ({% translate "Frozen" %}){% endif %}{% if not forloop.last %}, {% endif %}{% empty %}{% translate "Awaiting enrollment" %}{% endfor %}</p>
-      </a>
+        {% with acts=actions|get_item:s.pk %}{% if acts %}
+          <div class="relative z-10 mt-3 flex gap-2">
+            {% for a in acts %}<a href="{{ a.url }}" class="icon-dot" title="{{ a.label }}" aria-label="{{ a.label }}">{% icon a.icon "w-5 h-5" %}</a>{% endfor %}
+          </div>
+        {% endif %}{% endwith %}
+      </div>
     {% endfor %}
   </div>
   <div class="card table-scroll hidden md:block">

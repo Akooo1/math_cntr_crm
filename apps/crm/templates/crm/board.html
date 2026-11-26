@@ -65,7 +65,7 @@
             <span class="badge {{ c.stage.badge_css }}">{{ c.stage.name }}</span>
             <a href="?bosqich={{ c.stage.pk }}" class="count-pill text-xs hover:text-sky-700">{{ c.count }}</a>
           </header>
-          <div class="kanban-col flex min-h-24 flex-1 flex-col gap-2" data-stage="{{ c.stage.pk }}" data-kind="{{ c.stage.kind }}">
+          <div class="kanban-col flex min-h-24 flex-1 flex-col gap-2" data-stage="{{ c.stage.pk }}" data-kind="{{ c.stage.kind }}" data-name="{{ c.stage.name }}">
             {% for lead in c.leads %}{% include "crm/_lead_card.html" %}{% endfor %}
           </div>
           {% if c.count > c.leads|length %}<a href="?bosqich={{ c.stage.pk }}" class="mt-2 text-center text-xs font-medium text-sky-700">{% translate "Show all" %}</a>{% endif %}
@@ -86,13 +86,27 @@
         sort: false,
         onAdd: function (evt) {
           var url = board.dataset.moveUrl.replace("/0/", "/" + evt.item.dataset.lead + "/");
-          var body = new URLSearchParams({ stage: evt.to.dataset.stage });
-          fetch(url, { method: "POST", body: body, headers: { "X-CSRFToken": token, "HX-Request": "true" } })
-            .then(function (r) {
-              var target = r.headers.get("HX-Redirect");
-              if (target) window.location.href = target;
-              else if (!r.ok) window.location.reload();
+          function post(stage) {
+            return fetch(url, { method: "POST", body: new URLSearchParams({ stage: stage }), headers: { "X-CSRFToken": token, "HX-Request": "true" } });
+          }
+          post(evt.to.dataset.stage).then(function (r) {
+            var target = r.headers.get("HX-Redirect");
+            if (target) { window.location.href = target; return; }
+            if (!r.ok) { window.location.reload(); return; }
+            // Moved: offer "Undo" (back to the old column), except out of won / lost.
+            if (!window.mmToast) return;
+            var canUndo = ["won", "lost"].indexOf(evt.from.dataset.kind) === -1;
+            var texts = JSON.parse(document.getElementById("ui-i18n").textContent);
+            window.mmToast({
+              text: (texts.moved_to || "%s").replace("%s", evt.to.dataset.name),
+              undo: canUndo ? function () {
+                post(evt.from.dataset.stage).then(function (r2) {
+                  if (!r2.ok || r2.headers.get("HX-Redirect")) { window.location.reload(); return; }
+                  evt.from.insertBefore(evt.item, evt.from.children[evt.oldIndex] || null);
+                });
+              } : null
             });
+          });
         }
       });
     });

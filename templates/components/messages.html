@@ -1,12 +1,19 @@
 {# Django messages as toasts: they disappear on their own (static/js/app.js), errors last longer. #}
+{# A message with extra_tags "undo:/path/" gets an "Undo" button that POSTs there (core.ui.undo_message). #}
 <div class="toast-stack" data-toasts aria-live="polite">
   {% for m in messages %}
     {% with kind=m.level_tag|default:"info" %}
     <div class="toast" role="{% if kind == 'error' %}alert{% else %}status{% endif %}" data-toast data-kind="{{ kind }}">
       <span class="toast-icon mt-0.5">{% if kind == 'error' %}{% icon "x-circle" %}{% elif kind == 'warning' %}{% icon "alert" %}{% elif kind == 'success' %}{% icon "check-circle" %}{% else %}{% icon "info" %}{% endif %}</span>
       <p class="min-w-0 flex-1 pt-0.5">{{ m }}</p>
-      <button type="button" class="-my-1.5 -mr-1.5 grid h-9 w-9 shrink-0 place-items-center rounded-lg text-muted hover:bg-surface-2" data-toast-close aria-label="{% translate 'Close' %}">{% icon "x" "w-4 h-4" %}</button>
+      {% with undo=m.extra_tags|undo_url %}{% if undo %}
+        <form method="post" action="{{ undo }}" data-no-busy>{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="toast-undo" data-undo>{% translate "Undo" %}</button></form>
+      {% endif %}{% endwith %}
+      <button type="button" class="-my-1.5 -mr-1.5 grid h-9 w-9 shrink-0 place-items-center rounded-full text-muted hover:bg-surface-2" data-toast-close aria-label="{% translate 'Close' %}">{% icon "x" "w-4 h-4" %}</button>
     </div>
     {% endwith %}
   {% endfor %}
 </div>
+{# Icons for toasts made in the browser (window.mmToast). #}
+<template data-icon="check-circle">{% icon "check-circle" %}</template>
+<template data-icon="x-circle">{% icon "x-circle" %}</template>

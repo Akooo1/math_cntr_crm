@@ -118,7 +118,7 @@
   }
   function armToast(toast) {
     var kind = toast.getAttribute("data-kind");
-    var ms = kind === "error" ? 12000 : kind === "warning" ? 8000 : 5000;
+    var ms = kind === "error" ? 12000 : kind === "warning" || toast.querySelector("[data-undo]") ? 8000 : 5000;
     var timer = setTimeout(function () { dismiss(toast); }, ms);
     function hold() { clearTimeout(timer); }
     function resume() { timer = setTimeout(function () { dismiss(toast); }, 2500); }
@@ -127,6 +127,78 @@
     toast.addEventListener("mouseleave", resume);
   }
   on("click", "[data-toast-close]", function (e, btn) { dismiss(btn.closest("[data-toast]")); });
+
+  // A toast made in the browser, optionally with an "Undo" button: mmToast({ text, kind, undo }).
+  function makeIcon(name) {
+    var tpl = document.querySelector('template[data-icon="' + name + '"]');
+    return tpl ? tpl.content.cloneNode(true) : document.createTextNode("");
+  }
+  window.mmToast = function (opts) {
+    var stack = document.querySelector("[data-toasts]");
+    if (!stack) return;
+    var t = document.createElement("div");
+    t.className = "toast";
+    t.setAttribute("role", "status");
+    t.setAttribute("data-toast", "");
+    t.setAttribute("data-kind", opts.kind || "success");
+    var icon = document.createElement("span");
+    icon.className = "toast-icon mt-0.5";
+    icon.appendChild(makeIcon(opts.kind === "error" ? "x-circle" : "check-circle"));
+    var p = document.createElement("p");
+    p.className = "min-w-0 flex-1 pt-0.5";
+    p.textContent = opts.text;
+    t.appendChild(icon);
+    t.appendChild(p);
+    if (opts.undo) {
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "toast-undo";
+      b.setAttribute("data-undo", "");
+      b.textContent = T.undo || "↶";
+      b.addEventListener("click", function () { dismiss(t); opts.undo(); });
+      t.appendChild(b);
+    }
+    stack.appendChild(t);
+    armToast(t);
+  };
+
+  // First-paint animations only (assets/app.css, "Motion").
+  setTimeout(function () { root.classList.remove("is-entering"); }, 1000);
+
+  // A short buzz on Android phones for taps that save something (attendance).
+  function buzz() { try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) { /* not supported */ } }
+  on("click", "form[hx-post] button[name=status]", function () { buzz(); });
+
+  // Attendance: "Everyone came" marks every student nobody has marked yet.
+  on("click", "[data-mark-all]", function (e, btn) {
+    buzz();
+    btn.disabled = true;
+    document.querySelectorAll("li[id^=att-] form").forEach(function (form, i) {
+      if (form.querySelector('button[aria-pressed="true"]')) return;
+      var present = form.querySelector('button[name=status][value=present]');
+      if (present) setTimeout(function () { present.click(); }, i * 60);
+    });
+    setTimeout(function () { btn.disabled = false; }, 1500);
+  });
+
+  // Attendance: keep the "came / total" counter in the header current while tapping.
+  document.addEventListener("htmx:afterSwap", function () {
+    var pill = document.querySelector("[data-att-count]");
+    if (!pill) return;
+    var rows = document.querySelectorAll("li[id^=att-]").length;
+    var came = document.querySelectorAll('li[id^=att-] button[value=present][aria-pressed="true"]').length;
+    pill.textContent = came + " / " + rows;
+  });
+
+  // While htmx loads into an element, it shimmers instead of looking frozen.
+  document.addEventListener("htmx:beforeRequest", function (e) {
+    var t = e.detail.target;
+    if (t && t.classList && (e.detail.requestConfig.verb || "").toLowerCase() === "get") t.classList.add("is-loading-area");
+  });
+  document.addEventListener("htmx:afterRequest", function (e) {
+    var t = e.detail.target;
+    if (t && t.classList) t.classList.remove("is-loading-area");
+  });
 
   // ---------------------------------------------------------------------------------
   // Loading bar: htmx requests and full-page navigation.

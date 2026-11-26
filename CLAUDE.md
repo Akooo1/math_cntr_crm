@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **Design refresh after the owner's reference shots** (glass cards, dark sidebar, accent tiles, Plus Jakarta Sans) on the work branch; waiting for the owner's review before `main`. Update this line at the end of each phase.
+- Current phase: **Design refresh + interactions** (undo toasts, quick actions on student cards, payment success screen, "Hammasi keldi", motion) on the work branch; waiting for the owner's review before `main`. Update this line at the end of each phase.
 
 ## Ask the owner before
 
@@ -184,6 +184,9 @@ Inside a module:
 | Just now / N minutes ago / N hours ago / yesterday / N days ago | hozirgina / N daqiqa oldin / N soat oldin / kecha / N kun oldin |
 | Saving… | Saqlanmoqda… |
 | Collapse menu (sidebar) | Menyuni yig'ish |
+| Undo (toast button; not a money reversal) | Ortga qaytarish |
+| Everyone came (attendance) | Hammasi keldi |
+| Payment received (success screen) / take another payment | To'lov qabul qilindi / Yana to'lov qabul qilish |
 | Database backup (nightly / before an update) | Zaxira nusxa (kechki / yangilanishdan oldin) |
 
 Add new terms here before using them in the UI.
@@ -205,7 +208,8 @@ Add new terms here before using them in the UI.
   `UzTimeField` (24-hour text input; never `<input type="time">`, it shows AM/PM).
 - `students.services`: `register_enrollment_extension` (billing's hook into enroll / move /
   freeze / unfreeze / leave), `register_profile_panel`, `register_list_badge`,
-  `register_import_kind`. Billing uses these in phase 4; don't edit the students module.
+  `register_list_action` (round quick-action buttons on phone student cards: call, take
+  payment, message parents), `register_import_kind`. Billing uses these in phase 4; don't edit the students module.
 - `NavItem.role_priority` orders the phone bottom bar per role.
 - `billing.services.monthly.side_lines()`: the one engine that says what a month costs for an
   enrollment (lessons in window minus freezes, minus cancelled lessons, discounts). Joining,
@@ -229,7 +233,8 @@ Add new terms here before using them in the UI.
 - `core.excel.workbook(title, headers, rows, kinds, totals)` / `core.excel.response(...)`:
   every Excel export. Money stays numeric with a so'm number format.
 - `static/js/app.js`: `<form data-confirm="...">` asks before submitting; `[data-geolocate]`
-  reads the phone's GPS. Never put translated text inside inline JavaScript: Uzbek
+  reads the phone's GPS; `window.mmToast({text, kind, undo})` shows a toast from JS (with an
+  optional "Ortga qaytarish" button); `[data-mark-all]` marks unmarked attendance rows. Never put translated text inside inline JavaScript: Uzbek
   apostrophes break the quotes. Pass it in a `data-` attribute instead.
 - **Look and brand**: soft gradient canvas, light "glass" cards with large radii, pill
   buttons, round icon buttons, a dark floating sidebar (collapsible to icons) and a floating
@@ -279,7 +284,12 @@ Add new terms here before using them in the UI.
 - **Empty states**: `{% include "components/empty.html" with icon=".." title=_("..") text=_("..")
   url=.. label=_("..") reset=.. %}` — always offer the next action (or "clear filters").
 - **Messages** are toasts automatically (`components/messages.html`); just use
-  `django.contrib.messages`. Inline form errors stay in the form.
+  `django.contrib.messages`. Inline form errors stay in the form. For an action that is safe to
+  reverse (never money), `core.ui.undo_message(request, text, undo_path)` adds an "Ortga
+  qaytarish" button that POSTs to `undo_path`.
+- **Motion** (`assets/app.css`, "Motion"): page cross-fade (View Transitions), cards rise in on
+  first paint, chart bars grow, the payment check draws itself, htmx targets shimmer while
+  loading. Keep new animations ≤ 300 ms; reduced-motion users get none.
 - **Forms**: every POST form disables its buttons and shows a spinner on submit (no double
   payments); the pressed button's `name=value` is still sent. Opt out with `data-no-busy`.
   `data-confirm` works on the `<form>` or on a single submit `<button>`. `data-autosubmit`

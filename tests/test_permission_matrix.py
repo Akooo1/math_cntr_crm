@@ -75,6 +75,7 @@ def crm_cases(o) -> dict[str, list[Case]]:
             pair("crm:task_create", "/lidlar/{}/vazifa/", "post", {"title": "x"}),
             pair("crm:trial_book", "/lidlar/{}/sinov-darsi/", "post"),
             pair("crm:task_done", "/vazifalar/{}/bajarildi/", "post", key="task"),
+            pair("crm:task_reopen", "/vazifalar/{}/qayta-ochish/", "post", key="task"),
             pair(
                 "crm:trial_status",
                 "/sinov-darslari/{}/holat/",

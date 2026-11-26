@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
 from apps.core.audit_display import register_labels as register_audit_labels
@@ -74,6 +75,32 @@ def _panel(request, student):
     return {"connected": selectors.parent_connected(student), "student_id": student.pk}
 
 
+def _message_action(user, students):
+    """'Message to parents' button on student cards whose parent connected the bot."""
+    from apps.core.permissions import has_perm
+
+    from .models import Chat
+
+    if not has_perm(user, "telegram.send") or not students:
+        return {}
+    phones = {p for s in students for p in (s.parent_phone, s.phone, s.extra_phone) if p}
+    connected = set(
+        Chat.objects.filter(kind=Chat.Kind.PARENT, is_active=True, phone__in=phones).values_list(
+            "phone", flat=True
+        )
+    )
+    base = reverse("telegram:send")
+    return {
+        s.pk: [
+            student_services.ListAction(
+                f"{base}?oquvchi={s.pk}", "send", _("Message to parents"), 30
+            )
+        ]
+        for s in students
+        if connected & {s.parent_phone, s.phone, s.extra_phone}
+    }
+
+
 def _register():
     from .sections import TelegramSection, TemplateSection
 
@@ -88,6 +115,7 @@ def _register():
             order=30,
         )
     )
+    student_services.register_list_action(_message_action)
 
 
 _register()

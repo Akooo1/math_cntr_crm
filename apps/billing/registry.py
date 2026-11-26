@@ -181,6 +181,19 @@ def _status_badges(user, students):
     return out
 
 
+def _pay_action(user, students):
+    """'Take payment' button on student cards in the phone list."""
+    from apps.core.permissions import has_perm
+
+    if not has_perm(user, "billing.payment.create"):
+        return {}
+    base = reverse("billing:payment_create")
+    return {
+        s.pk: [student_services.ListAction(f"{base}?oquvchi={s.pk}", "card", _("Take payment"), 20)]
+        for s in students
+    }
+
+
 def _register_hooks():
     from . import import_kinds
     from .enrollment import BillingExtension
@@ -205,6 +218,7 @@ def _register_hooks():
         )
     )
     student_services.register_list_badge(_status_badges)
+    student_services.register_list_action(_pay_action)
     import_kinds.register()
 
 

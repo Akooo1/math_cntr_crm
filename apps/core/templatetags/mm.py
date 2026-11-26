@@ -17,6 +17,15 @@ register = template.Library()
 
 
 @register.filter
+def undo_url(extra_tags):
+    """messages extra_tags "undo:/path/" -> "/path/" (only same-site paths), else ""."""
+    for tag in (extra_tags or "").split():
+        if tag.startswith("undo:/") and not tag.startswith("undo://"):
+            return tag[5:]
+    return ""
+
+
+@register.filter
 def som(value):
     """1250000 -> 1 250 000 so'm"""
     if value in (None, ""):

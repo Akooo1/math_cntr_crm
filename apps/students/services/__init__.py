@@ -3,7 +3,9 @@
 from ..extensions import (
     ActionResult,
     EnrollmentAction,
+    ListAction,
     ProfilePanel,
+    register_list_action,
     register_list_badge,
     register_profile_panel,
 )
@@ -20,8 +22,10 @@ __all__ = [
     "ImportContext",
     "ImportKind",
     "ParseResult",
+    "ListAction",
     "ProfilePanel",
     "RowError",
+    "register_list_action",
     "register_list_badge",
     "register_profile_panel",
     "EnrollmentAction",

@@ -19,6 +19,7 @@ urlpatterns = [
     path("lidlar/<int:pk>/oquvchi/", views.convert, name="convert"),
     path("vazifalar/", views.tasks, name="tasks"),
     path("vazifalar/<int:pk>/bajarildi/", views.task_done, name="task_done"),
+    path("vazifalar/<int:pk>/qayta-ochish/", views.task_reopen, name="task_reopen"),
     path("sinov-darslari/", views.trials, name="trials"),
     path("sinov-darslari/<int:pk>/holat/", views.trial_status, name="trial_status"),
 ]

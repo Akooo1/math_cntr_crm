@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-26 12:37+0500\n"
+"POT-Creation-Date: 2026-11-26 13:08+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -623,6 +623,9 @@ msgstr "Qarzi bor"
 msgid "Payment expected"
 msgstr "To'lov kutilmoqda"
 
+msgid "Take payment"
+msgstr "To'lov qabul qilish"
+
 msgid "Courses and prices"
 msgstr "Kurslar va narxlar"
 
@@ -895,9 +898,6 @@ msgstr "hisob-kitob yopiq"
 msgid "overdue %(o)s"
 msgstr "muddati o'tgan %(o)s"
 
-msgid "Take payment"
-msgstr "To'lov qabul qilish"
-
 msgid "due"
 msgstr "muddat"
 
@@ -939,6 +939,15 @@ msgstr "Bekor qilish"
 
 msgid "Print receipt"
 msgstr "Chekni chop etish"
+
+msgid "Payment received"
+msgstr "To'lov qabul qilindi"
+
+msgid "Take another payment"
+msgstr "Yana to'lov qabul qilish"
+
+msgid "Student card"
+msgstr "O'quvchi kartasi"
 
 #, python-format
 msgid "Reversed on %(d)s (%(n)s)."
@@ -1070,10 +1079,6 @@ msgid "%(n)s day not closed"
 msgid_plural "%(n)s days not closed"
 msgstr[0] "%(n)s kun yopilmagan"
 msgstr[1] "%(n)s kun yopilmagan"
-
-#, python-format
-msgid "Payment saved. Receipt %(n)s."
-msgstr "To'lov saqlandi. Chek %(n)s."
 
 msgid "The payment was reversed."
 msgstr "To'lov bekor qilindi."
@@ -1311,6 +1316,13 @@ msgstr "Keyingi oy"
 
 msgid "Saving…"
 msgstr "Saqlanmoqda…"
+
+msgid "Undo"
+msgstr "Ortga qaytarish"
+
+#, python-format
+msgid "Moved to: %s"
+msgstr "Ko'chirildi: %s"
 
 #, python-format
 msgid "Constraint “%(name)s” is violated."
@@ -1860,6 +1872,9 @@ msgstr "Lid qayta ochildi."
 
 msgid "Task added."
 msgstr "Vazifa qo'shildi."
+
+msgid "Task done."
+msgstr "Vazifa bajarildi."
 
 msgid "Booked for a trial lesson."
 msgstr "Sinov darsiga yozildi."
@@ -3437,6 +3452,12 @@ msgstr "Bu kuni dars yo'q."
 msgid "This lesson can't be marked now (future, cancelled or too old)."
 msgstr ""
 "Bu darsni hozir belgilab bo'lmaydi (kelajakdagi, bekor qilingan yoki eski)."
+
+msgid "Everyone came"
+msgstr "Hammasi keldi"
+
+msgid "Marks only the students not marked yet."
+msgstr "Faqat hali belgilanmagan o'quvchilarni belgilaydi."
 
 msgid "No students in this group on this date."
 msgstr "Bu sanada guruhda o'quvchi yo'q."

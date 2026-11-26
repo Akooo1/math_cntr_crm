@@ -167,7 +167,7 @@ class TestPages:
             },
         )
         payment = Payment.objects.get()
-        assert resp.status_code == 302 and resp["Location"] == f"/tolovlar/{payment.pk}/"
+        assert resp.status_code == 302 and resp["Location"] == f"/tolovlar/{payment.pk}/?yangi=1"
         receipt = page_text(c.get(f"/tolovlar/{payment.pk}/chek/"))
         assert "CH-000001" in receipt and "450 000 so'm" in receipt
         profile = page_text(c.get(f"/oquvchilar/{student.pk}/"))

@@ -3,10 +3,29 @@
 {% block heading %}{{ payment.receipt_number }}{% endblock %}
 {% block count %}<span class="badge {% if payment.kind == 'payment' %}bg-emerald-100 text-emerald-800{% else %}bg-rose-100 text-rose-800{% endif %}">{{ payment.get_kind_display }}</span>{% endblock %}
 {% block menu %}{% if can_reverse and payment.kind == 'payment' and not reversal and payment.provider_code == 'manual' %}<a href="{% url 'billing:reverse' payment.pk %}" class="menu-item menu-item-danger" role="menuitem">{% icon "x-circle" "w-4 h-4" %}{% translate "Reverse" %}</a>{% endif %}{% endblock %}
-{% block primary %}<a href="{% url 'billing:receipt' payment.pk %}" target="_blank" class="btn-primary">{% icon "receipt" %}<span>{% translate "Print receipt" %}</span></a>{% endblock %}
+{% block primary %}{% if not fresh %}<a href="{% url 'billing:receipt' payment.pk %}" target="_blank" class="btn-primary">{% icon "receipt" %}<span>{% translate "Print receipt" %}</span></a>{% endif %}{% endblock %}
 {% block breadcrumbs %}{% if user|can:"billing.view" %}<a href="{% url 'billing:payments' %}">{% translate "Payments" %}</a>{% endif %}<a href="{% url 'students:detail' payment.student_id %}">{{ payment.student.full_name }}</a>{% endblock %}
 {% block content %}
   <div class="max-w-xl space-y-4">
+    {% if fresh %}
+      {# Success screen right after "Take payment". #}
+      <section class="card success-card p-6 text-center md:p-8">
+        <svg class="success-check mx-auto h-16 w-16" viewBox="0 0 52 52" aria-hidden="true"><circle cx="26" cy="26" r="24"/><path d="M15 27l7 7 15-16"/></svg>
+        <p class="mt-4 text-sm font-medium text-muted">{% translate "Payment received" %}</p>
+        <p class="tile-num mt-1">{{ payment.amount|som }}</p>
+        <p class="mt-1 text-sm text-slate-600">{{ payment.student.full_name }} · {{ payment.method.name }} · {{ payment.receipt_number }}</p>
+        <p class="mt-4 inline-flex flex-wrap items-center justify-center gap-x-2 rounded-full bg-surface-2 px-4 py-2 text-sm">
+          <span class="text-muted">{% translate "Balance" %}:</span>
+          <strong class="tabular-nums {% if balance < 0 %}text-rose-700{% elif balance > 0 %}text-emerald-700{% endif %}">{{ balance|som }}</strong>
+          <span class="text-muted">{% if balance < 0 %}{% translate "debt" %}{% elif balance > 0 %}{% translate "credit (avans)" %}{% else %}{% translate "settled" %}{% endif %}</span>
+        </p>
+        <div class="mt-6 flex flex-wrap justify-center gap-2">
+          <a href="{% url 'billing:receipt' payment.pk %}" target="_blank" class="btn-primary">{% icon "receipt" %}<span>{% translate "Print receipt" %}</span></a>
+          <a href="{% url 'billing:payment_create' %}" class="btn-secondary">{% icon "plus" %}<span>{% translate "Take another payment" %}</span></a>
+          <a href="{% url 'students:detail' payment.student_id %}" class="btn-ghost">{% icon "user" %}<span>{% translate "Student card" %}</span></a>
+        </div>
+      </section>
+    {% endif %}
     <section class="card p-5">
       <div class="flex items-start justify-between gap-3">
         <div><p class="text-sm text-slate-500">{% translate "Amount" %}</p><p class="text-3xl font-semibold tabular-nums">{{ payment.amount|som }}</p></div>

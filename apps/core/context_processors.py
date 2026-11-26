@@ -62,6 +62,9 @@ def ui_strings() -> dict:
         "prev_month": _("Previous month"),
         "next_month": _("Next month"),
         "saving": _("Saving…"),
+        "undo": _("Undo"),
+        # %s: the stage's name
+        "moved_to": _("Moved to: %s"),
     }
 
 

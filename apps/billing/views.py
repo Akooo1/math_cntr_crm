@@ -167,10 +167,8 @@ def payment_create(request):
         except ValidationError as exc:
             _error(form, exc)
         else:
-            messages.success(
-                request, _("Payment saved. Receipt %(n)s.") % {"n": payment.receipt_number}
-            )
-            return redirect("billing:payment", pk=payment.pk)
+            # The payment page opens with the success screen (amount, new balance, receipt).
+            return redirect(f"{reverse('billing:payment', args=[payment.pk])}?yangi=1")
     context = {"form": form, "student": student}
     if student:
         context["balance"] = selectors.balance(student.pk)
@@ -195,11 +193,19 @@ def student_search(request):
 @perm_required("billing.view")
 def payment_detail(request, pk):
     payment = selectors.get_payment(request.user, pk)
+    # Right after "Take payment": the success screen, for the person who took it.
+    fresh = (
+        request.GET.get("yangi") == "1"
+        and payment.kind == Payment.Kind.PAYMENT
+        and payment.received_by_id == request.user.pk
+    )
     return render(
         request,
         "billing/payment_detail.html",
         {
             "payment": payment,
+            "fresh": fresh,
+            "balance": selectors.balance(payment.student_id) if fresh else None,
             "allocations": payment.allocations.select_related("charge", "charge__group"),
             "reversal": Payment.objects.filter(reverses=payment).first(),
             "can_reverse": has_perm(request.user, "billing.reverse"),

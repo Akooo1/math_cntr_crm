@@ -11,6 +11,7 @@ from django.views.decorators.http import require_POST
 
 from apps.core import dates, listing, phone
 from apps.core.permissions import accessible_branch_ids, has_perm, perm_required
+from apps.core.ui import undo_message
 
 from . import selectors, services
 from .forms import (
@@ -286,8 +287,22 @@ def task_done(request, pk):
     services.complete_task(actor=request.user, task=task)
     if _is_htmx(request):
         return HttpResponse("")
+    undo_message(request, _("Task done."), reverse("crm:task_reopen", args=[task.pk]))
     target = request.POST.get("next")
-    return redirect(target if target and target.startswith("/") else reverse("crm:tasks"))
+    return redirect(target if _safe_path(target) else reverse("crm:tasks"))
+
+
+@perm_required("crm.leads.edit")
+@require_POST
+def task_reopen(request, pk):
+    task = selectors.get_task(request.user, pk)
+    services.reopen_task(actor=request.user, task=task)
+    target = request.POST.get("next")
+    return redirect(target if _safe_path(target) else reverse("crm:tasks"))
+
+
+def _safe_path(target) -> bool:
+    return bool(target) and target.startswith("/") and not target.startswith("//")
 
 
 @perm_required("crm.leads.edit")

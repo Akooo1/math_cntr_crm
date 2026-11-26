@@ -83,6 +83,7 @@ def student_list(request):
     badges = {}
     for provider in extensions.list_badges():
         badges.update(provider(request.user, list(page.object_list)) or {})
+    actions = extensions.list_actions(request.user, list(page.object_list))
     return render(
         request,
         "students/student_list.html",
@@ -98,6 +99,7 @@ def student_list(request):
                 status="finished"
             ),
             "badges": badges,
+            "actions": actions,
             "query": query,
             "can_manage": has_perm(request.user, "students.manage"),
         },

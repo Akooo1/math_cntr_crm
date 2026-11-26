@@ -234,6 +234,20 @@ def complete_task(*, actor, task: FollowUpTask) -> FollowUpTask:
     return task
 
 
+def reopen_task(*, actor, task: FollowUpTask) -> FollowUpTask:
+    """Undo "done" (the toast's undo button): the task is open again."""
+    require_perm(actor, "crm.leads.edit")
+    ensure_branch_access(actor, task.lead.branch_id)
+    with transaction.atomic():
+        task = FollowUpTask.objects.select_for_update().get(pk=task.pk)
+        if task.done_at is not None:
+            task.done_at = None
+            task.done_by = None
+            task.save(update_fields=["done_at", "done_by"])
+            _refresh_follow_up(task.lead)
+    return task
+
+
 # --- Trial lessons --------------------------------------------------------------------
 
 BEFORE_TRIAL = {Kind.NEW, Kind.CONTACTED, Kind.CUSTOM}

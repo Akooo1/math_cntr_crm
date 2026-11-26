@@ -469,6 +469,9 @@
   .toast[data-kind="warning"] .toast-icon { color: var(--color-amber-600); }
   .toast[data-kind="info"] { border-left-color: var(--color-sky-500); }
   .toast[data-kind="info"] .toast-icon { color: var(--color-sky-600); }
+  .toast-undo { flex-shrink: 0; align-self: center; min-height: 2.75rem; padding: 0 0.875rem; border-radius: 9999px; font-size: 0.8125rem; font-weight: 600; background-color: var(--color-primary); color: var(--color-on-primary); }
+  .toast-undo:hover { background-color: var(--color-primary-hover); }
+  .toast form { display: contents; }
   .toast.is-leaving { opacity: 0; transform: translateY(-6px); transition: opacity 200ms, transform 200ms; }
 
   /* ---- Loading bar for htmx requests and page navigation */
@@ -558,6 +561,55 @@
 .checkbox-list label { display: flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; padding: 0.5rem 0.875rem; border: 1px solid var(--color-line-strong); border-radius: 9999px; background-color: var(--glass-strong); font-size: 0.875rem; cursor: pointer; }
 .checkbox-list label:has(input:checked) { border-color: var(--color-sky-500); background-color: var(--color-sky-50); }
 .checkbox-list input { width: 1.25rem; height: 1.25rem; flex-shrink: 0; accent-color: var(--color-sky-600); }
+
+/* ==========================================================================
+   Motion. Short (≤ 300 ms per element), only where it explains what happened. The global
+   prefers-reduced-motion rule above turns all of it into an instant change.
+   ========================================================================== */
+
+/* Page changes cross-fade instead of flashing white (browsers without View Transitions
+   simply load the page). The sidebar, top bar and tab bar stay put. */
+@view-transition { navigation: auto; }
+@media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+.rail { view-transition-name: rail; }
+.topbar { view-transition-name: topbar; }
+.tabbar { view-transition-name: tabbar; }
+::view-transition-old(root) { animation: 120ms ease-in both vt-out; }
+::view-transition-new(root) { animation: 200ms ease-out both vt-in; }
+@keyframes vt-out { to { opacity: 0; } }
+@keyframes vt-in { from { opacity: 0; transform: translateY(6px); } }
+
+/* First paint: cards and tiles rise in one after another (html.is-entering is set in the
+   <head> and removed by app.js after 1 s, so later htmx swaps don't animate). */
+html.is-entering main :is(.card, .tile, .stat) { animation: rise 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+html.is-entering main :is(.card, .tile):nth-child(2) { animation-delay: 40ms; }
+html.is-entering main :is(.card, .tile):nth-child(3) { animation-delay: 80ms; }
+html.is-entering main :is(.card, .tile):nth-child(4) { animation-delay: 120ms; }
+html.is-entering main :is(.card, .tile):nth-child(5) { animation-delay: 160ms; }
+html.is-entering main :is(.card, .tile):nth-child(n+6) { animation-delay: 200ms; }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } }
+
+/* Chart bars grow from the axis. */
+html.is-entering .bar-grow { transform-origin: bottom; animation: grow 520ms cubic-bezier(0.2, 0.7, 0.2, 1) both; animation-delay: calc(var(--i, 0) * 50ms + 120ms); }
+@keyframes grow { from { transform: scaleY(0); } }
+
+/* Payment saved: the check mark draws itself. */
+.success-check circle { fill: none; stroke: var(--color-emerald-600); stroke-width: 2.5; stroke-dasharray: 151; stroke-dashoffset: 151; animation: draw 420ms ease-out forwards; }
+.success-check path { fill: none; stroke: var(--color-emerald-600); stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 36; stroke-dashoffset: 36; animation: draw 300ms 360ms ease-out forwards; }
+.success-card { animation: pop 320ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes pop { from { opacity: 0; transform: scale(0.96); } }
+
+/* htmx is loading into this area: a soft shimmer instead of a frozen look. */
+.is-loading-area { position: relative; }
+.is-loading-area > * { opacity: 0.55; transition: opacity 150ms; }
+.is-loading-area::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; background: linear-gradient(100deg, transparent 20%, color-mix(in srgb, var(--color-surface) 70%, transparent) 50%, transparent 80%); background-size: 200% 100%; animation: shimmer 1.1s linear infinite; }
+@keyframes shimmer { from { background-position: 150% 0; } to { background-position: -50% 0; } }
+
+/* Attendance and other toggle buttons: a small press. */
+:is(.btn-success, .btn-danger, .btn-secondary)[aria-pressed] { transition: background-color 160ms, color 160ms, transform 120ms; }
+:is(.btn-success, .btn-danger)[aria-pressed="true"] { animation: press 220ms ease-out; }
+@keyframes press { 40% { transform: scale(0.94); } }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 @keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }

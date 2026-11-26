@@ -9,6 +9,7 @@ from apps.core.roles import Role
 from apps.core.system_settings import SettingDef, register_setting
 
 from . import import_kinds
+from .extensions import register_list_action
 
 D, A, M, T = Role.DIRECTOR, Role.BRANCH_ADMIN, Role.SALES_MANAGER, Role.TEACHER
 
@@ -110,6 +111,20 @@ registry.add_widget(
 )
 
 import_kinds.register()
+
+
+def _call_action(user, students):
+    """'Call' button on student cards: the parent's phone, else the student's."""
+    from .extensions import ListAction
+
+    return {
+        s.pk: [ListAction(f"tel:{s.parent_phone or s.phone}", "phone", _("Call"), 10)]
+        for s in students
+        if s.parent_phone or s.phone
+    }
+
+
+register_list_action(_call_action)
 
 register_audit_labels(
     {

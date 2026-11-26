@@ -1,13 +1,20 @@
 {% extends "base.html" %}
 {% block title %}{% translate "Attendance" %}{% endblock %}
 {% block heading %}{{ lesson.group.name }}{% endblock %}
-{% block count %}<span class="count-pill" title="{% translate 'Came' %}">{{ present }} / {{ total }}</span>{% endblock %}
+{% block count %}<span class="count-pill" title="{% translate 'Came' %}" data-att-count>{{ present }} / {{ total }}</span>{% endblock %}
 {% block breadcrumbs %}<a href="{% url 'students:attendance' %}">{% translate "Attendance" %}</a><a href="{% url 'students:attendance' %}?sana={{ lesson.date|sana }}">{{ lesson.date|sana }}</a>{% endblock %}
 {% block content %}
   <div class="max-w-2xl">
     <div class="card mb-4 p-4">
       <p class="text-sm text-slate-600">{{ lesson.date|sana }} · {{ lesson.start_time|time:"H:i" }}–{{ lesson.end_time|time:"H:i" }}{% if lesson.room %} · {{ lesson.room.name }}{% endif %}</p>
       {% if not editable %}<p class="mt-2 text-sm text-amber-800">{% translate "This lesson can't be marked now (future, cancelled or too old)." %}</p>{% endif %}
+      {% if editable and rows %}
+        {# Marks only the students nobody has marked yet; then tap "Did not come" for the absent ones. #}
+        <div class="mt-3 flex flex-wrap items-center gap-3">
+          <button type="button" class="btn-success" data-mark-all>{% icon "check-circle" "w-5 h-5" %}<span>{% translate "Everyone came" %}</span></button>
+          <span class="text-sm text-slate-500">{% translate "Marks only the students not marked yet." %}</span>
+        </div>
+      {% endif %}
     </div>
     <ul class="space-y-2">
       {% for row in rows %}{% include "students/_attendance_row.html" %}{% empty %}

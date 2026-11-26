@@ -79,6 +79,17 @@ class ProfilePanel:
 
 _panels: dict[str, ProfilePanel] = {}
 _badges: list = []  # callables(user, students: list) -> {student_id: (label, css)}
+_actions: list = []  # callables(user, students: list) -> {student_id: [ListAction, ...]}
+
+
+@dataclass(frozen=True)
+class ListAction:
+    """A round quick-action button on a student's card in the phone list."""
+
+    url: str
+    icon: str
+    label: str
+    order: int = 50
 
 
 def register_profile_panel(panel: ProfilePanel) -> None:
@@ -96,3 +107,18 @@ def register_list_badge(provider) -> None:
 
 def list_badges() -> list:
     return list(_badges)
+
+
+def register_list_action(provider) -> None:
+    if provider not in _actions:
+        _actions.append(provider)
+
+
+def list_actions(user, students: list) -> dict[int, list[ListAction]]:
+    out: dict[int, list[ListAction]] = {}
+    for provider in _actions:
+        for sid, actions in (provider(user, students) or {}).items():
+            out.setdefault(sid, []).extend(actions)
+    for actions in out.values():
+        actions.sort(key=lambda a: a.order)
+    return out
