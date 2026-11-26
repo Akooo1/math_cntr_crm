@@ -253,9 +253,7 @@ class Command(BaseCommand):
                     },
                     confirm_duplicate=True,
                 )
-                Lead.objects.filter(pk=lead.pk).update(
-                    created_at=now - dt.timedelta(hours=26 + k)
-                )
+                Lead.objects.filter(pk=lead.pk).update(created_at=now - dt.timedelta(hours=26 + k))
 
     def _seed_expenses(self, User):
         """This month's expenses per branch (not from the cash desk, so the demo Kassa stays
