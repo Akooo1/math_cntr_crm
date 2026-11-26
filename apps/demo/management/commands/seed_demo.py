@@ -161,6 +161,12 @@ class Command(BaseCommand):
             with transaction.atomic():
                 self._seed_expenses(User)
             created = True
+        from apps.settings.models import UserPermissionGrant
+
+        if not UserPermissionGrant.objects.exists():
+            with transaction.atomic():
+                self._seed_showcase(User)
+            created = True
         # Early warnings from the demo attendance, debts and leads (the cron job does this
         # every 15 minutes in production). Idempotent.
         from apps.alerts.services import run_checks
@@ -172,6 +178,69 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Demo data created."))
         for phone, name, role, _b in USERS:
             self.stdout.write(f"  {phone}  {DEMO_PASSWORD}  {role}  {name}")
+
+    def _seed_showcase(self, User):
+        """Examples for the newest features (docs/SPEC.md §19, §22): one administrator with
+        an extra Ombor permission, students who left with a reason, missed-lesson streaks
+        and new leads nobody has called yet."""
+        from apps.crm import services as crm_services
+        from apps.settings.models import UserPermissionGrant
+        from apps.students.models import LeaveReason
+
+        director = User.objects.get(phone=USERS[0][0])
+        today = dates.today()
+        now = dates.now()
+        # Bekzod (Yunusobod administrator) may record Kirim; Aziza may not.
+        UserPermissionGrant.objects.create(
+            user=User.objects.get(phone=USERS[5][0]),
+            code="store.stock.receive",
+            granted_by=director,
+        )
+        # Students who left with a reason (for "O'quvchilar nega ketadi").
+        reasons = list(LeaveReason.objects.filter(is_active=True).order_by("sort_order"))
+        for i, branch in enumerate(Branch.objects.order_by("pk")):
+            admin = User.objects.get(phone=USERS[1 + i * 4][0])
+            active = list(
+                Enrollment.objects.filter(
+                    group__branch=branch,
+                    status="active",
+                    start_date__lte=today - dt.timedelta(days=14),
+                ).order_by("pk")
+            )
+            for n, e in enumerate(active[-3:]):
+                student_services.leave(
+                    actor=admin,
+                    enrollment=e,
+                    end_date=today - dt.timedelta(days=2 + n),
+                    reason="",
+                    leave_reason=reasons[(i * 3 + n) % len(reasons)],
+                )
+            # Two students missed their last two lessons: a warning "call the parent".
+            for e in active[4:6]:
+                last_two = list(
+                    Attendance.objects.filter(enrollment=e, lesson__date__lt=today)
+                    .order_by("-lesson__date", "-lesson__start_time")
+                    .values_list("pk", flat=True)[:2]
+                )
+                Attendance.objects.filter(pk__in=last_two).update(status="absent")
+            # Two new leads from this morning that nobody has called yet.
+            manager = User.objects.get(phone=USERS[2 + i * 4][0])
+            source = LeadSource.objects.filter(is_active=True).first()
+            for k in range(2):
+                lead = crm_services.create_lead(
+                    actor=manager,
+                    branch=branch,
+                    data={
+                        "full_name": f"{LAST_NAMES[k + i]} {FIRST_NAMES[k + 3]}",
+                        "phone": f"+99897{7_100_000 + i * 10 + k:07d}",
+                        "source": source,
+                        "manager": manager,
+                    },
+                    confirm_duplicate=True,
+                )
+                Lead.objects.filter(pk=lead.pk).update(
+                    created_at=now - dt.timedelta(hours=26 + k)
+                )
 
     def _seed_expenses(self, User):
         """This month's expenses per branch (not from the cash desk, so the demo Kassa stays

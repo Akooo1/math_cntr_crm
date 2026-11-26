@@ -26,7 +26,8 @@ created. Demo logins (password `demo12345` for all):
 | Sotuv menejeri | +998 90 000 00 22 | Yunusobod filiali |
 | O'qituvchi | +998 90 000 00 23 | Yunusobod filiali |
 
-The phone field accepts any format (`90 000 00 01`, `+998900000001`, ...).
+The phone field accepts any format (`90 000 00 01`, `+998900000001`, ...). All demo
+accounts, what the demo contains and a short tour per role: [docs/demo.md](docs/demo.md).
 
 To start from an empty database: `docker compose down -v && docker compose up`.
 
