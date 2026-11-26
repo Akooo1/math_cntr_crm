@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-26 14:18+0500\n"
+"POT-Creation-Date: 2026-11-26 16:35+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -1373,6 +1373,9 @@ msgstr "O'zgartirilgan vaqt"
 msgid "Branches"
 msgstr "Filiallar"
 
+msgid "Extra permissions"
+msgstr "Qo'shimcha ruxsatlar"
+
 msgid "Lesson"
 msgstr "Dars"
 
@@ -2667,6 +2670,9 @@ msgstr "Tizimga kirish uchun ishlatiladi."
 msgid "The director works in all branches automatically."
 msgstr "Direktor avtomatik ravishda barcha filiallarda ishlaydi."
 
+msgid "On top of the role, only for this person. The Direktor has all of them."
+msgstr "Lavozimga qo'shimcha, faqat shu xodim uchun. Direktorda hammasi bor."
+
 msgid "Temporary password"
 msgstr "Vaqtinchalik parol"
 
@@ -2696,6 +2702,15 @@ msgstr "1 dan 5 tagacha lotin bosh harflari."
 
 msgid "Receipt numbers look like CH-000123."
 msgstr "Chek raqamlari CH-000123 ko'rinishida bo'ladi."
+
+msgid "Permission"
+msgstr "Ruxsat"
+
+msgid "Given by"
+msgstr "Kim bergan"
+
+msgid "Given at"
+msgstr "Berilgan vaqt"
 
 msgid "Capacity"
 msgstr "Sig'imi"
@@ -2940,6 +2955,9 @@ msgstr "Xodim bu filialda ishlamaydi."
 msgid "The time can't be in the future."
 msgstr "Vaqt kelajakda bo'lishi mumkin emas."
 
+msgid "A teacher's arrival time comes from their lesson schedule."
+msgstr "O'qituvchining kelish vaqti uning dars jadvalidan olinadi."
+
 msgid "Choose at least one workday."
 msgstr "Kamida bitta ish kunini tanlang."
 
@@ -3024,6 +3042,9 @@ msgstr ""
 "hisoblanadi (Umumiy sozlamalar). Ish vaqti belgilanmagan xodimlarning "
 "kelishi yoziladi, lekin kechikish hisoblanmaydi."
 
+msgid "From the lesson schedule"
+msgstr "Dars jadvalidan"
+
 #, python-format
 msgid "Arrived at %(t)s"
 msgstr "%(t)s da keldingiz"
@@ -3035,8 +3056,15 @@ msgstr[0] "%(m)s daqiqa kechikish"
 msgstr[1] "%(m)s daqiqa kechikish"
 
 #, python-format
+msgid "Your first lesson today starts at %(t)s"
+msgstr "Bugungi birinchi darsingiz soat %(t)s da"
+
+#, python-format
 msgid "Work starts at %(t)s"
 msgstr "Ish %(t)s da boshlanadi"
+
+msgid "No lessons today."
+msgstr "Bugun dars yo'q."
 
 msgid "I'm here"
 msgstr "Keldim"
@@ -3979,9 +4007,6 @@ msgstr "Hali o'quvchilar yo'q"
 
 msgid "Add the first student or import a list from Excel."
 msgstr "Birinchi o'quvchini qo'shing yoki ro'yxatni Excel'dan import qiling."
-
-msgid "No lessons today."
-msgstr "Bugun dars yo'q."
 
 msgid "Student created."
 msgstr "O'quvchi yaratildi."

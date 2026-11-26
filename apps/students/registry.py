@@ -146,6 +146,31 @@ def _call_action(user, students):
 register_list_action(_call_action)
 
 
+def _teacher_day_starts(user_ids, start, end):
+    """Each teacher's first (not cancelled) lesson per day: when they are expected for
+    "Keldim" (core.day_plans)."""
+    from django.db.models import Min
+
+    from .models import Lesson
+
+    rows = (
+        Lesson.objects.filter(group__teacher_id__in=user_ids, date__gte=start, date__lte=end)
+        .exclude(status=Lesson.Status.CANCELLED)
+        .values("group__teacher_id", "date")
+        .annotate(first=Min("start_time"))
+    )
+    return {(r["group__teacher_id"], r["date"]): r["first"] for r in rows}
+
+
+def _register_day_plans():
+    from apps.core.day_plans import register_day_start_provider
+
+    register_day_start_provider(_teacher_day_starts)
+
+
+_register_day_plans()
+
+
 def _register_reports():
     from apps.core.reports import ReportDef, register_report
 

@@ -28,6 +28,35 @@ class Branch(models.Model):
         return self.name
 
 
+class UserPermissionGrant(models.Model):
+    """A permission the Direktor gave one person on top of their role (docs/SPEC.md §22).
+    Only codes registered as grantable count. Lives here for the same reason as UserBranch."""
+
+    user = models.ForeignKey(
+        dj_settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="permission_grants",
+        verbose_name=_("Employee"),
+    )
+    code = models.CharField(_("Permission"), max_length=80)
+    granted_by = models.ForeignKey(
+        dj_settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name=_("Given by"),
+    )
+    granted_at = models.DateTimeField(_("Given at"), auto_now_add=True)
+
+    class Meta:
+        db_table = "accounts_user_permission"
+        constraints = [
+            models.UniqueConstraint(fields=["user", "code"], name="uniq_user_permission")
+        ]
+
+    def __str__(self):
+        return f"{self.user_id}: {self.code}"
+
+
 class UserBranch(models.Model):
     """Which branches a staff member works in. Table name per docs/SPEC.md 5.2.
 

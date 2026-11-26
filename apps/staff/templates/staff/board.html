@@ -19,7 +19,7 @@
   <div class="space-y-2 {% if rows %}md:hidden{% endif %}">
     {% for r in rows %}
       <div class="card p-4">
-        <div class="flex items-start justify-between gap-2"><div class="min-w-0"><p class="font-medium">{{ r.user.full_name }}</p><p class="text-sm text-slate-500">{{ r.user.get_role_display }}{% if r.schedule %} · {{ r.schedule.start_time|time:"H:i" }}{% endif %}</p></div>{% include "staff/_status.html" %}</div>
+        <div class="flex items-start justify-between gap-2"><div class="min-w-0"><p class="font-medium">{{ r.user.full_name }}</p><p class="text-sm text-slate-500">{{ r.user.get_role_display }}{% if r.expected %} · {{ r.expected|time:"H:i" }}{% endif %}</p></div>{% include "staff/_status.html" %}</div>
         {% if r.checkin %}<p class="mt-1 text-sm">{{ r.checkin.checked_in_at|time:"H:i" }} · {{ r.checkin.branch.name }}{% if r.checkin.source == "manual" %} · {% translate "entered by hand" %}{% endif %}</p>{% endif %}
       </div>
     {% empty %}<div class="card">{% include "components/empty.html" with icon="clock" title=_("No employees yet.") %}</div>{% endfor %}
@@ -36,7 +36,7 @@
           <tr class="hover:bg-surface-2">
             <td class="table-cell font-medium">{{ r.user.full_name }}</td>
             <td class="table-cell">{{ r.user.get_role_display }}</td>
-            <td class="table-cell">{% if r.schedule %}{{ r.schedule.start_time|time:"H:i" }}{% else %}—{% endif %}</td>
+            <td class="table-cell">{% if r.expected %}{{ r.expected|time:"H:i" }}{% else %}—{% endif %}</td>
             <td class="table-cell">{% if r.checkin %}{{ r.checkin.checked_in_at|time:"H:i" }}{% if r.checkin.source == "manual" %} <span class="text-xs text-slate-500">({% translate "entered by hand" %})</span>{% endif %}{% else %}—{% endif %}</td>
             <td class="table-cell">{{ r.checkin.branch.name|default:"—" }}</td>
             <td class="table-cell">{% include "staff/_status.html" %}</td>

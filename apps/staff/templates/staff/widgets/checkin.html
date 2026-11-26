@@ -14,7 +14,7 @@
   {% else %}
     {% translate "This browser can't share its location." as no_geo %}{% translate "Allow location access for this site and try again." as denied %}
     <div data-geo-box data-no-geo="{{ no_geo }}" data-denied="{{ denied }}">
-      <p class="text-sm text-slate-500">{% if ctx.schedule %}{% blocktranslate with t=ctx.schedule.start_time|time:"H:i" %}Work starts at {{ t }}{% endblocktranslate %}{% else %}{% translate "Arrival" %}{% endif %}</p>
+      <p class="text-sm text-slate-500">{% if ctx.expected and ctx.from_lessons %}{% blocktranslate with t=ctx.expected|time:"H:i" %}Your first lesson today starts at {{ t }}{% endblocktranslate %}{% elif ctx.expected %}{% blocktranslate with t=ctx.expected|time:"H:i" %}Work starts at {{ t }}{% endblocktranslate %}{% elif ctx.from_lessons %}{% translate "No lessons today." %}{% else %}{% translate "Arrival" %}{% endif %}</p>
       <form method="post" action="{% url 'staff:check_in' %}" class="mt-3">{% csrf_token %}
         <input type="hidden" name="lat"><input type="hidden" name="lng"><input type="hidden" name="accuracy">
         <button type="button" data-geolocate="submit" class="btn-primary min-h-14 w-full text-lg">

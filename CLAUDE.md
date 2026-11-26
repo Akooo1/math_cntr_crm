@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **Leave reasons + early warnings (§19), expenses + staff salaries + branch profit (§20), parent menu in the bot (§21)** on the work branch, on top of the design refresh; waiting for the owner's review before `main`. Update this line at the end of each phase.
+- Current phase: **§19–§22 on the work branch** (warnings, expenses and profit, parent bot menu, Ombor rights per person, teachers' arrival from lessons) with the lime/black design; waiting for the owner's review before `main`. Update this line at the end of each phase.
 
 ## Ask the owner before
 
@@ -194,14 +194,20 @@ Inside a module:
 | Branch profit / profit | Filial foydasi / Foyda |
 | Fixed salary (staff) / staff salaries | Belgilangan maosh / Xodimlar maoshi |
 | Parent menu (bot) / next payment / next lesson | Menyu / Keyingi to'lov / Keyingi dars |
+| Extra permissions (per person) / from the lesson schedule | Qo'shimcha ruxsatlar / Dars jadvalidan |
 | Database backup (nightly / before an update) | Zaxira nusxa (kechki / yangilanishdan oldin) |
 
 Add new terms here before using them in the UI.
 
 ## Building blocks that already exist (use them, don't re-invent)
 
-- `core.permissions`: `register_permission`, `has_perm`, `require_perm`, `perm_required` (view
-  decorator), `scope_by_branch`, `ensure_branch_access` (404), `accessible_branch_ids`.
+- `core.permissions`: `register_permission` (`grantable=True`: the Direktor may give it to
+  individual people in Sozlamalar → Foydalanuvchilar; `has_perm` = role or grant),
+  `has_perm`, `require_perm`, `perm_required` (view decorator), `scope_by_branch`,
+  `ensure_branch_access` (404), `accessible_branch_ids`. `SettingsSection.permission` guards
+  each Sozlamalar page.
+- `core.day_plans`: `register_day_start_provider` / `day_starts` — when a person is expected
+  on a day (students provides teachers' first lesson; staff uses it for "Keldim").
   `request.branch_filter` is the branch picked in the top-bar switcher (None = all).
 - `core.audit.record(...)` / `core.audit.snapshot(obj)`; `core.crud.save_form` / `set_active`
   for audited reference-data writes.

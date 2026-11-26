@@ -21,15 +21,21 @@ class Permission:
     code: str
     label: str
     roles: frozenset[str]
+    # The Direktor may give it to individual people (Sozlamalar -> Foydalanuvchilar).
+    grantable: bool = False
 
 
 _registry: dict[str, Permission] = {}
 
 
-def register_permission(code: str, label, roles) -> Permission:
-    perm = Permission(code=code, label=label, roles=frozenset(roles))
+def register_permission(code: str, label, roles, *, grantable: bool = False) -> Permission:
+    perm = Permission(code=code, label=label, roles=frozenset(roles), grantable=grantable)
     _registry[code] = perm
     return perm
+
+
+def grantable_permissions() -> list[Permission]:
+    return [p for p in all_permissions() if p.grantable]
 
 
 def get_permission(code: str) -> Permission:
@@ -46,7 +52,11 @@ def all_permissions() -> list[Permission]:
 def has_perm(user, code: str) -> bool:
     if user is None or not getattr(user, "is_authenticated", False) or not user.is_active:
         return False
-    return user.role in get_permission(code).roles
+    perm = get_permission(code)
+    if user.role in perm.roles:
+        return True
+    # Given to this person by the Direktor (only grantable permissions count).
+    return perm.grantable and code in getattr(user, "granted_permissions", ())
 
 
 def require_perm(user, code: str) -> None:

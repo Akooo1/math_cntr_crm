@@ -182,21 +182,27 @@ class TestDebtReminders:
 
 
 class TestMorningSummary:
-    def test_summary(self, bot, clock, director, branch_a, teacher_a, admin_a, manager_a):
+    def test_summary(self, bot, clock, director, branch_a, admin_a, manager_a):
+        from apps.core.roles import Role
+        from tests.factories import UserFactory
+
         services.handle_update(update(200, f"/start {services.link_token(director)}"))
         staff.save_location(
             actor=director, branch=branch_a, latitude=41.2756, longitude=69.2034, radius_m=200
         )
-        for user, start in ((teacher_a, dt.time(9, 0)), (admin_a, dt.time(9, 0))):
-            staff.save_schedule(actor=director, user=user, start_time=start, workdays=[1])
+        second = UserFactory(
+            role=Role.BRANCH_ADMIN, full_name="Ikkinchi Admin", branches=[branch_a]
+        )
+        for user in (admin_a, second):
+            staff.save_schedule(actor=director, user=user, start_time=dt.time(9, 0), workdays=[1])
         staff.save_schedule(actor=director, user=manager_a, start_time=dt.time(14, 0), workdays=[1])
         clock.move_to(dt.datetime(2026, 11, 16, 4, 25, tzinfo=dt.UTC))  # 09:25
-        staff.check_in(actor=teacher_a, latitude=41.2756, longitude=69.2034, accuracy_m=10)
+        staff.check_in(actor=admin_a, latitude=41.2756, longitude=69.2034, accuracy_m=10)
         clock.move_to(dt.datetime(2026, 11, 16, 4, 30, tzinfo=dt.UTC))  # 09:30
         assert services.send_morning_summary() == {"sent": 1, "failed": 0}
         text = bot.texts(200)[-1]
-        assert teacher_a.full_name in text and "25" in text  # late 25 min
-        assert admin_a.full_name in text  # work started, not here
+        assert admin_a.full_name in text and "25" in text  # late 25 min
+        assert second.full_name in text  # work started, not here
         assert manager_a.full_name not in text  # starts at 14:00
 
 

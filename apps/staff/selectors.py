@@ -7,6 +7,7 @@ from django.db.models import Count, Q, Sum
 from django.utils.translation import gettext_lazy as _
 
 from apps.core import dates
+from apps.core.day_plans import day_starts
 from apps.core.permissions import accessible_branch_ids, require_perm
 from apps.core.reports import Col, Result
 from apps.core.roles import Role
@@ -29,6 +30,21 @@ def staff(user=None, branch_id: int | None = None):
     return qs.distinct().order_by("full_name")
 
 
+def _teacher_ids(people) -> list[int]:
+    return [p.pk for p in people if p.role == Role.TEACHER]
+
+
+def expected_start(person, day: dt.date) -> dt.time | None:
+    """When `person` is expected on `day` (None = not expected: a day off). Teachers: their
+    first lesson that day; everyone else: their working-time schedule."""
+    if person.role == Role.TEACHER:
+        return day_starts([person.pk], day, day).get((person.pk, day))
+    schedule = Schedule.objects.filter(user=person).first()
+    if schedule and rules.works_on(schedule.workdays, day):
+        return schedule.start_time
+    return None
+
+
 def board(user, day: dt.date, branch_id: int | None = None) -> dict:
     require_perm(user, "staff.attendance.view")
     people = list(staff(user, branch_id))
@@ -37,19 +53,34 @@ def board(user, day: dt.date, branch_id: int | None = None) -> dict:
         c.user_id: c
         for c in CheckIn.objects.filter(date=day, user__in=people).select_related("branch")
     }
+    lessons = day_starts(_teacher_ids(people), day, day)
     rows = []
     for person in people:
         schedule, checkin = schedules.get(person.pk), checkins.get(person.pk)
-        works = schedule is not None and rules.works_on(schedule.workdays, day)
+        if person.role == Role.TEACHER:  # from the lesson schedule
+            expected = lessons.get((person.pk, day))
+            scheduled, works = True, expected is not None
+        else:
+            works = schedule is not None and rules.works_on(schedule.workdays, day)
+            scheduled = schedule is not None
+            expected = schedule.start_time if works else None
         st = rules.status(
-            scheduled=schedule is not None,
+            scheduled=scheduled,
             works_today=works,
             checked_in=checkin is not None,
             late=checkin.late_minutes if checkin else 0,
         )
         if st == "not_yet" and day < dates.today():
             st = "absent"
-        rows.append({"user": person, "schedule": schedule, "checkin": checkin, "status": st})
+        rows.append(
+            {
+                "user": person,
+                "schedule": schedule,
+                "expected": expected,
+                "checkin": checkin,
+                "status": st,
+            }
+        )
     order = {s: i for i, s in enumerate(["absent", *STATUS_ORDER])}
     rows.sort(key=lambda r: (order[r["status"]], r["user"].full_name))
     counts = {s: sum(1 for r in rows if r["status"] == s) for s in order}
@@ -58,11 +89,12 @@ def board(user, day: dt.date, branch_id: int | None = None) -> dict:
 
 def my_today(user) -> dict:
     today = dates.today()
-    schedule = Schedule.objects.filter(user=user).first()
+    expected = expected_start(user, today)
     return {
         "checkin": CheckIn.objects.filter(user=user, date=today).select_related("branch").first(),
-        "schedule": schedule,
-        "works_today": schedule is not None and rules.works_on(schedule.workdays, today),
+        "expected": expected,
+        "from_lessons": user.role == Role.TEACHER,
+        "works_today": expected is not None,
         "has_location": BranchLocation.objects.filter(branch_id__in=user.branch_ids).exists(),
     }
 
@@ -80,7 +112,10 @@ def locations() -> list[dict]:
 def schedules() -> list[dict]:
     people = list(staff())
     by_user = {s.user_id: s for s in Schedule.objects.filter(user__in=people)}
-    return [{"user": p, "schedule": by_user.get(p.pk)} for p in people]
+    return [
+        {"user": p, "schedule": by_user.get(p.pk), "from_lessons": p.role == Role.TEACHER}
+        for p in people
+    ]
 
 
 def workdays_between(workdays: list[int], start: dt.date, end: dt.date) -> int:
@@ -93,8 +128,9 @@ def workdays_between(workdays: list[int], start: dt.date, end: dt.date) -> int:
 
 
 def monthly_report(user, p) -> Result:
-    """Per employee for the period: workdays (by the current schedule), arrivals, late
-    arrivals and minutes, missed workdays (up to yesterday)."""
+    """Per employee for the period: workdays (teachers: days with lessons; others: by the
+    current schedule), arrivals, late arrivals and minutes, missed workdays (up to
+    yesterday)."""
     require_perm(user, "staff.attendance.view")
     people = list(staff(user, p.branch_id))
     schedules_by_user = {s.user_id: s for s in Schedule.objects.filter(user__in=people)}
@@ -109,19 +145,25 @@ def monthly_report(user, p) -> Result:
         )
     }
     yesterday = dates.today() - dt.timedelta(days=1)
+    end = min(p.date_to, yesterday)
+    lesson_days = day_starts(_teacher_ids(people), p.date_from, end)
     rows = []
     for person in people:
         s = schedules_by_user.get(person.pk)
         st = stats.get(person.pk, {})
-        end = min(p.date_to, yesterday)
-        workdays = workdays_between(s.workdays, p.date_from, end) if s else 0
-        came_on_workdays = (
-            CheckIn.objects.filter(user=person, date__gte=p.date_from, date__lte=end)
-            .filter(date__week_day__in=[(d % 7) + 1 for d in s.workdays])
-            .count()
-            if s
-            else 0
-        )
+        if person.role == Role.TEACHER:  # workdays = days with lessons
+            days = {d for (uid, d) in lesson_days if uid == person.pk}
+            workdays = len(days)
+            came_on_workdays = CheckIn.objects.filter(user=person, date__in=days).count()
+        else:
+            workdays = workdays_between(s.workdays, p.date_from, end) if s else 0
+            came_on_workdays = (
+                CheckIn.objects.filter(user=person, date__gte=p.date_from, date__lte=end)
+                .filter(date__week_day__in=[(d % 7) + 1 for d in s.workdays])
+                .count()
+                if s
+                else 0
+            )
         rows.append(
             [
                 person.full_name,

@@ -39,6 +39,7 @@ def save_staff_user(*, actor, form, instance=None):
             audit.record(
                 actor, "accounts.user.create", user, after=account_services.snapshot(user, ids)
             )
+            _set_grants(actor, user, data.get("extra_permissions") or [])
             return user
         if instance.pk == actor.pk and data["role"] != instance.role:
             raise ValidationError(_("You can't change your own role."))
@@ -58,7 +59,34 @@ def save_staff_user(*, actor, form, instance=None):
             before=before,
             after=account_services.snapshot(user, ids),
         )
+        _set_grants(actor, user, data.get("extra_permissions") or [])
         return user
+
+
+def _set_grants(actor, user, codes) -> None:
+    """Replace the person's extra permissions (grantable codes only; the Direktor needs
+    none). Audited as accounts.user.permissions when anything changed."""
+    from apps.core.permissions import grantable_permissions
+    from apps.core.roles import Role
+
+    from .models import UserPermissionGrant
+
+    allowed = {p.code for p in grantable_permissions()}
+    wanted = set() if user.role == Role.DIRECTOR else {c for c in codes if c in allowed}
+    before = set(UserPermissionGrant.objects.filter(user=user).values_list("code", flat=True))
+    if wanted == before:
+        return
+    UserPermissionGrant.objects.filter(user=user).exclude(code__in=wanted).delete()
+    for code in sorted(wanted - before):
+        UserPermissionGrant.objects.create(user=user, code=code, granted_by=actor)
+    user.clear_grants_cache()
+    audit.record(
+        actor,
+        "accounts.user.permissions",
+        user,
+        before={"permissions": sorted(before)},
+        after={"permissions": sorted(wanted)},
+    )
 
 
 def set_user_active(*, actor, user, active: bool):

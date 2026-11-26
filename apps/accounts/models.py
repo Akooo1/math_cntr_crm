@@ -58,5 +58,18 @@ class User(AbstractBaseUser):
         self.__dict__.pop("_branch_ids_cache", None)
 
     @property
+    def granted_permissions(self) -> frozenset[str]:
+        """Permission codes the Direktor gave this person on top of their role (rows of
+        accounts_user_permission; docs/SPEC.md §22)."""
+        cached = getattr(self, "_grants_cache", None)
+        if cached is None:
+            cached = frozenset(self.permission_grants.values_list("code", flat=True))
+            self._grants_cache = cached
+        return cached
+
+    def clear_grants_cache(self):
+        self.__dict__.pop("_grants_cache", None)
+
+    @property
     def is_director(self) -> bool:
         return self.role == Role.DIRECTOR

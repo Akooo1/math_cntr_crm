@@ -1451,3 +1451,35 @@ button's word by hand also works. People who are not connected are asked for the
 before. Parents see only the students whose phone, parent phone or extra phone equals the
 number they shared (`students.selectors.find_by_phones`); billing data comes from
 `billing.selectors.parent_view(student_id)`. Answers are logged as bot replies.
+
+---
+
+## 22. Ombor rights per person; teachers' arrival from lessons (owner's request)
+
+### 22.1 Ombor (store) rights
+
+Kirim (stock received), Tuzatish (stock correction) and products and prices are the
+Direktor's by default (before: administrators also recorded Kirim). The Direktor can give
+each of them to an individual person: Sozlamalar → Foydalanuvchilar → (person) →
+"Qo'shimcha ruxsatlar". Purchase cost and margin stay Direktor-only.
+
+- `accounts_user_permission` (`center_settings.UserPermissionGrant`: user, code, granted
+  by, when; one row per user and code; lives next to `accounts_user_branch` for the same
+  reason). Only permissions registered with `grantable=True` count
+  (`core.permissions.register_permission(..., grantable=True)`); a stray row for any other
+  code is ignored. Changes are audited as `accounts.user.permissions`.
+- `has_perm` = role default **or** a grant. Sozlamalar pages now check each page's own
+  permission (`SettingsSection.permission`); Mahsulotlar uses `store.catalog.manage`, so a
+  person given it opens only that page (linked from the Ombor menu).
+
+### 22.2 Teachers' "Keldim"
+
+A teacher is expected at the start of their first lesson of the day (cancelled lessons don't
+count), taken from their groups' schedule; one check-in per day; late = after that time plus
+`staff.grace_minutes`. A day without lessons is a day off. Other staff keep the working-time
+schedule (Sozlamalar → Ish vaqti; teachers show "Dars jadvalidan" there and can't be given a
+manual time). The monthly report counts a teacher's workdays as days with lessons.
+
+Staff and students sit on the same layer, so the link is a core extension point:
+`core.day_plans.register_day_start_provider(provider)` / `day_starts(user_ids, start, end)`;
+the students module registers teachers' first lesson per day.

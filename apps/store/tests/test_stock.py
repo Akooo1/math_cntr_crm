@@ -46,7 +46,17 @@ class TestStockMath:
         with pytest.raises(ValidationError):
             receive(director, branch_a, shop["small"], 1, cost=-1)
 
-    def test_admin_receives_for_own_branch_only(self, shop, admin_a, branch_a, branch_b):
+    def test_admin_receives_only_when_given_and_in_own_branch(
+        self, shop, admin_a, director, branch_a, branch_b
+    ):
+        from apps.settings.models import UserPermissionGrant
+
+        with pytest.raises(PermissionDenied):  # Kirim is the Direktor's by default
+            receive(admin_a, branch_a, shop["small"], 5)
+        UserPermissionGrant.objects.create(
+            user=admin_a, code="store.stock.receive", granted_by=director
+        )
+        admin_a.clear_grants_cache()
         receive(admin_a, branch_a, shop["small"], 5)
         assert on_hand(branch_a, shop["small"]) == 25
         with pytest.raises(Http404):

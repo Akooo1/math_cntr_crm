@@ -417,8 +417,9 @@ def _store_objects(director, branch_a, branch_b, o, cash):
 
 
 def store_cases(o) -> dict[str, list[Case]]:
-    """Store: Direktor everywhere; Filial administratori sells, gives books and records Kirim
-    in their own branch; corrections and cancellations are the Direktor's. Sotuv menejeri and
+    """Store: Direktor everywhere; Filial administratori sells and gives books in their own
+    branch; Kirim, corrections and cancellations are the Direktor's (Kirim and corrections
+    can be given to a person). Sotuv menejeri and
     O'qituvchi never."""
     both = expect({D: 200, A: 200})
     other = expect({D: 200, A: 404})
@@ -462,10 +463,11 @@ def store_cases(o) -> dict[str, list[Case]]:
             Case("/ombor/", expect=both),
             Case(f"/ombor/?filial={fb}", expect=other),
         ],
+        # Kirim: the Direktor's unless given to a person (SPEC §22).
         "store:receive": [
-            Case(f"/ombor/kirim/?filial={fa}", expect=both),
-            Case(f"/ombor/kirim/?filial={fb}", expect=other),
-            Case("/ombor/kirim/", "post", post_both, receive_data),
+            Case(f"/ombor/kirim/?filial={fa}", expect=director),
+            Case(f"/ombor/kirim/?filial={fb}", expect=director),
+            Case("/ombor/kirim/", "post", expect({D: 302}), receive_data),
         ],
         "store:correct": [
             Case(f"/ombor/tuzatish/?filial={fa}", expect=director),

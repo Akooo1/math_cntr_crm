@@ -49,6 +49,7 @@ LABELS = {
     "created_at": _("Created at"),
     "updated_at": _("Updated at"),
     "branches": _("Branches"),
+    "permissions": _("Extra permissions"),
     "kind": _("Type"),
     "value": _("Value"),
     "amount": _("Amount"),

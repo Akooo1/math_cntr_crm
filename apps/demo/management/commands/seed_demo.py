@@ -307,25 +307,30 @@ class Command(BaseCommand):
                 actor=director, branch=branch, latitude=lat, longitude=lon, radius_m=200
             )
             locs[branch.pk] = (lat, lon)
-        starts = {
-            Role.BRANCH_ADMIN: dt.time(9, 0),
-            Role.SALES_MANAGER: dt.time(9, 30),
-            Role.TEACHER: dt.time(14, 0),
-        }
+        starts = {Role.BRANCH_ADMIN: dt.time(9, 0), Role.SALES_MANAGER: dt.time(9, 30)}
         rnd = random.Random(7)
         today = dates.today()
         grace = get_setting("staff.grace_minutes")
+        from apps.staff import selectors as staff_selectors
+
         for user in User.objects.exclude(role=Role.DIRECTOR).filter(is_active=True):
-            start = starts[user.role]
-            staff.save_schedule(
-                actor=director, user=user, start_time=start, workdays=[1, 2, 3, 4, 5, 6]
-            )
+            teacher = user.role == Role.TEACHER  # teachers: expected at their first lesson
+            if not teacher:
+                staff.save_schedule(
+                    actor=director,
+                    user=user,
+                    start_time=starts[user.role],
+                    workdays=[1, 2, 3, 4, 5, 6],
+                )
             branch_id = user.branch_ids[0]
             lat, lon = locs[branch_id]
             for back in range(14, 0, -1):
                 day = today - dt.timedelta(days=back)
-                if day.isoweekday() == 7 or rnd.random() < 0.08:
-                    continue  # Sunday, or a missed day
+                start = staff_selectors.expected_start(user, day) if teacher else starts[user.role]
+                if start is None or (not teacher and day.isoweekday() == 7):
+                    continue  # no lessons / Sunday
+                if rnd.random() < 0.08:
+                    continue  # a missed day
                 minutes = (
                     start.hour * 60 + start.minute + rnd.choice([-20, -12, -8, -5, 0, 4, 18, 35])
                 )

@@ -35,11 +35,16 @@ def place(clock, director, branch_a):
 
 
 @pytest.fixture
-def nine(place, director, teacher_a):
+def nine(place, director, branch_a):
+    """A sales manager who starts at 9:00 Mon-Sat (teachers' times come from lessons)."""
+    from apps.core.roles import Role
+    from tests.factories import UserFactory
+
+    person = UserFactory(role=Role.SALES_MANAGER, full_name="Menejer Nine", branches=[branch_a])
     services.save_schedule(
-        actor=director, user=teacher_a, start_time=dt.time(9, 0), workdays=[1, 2, 3, 4, 5, 6]
+        actor=director, user=person, start_time=dt.time(9, 0), workdays=[1, 2, 3, 4, 5, 6]
     )
-    return teacher_a
+    return person
 
 
 def check(user, coords=NEAR, accuracy=20):
@@ -201,3 +206,51 @@ class TestOutbox:
         assert outbox.purge(actor=director, older_than_days=90) == 1
         assert OutboxEvent.objects.filter(event_type="staff.checked_in").exists()
         assert AuditLog.objects.filter(action="core.outbox.purge").exists()
+
+
+class TestTeachersFromLessons:
+    """docs/SPEC.md §22: a teacher is expected at their first lesson of the day."""
+
+    @pytest.fixture
+    def lessons(self, clock, place, admin_a, teacher_a, branch_a):
+        from tests.factories import make_group
+
+        # Lessons on Mondays and Tuesdays at 15:00 (the factory's time).
+        g = make_group(
+            admin_a, branch_a, teacher=teacher_a, start=dt.date(2026, 11, 1), days=(1, 2)
+        )
+        return g
+
+    def test_expected_start_is_the_first_lesson(self, clock, lessons, teacher_a):
+        from apps.students.models import Lesson
+
+        monday = sorted(Lesson.objects.filter(date=MON).values_list("start_time", flat=True))
+        assert selectors.expected_start(teacher_a, MON) == monday[0]
+        sunday = MON + dt.timedelta(days=6)
+        assert selectors.expected_start(teacher_a, sunday) is None  # no lessons: day off
+
+    def test_late_counts_from_the_first_lesson(self, clock, lessons, teacher_a):
+        first = selectors.expected_start(teacher_a, MON)
+        start = dt.datetime.combine(MON, first) + dt.timedelta(minutes=25)
+        at(clock, start.hour, start.minute)
+        c = check(teacher_a)
+        assert (c.expected_start, c.late_minutes) == (first, 25)
+
+    def test_board_and_report(self, clock, lessons, teacher_a, director):
+        at(clock, 7, 0)
+        row = next(r for r in selectors.board(director, MON)["rows"] if r["user"] == teacher_a)
+        assert row["status"] == "not_yet" and row["expected"] == selectors.expected_start(
+            teacher_a, MON
+        )
+        sunday = MON + dt.timedelta(days=6)
+        at(clock, 7, 0, sunday)
+        row = next(r for r in selectors.board(director, sunday)["rows"] if r["user"] == teacher_a)
+        assert row["status"] == "day_off"
+
+    def test_teacher_has_no_manual_work_time(self, clock, director, teacher_a):
+        from django.core.exceptions import ValidationError
+
+        with pytest.raises(ValidationError):
+            services.save_schedule(
+                actor=director, user=teacher_a, start_time=dt.time(9, 0), workdays=[1]
+            )

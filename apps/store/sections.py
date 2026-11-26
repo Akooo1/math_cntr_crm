@@ -47,6 +47,8 @@ def _price_view(request, section, product):
 
 class ProductSection(SettingsSection):
     slug = "mahsulotlar"
+    # The Direktor, or someone the Direktor gave "products and prices" (SPEC §22).
+    permission = "store.catalog.manage"
     title = gettext_lazy("Products")
     description = gettext_lazy("Books and items sold at the desk: names, prices, low stock.")
     icon = "tag"

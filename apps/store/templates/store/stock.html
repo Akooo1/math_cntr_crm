@@ -2,7 +2,7 @@
 {% block title %}{% translate "Stock" %}{% endblock %}
 {% block heading %}{% translate "Stock" %}{% endblock %}
 {% block count %}<span class="count-pill">{{ rows|length }}</span>{% endblock %}
-{% block menu %}{% if user|can:"store.stock.correct" %}<a href="{% url 'store:correct' %}?filial={{ branch.pk }}" class="menu-item" role="menuitem">{% icon "pencil" "w-4 h-4" %}{% translate "Stock correction" %}</a>{% endif %}{% endblock %}
+{% block menu %}{% if user|can:"store.catalog.manage" %}<a href="{% url 'settings:section_list' 'mahsulotlar' %}" class="menu-item" role="menuitem">{% icon "tag" "w-4 h-4" %}{% translate "Products" %}</a>{% endif %}{% if user|can:"store.stock.correct" %}<a href="{% url 'store:correct' %}?filial={{ branch.pk }}" class="menu-item" role="menuitem">{% icon "pencil" "w-4 h-4" %}{% translate "Stock correction" %}</a>{% endif %}{% endblock %}
 {% block primary %}{% if user|can:"store.stock.receive" %}<a href="{% url 'store:receive' %}?filial={{ branch.pk }}" class="btn-primary">{% icon "plus" %}<span>{% translate "Stock received" %}</span></a>{% endif %}{% endblock %}
 {% block content %}
   <div class="mb-4 flex flex-wrap items-center justify-between gap-2">

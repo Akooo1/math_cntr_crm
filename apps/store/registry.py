@@ -12,10 +12,16 @@ from apps.students import services as student_services
 
 D, A = Role.DIRECTOR, Role.BRANCH_ADMIN
 
+# Kirim, corrections and the catalog are the Direktor's; the Direktor can give each of
+# them to individual people in Sozlamalar -> Foydalanuvchilar (docs/SPEC.md §22).
+for code, label in (
+    ("store.catalog.manage", _("Manage products and prices")),
+    ("store.stock.receive", _("Record stock received")),
+    ("store.stock.correct", _("Correct stock")),
+):
+    register_permission(code, label, {D}, grantable=True)
+
 for code, label, roles in (
-    ("store.catalog.manage", _("Manage products and prices"), {D}),
-    ("store.stock.receive", _("Record stock received"), {D, A}),
-    ("store.stock.correct", _("Correct stock"), {D}),
     ("store.sell", _("Sell items and give books"), {D, A}),
     ("store.sale.reverse", _("Cancel sales"), {D}),
     ("store.view", _("See stock and sales"), {D, A}),

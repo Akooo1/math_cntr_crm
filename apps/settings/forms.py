@@ -66,6 +66,12 @@ class StaffUserForm(StyledForm):
         widget=forms.CheckboxSelectMultiple,
         help_text=_("The director works in all branches automatically."),
     )
+    extra_permissions = forms.MultipleChoiceField(
+        label=_("Extra permissions"),
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+        help_text=_("On top of the role, only for this person. The Direktor has all of them."),
+    )
     password = forms.CharField(
         label=_("Temporary password"),
         strip=False,
@@ -77,7 +83,13 @@ class StaffUserForm(StyledForm):
         self.instance = instance
         super().__init__(*args, **kwargs)
         self.fields["branches"].queryset = Branch.objects.filter(is_active=True)
+        from apps.core.permissions import grantable_permissions
+
+        self.fields["extra_permissions"].choices = [
+            (p.code, p.label) for p in grantable_permissions()
+        ]
         if instance is not None:
+            self.initial["extra_permissions"] = sorted(instance.granted_permissions)
             del self.fields["password"]
             self.initial.update(
                 full_name=instance.full_name,

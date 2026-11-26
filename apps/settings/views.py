@@ -1,6 +1,7 @@
 """Sozlamalar panel: index + generic list/create/edit/toggle for registered sections."""
 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
@@ -8,7 +9,7 @@ from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from apps.core import listing
-from apps.core.permissions import has_perm, perm_required, require_perm
+from apps.core.permissions import has_perm, require_perm
 from apps.core.settings_panel import get_section, sections
 
 
@@ -20,11 +21,15 @@ def _section_or_404(request, slug):
     return section
 
 
-@perm_required("settings.manage")
+@login_required
 def index(request):
+    """The Direktor sees every page; someone given a single page's permission (e.g.
+    "products and prices") sees only that one."""
     visible = sorted(
         (s for s in sections() if has_perm(request.user, s.permission)), key=lambda s: s.order
     )
+    if not visible:
+        raise PermissionDenied
     groups: dict[str, list] = {}
     for section in visible:
         groups.setdefault(str(section.group), []).append(section)
@@ -32,7 +37,7 @@ def index(request):
     return render(request, "settings/index.html", {"groups": grouped})
 
 
-@perm_required("settings.manage")
+@login_required
 def section_list(request, slug):
     section = _section_or_404(request, slug)
     if section.custom_view is not None:
@@ -95,7 +100,7 @@ def _form_view(request, section, obj=None):
     )
 
 
-@perm_required("settings.manage")
+@login_required
 def section_create(request, slug):
     section = _section_or_404(request, slug)
     if not section.can_create(request):
@@ -103,7 +108,7 @@ def section_create(request, slug):
     return _form_view(request, section)
 
 
-@perm_required("settings.manage")
+@login_required
 def section_edit(request, slug, pk):
     section = _section_or_404(request, slug)
     if not section.allow_edit:
@@ -114,7 +119,7 @@ def section_edit(request, slug, pk):
     return _form_view(request, section, obj)
 
 
-@perm_required("settings.manage")
+@login_required
 @require_POST
 def section_toggle(request, slug, pk):
     section = _section_or_404(request, slug)
@@ -130,7 +135,7 @@ def section_toggle(request, slug, pk):
     return redirect("settings:section_list", slug=section.slug)
 
 
-@perm_required("settings.manage")
+@login_required
 def section_action(request, slug, pk, action):
     section = _section_or_404(request, slug)
     if action not in section.actions:

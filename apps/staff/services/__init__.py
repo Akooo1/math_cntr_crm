@@ -20,10 +20,11 @@ from ..models import BranchLocation, CheckIn, Schedule
 
 
 def _expected(user, day: dt.date) -> dt.time | None:
-    schedule = Schedule.objects.filter(user=user).first()
-    if schedule and rules.works_on(schedule.workdays, day):
-        return schedule.start_time
-    return None
+    """Teachers: the start of their first lesson that day (no lessons = day off). Others:
+    their working-time schedule."""
+    from .. import selectors
+
+    return selectors.expected_start(user, day)
 
 
 def _create(*, user, branch_id: int, at: dt.datetime, actor, **fields) -> CheckIn:
@@ -158,6 +159,8 @@ def save_location(*, actor, branch, latitude: float, longitude: float, radius_m:
 
 
 def save_schedule(*, actor, user, start_time: dt.time | None, workdays: list[int]):
+    if user.role == Role.TEACHER:
+        raise ValidationError(_("A teacher's arrival time comes from their lesson schedule."))
     """Start time and workdays; no start time removes the schedule (no lateness)."""
     require_perm(actor, "settings.manage")
     if user.role == Role.DIRECTOR:
