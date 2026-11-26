@@ -27,7 +27,7 @@
 <aside class="rail hidden md:flex" x-data>
   <a href="{% url 'core:home' %}" class="rail-brand" title="{{ center_name }}">
     <span class="rail-mark"><img src="{% static 'brand/mark.svg' %}" alt="" class="h-8 w-8"></span>
-    <span class="rail-label min-w-0">{% include "components/brand_name.html" with on_dark=True %}</span>
+    <span class="rail-label min-w-0">{% include "components/brand_name.html" %}</span>
   </a>
   <nav class="rail-nav space-y-1" aria-label="{% translate 'Main menu' %}">
     {% for n in nav %}

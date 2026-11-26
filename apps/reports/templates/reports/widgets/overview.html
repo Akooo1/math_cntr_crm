@@ -6,7 +6,7 @@
     <div class="stat">
       <span class="stat-icon">{% icon "wallet" "w-5 h-5" %}</span>
       <div class="min-w-0">
-        <p class="flex flex-wrap items-center gap-2"><span class="stat-num">{{ ctx.collected_now|som }}</span>{% with d=ctx.collected_now|change_pct:ctx.collected_prev_same %}{% if d %}<span class="chip-yellow" title="{% blocktranslate %}{{ d }} vs the same days of last month{% endblocktranslate %}">{{ d }}</span>{% endif %}{% endwith %}</p>
+        <p class="flex flex-wrap items-center gap-2"><span class="stat-num">{{ ctx.collected_now|som }}</span>{% with d=ctx.collected_now|change_pct:ctx.collected_prev_same %}{% if d %}<span class="delta {% if d|slice:':1' == '-' %}delta-down{% else %}delta-up{% endif %}" title="{% blocktranslate %}{{ d }} vs the same days of last month{% endblocktranslate %}">{% if d|slice:':1' == '-' %}↓{% else %}↑{% endif %} {{ d }}</span>{% endif %}{% endwith %}</p>
         <p class="stat-label">{% translate "Collected this month" %}</p>
       </div>
     </div>
@@ -27,7 +27,7 @@
     <div class="stat">
       <span class="stat-icon">{% icon "user-plus" "w-5 h-5" %}</span>
       <div class="min-w-0">
-        <p class="flex flex-wrap items-center gap-2"><span class="stat-num">{{ ctx.new_leads }}</span>{% if ctx.converted %}<span class="badge bg-sky-100 text-sky-800">+{{ ctx.converted }}</span>{% endif %}</p>
+        <p class="flex flex-wrap items-center gap-2"><span class="stat-num">{{ ctx.new_leads }}</span>{% if ctx.converted %}<span class="delta delta-up">↑ {{ ctx.converted }}</span>{% endif %}</p>
         <p class="stat-label">{% translate "New leads this month" %} · {% blocktranslate with c=ctx.converted %}{{ c }} became students{% endblocktranslate %}</p>
       </div>
     </div>

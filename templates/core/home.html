@@ -13,9 +13,12 @@
   <h2 class="mb-3 mt-8 text-lg font-semibold">{% translate "Sections" %}</h2>
   <div class="grid grid-cols-2 gap-3 md:grid-cols-4">
     {% for n in nav %}{% if n.item.key != "home" %}
-      <a href="{{ n.url }}" class="card flex flex-col gap-4 p-4 md:p-5">
-        <span class="flex items-center justify-between gap-2"><span class="stat-icon">{% icon n.item.icon "w-5 h-5" %}</span><span class="arrow-dot hidden sm:grid">{% icon "arrow-up-right" "w-4 h-4" %}</span></span>
-        <span class="text-sm font-semibold">{{ n.item.label }}</span>
+      <a href="{{ n.url }}" class="notch-wrap">
+        <span class="card notch flex h-full flex-col gap-4 p-4 md:p-5">
+          <span class="stat-icon">{% icon n.item.icon "w-5 h-5" %}</span>
+          <span class="text-base font-semibold">{{ n.item.label }}</span>
+        </span>
+        <span class="arrow-dot notch-btn">{% icon "arrow-up-right" "w-4 h-4" %}</span>
       </a>
     {% endif %}{% endfor %}
   </div>

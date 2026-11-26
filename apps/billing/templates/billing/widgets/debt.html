@@ -1,6 +1,9 @@
-<a href="{% url 'billing:debtors' %}" class="tile tile-yellow">
-  <div class="card-head"><p class="tile-sub font-medium">{% translate "Overdue debt" %}</p><span class="arrow-dot">{% icon "arrow-up-right" "w-5 h-5" %}</span></div>
-  <p class="tile-num mt-3">{{ ctx.total|som }}</p>
-  <p class="tile-sub">{% blocktranslate count n=ctx.count %}{{ n }} debtor{% plural %}{{ n }} debtors{% endblocktranslate %}</p>
-  <ul class="mt-2 space-y-1 text-sm">{% for r in ctx.top %}<li class="flex justify-between gap-2"><span class="truncate">{{ r.student.full_name }}</span><span class="shrink-0 font-semibold tabular-nums">{{ r.overdue|som }}</span></li>{% endfor %}</ul>
+<a href="{% url 'billing:debtors' %}" class="notch-wrap">
+  <div class="tile tile-white notch h-full">
+    <p class="tile-sub pr-12 font-medium">{% translate "Overdue debt" %}</p>
+    <p class="tile-num mt-3 {% if ctx.total %}text-rose-700{% endif %}">{{ ctx.total|som }}</p>
+    <p class="tile-sub">{% blocktranslate count n=ctx.count %}{{ n }} debtor{% plural %}{{ n }} debtors{% endblocktranslate %}</p>
+    <ul class="mt-2 space-y-1 text-sm">{% for r in ctx.top %}<li class="flex justify-between gap-2"><span class="truncate">{{ r.student.full_name }}</span><span class="shrink-0 font-semibold tabular-nums">{{ r.overdue|som }}</span></li>{% endfor %}</ul>
+  </div>
+  <span class="arrow-dot notch-btn">{% icon "arrow-up-right" "w-5 h-5" %}</span>
 </a>

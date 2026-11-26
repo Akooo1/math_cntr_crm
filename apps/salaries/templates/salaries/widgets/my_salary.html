@@ -1,6 +1,9 @@
-<a href="{% url 'salaries:mine' %}?oy={{ ctx.month|date:'m.Y' }}" class="tile tile-teal">
-  <div class="card-head"><p class="tile-sub font-medium">{% blocktranslate with m=ctx.month|date:"F Y" %}My salary, {{ m }}{% endblocktranslate %}</p><span class="arrow-dot">{% icon "arrow-up-right" "w-5 h-5" %}</span></div>
-  <p class="tile-num mt-3">{{ ctx.totals.total|som }}</p>
-  {% if ctx.totals.paid or not ctx.totals.fixed %}<p class="tile-sub">{% blocktranslate with p=ctx.totals.paid|som %}Students paid {{ p }} so far{% endblocktranslate %}</p>{% endif %}
-  {% if ctx.totals.fixed %}<p class="tile-sub">{% blocktranslate with f=ctx.totals.fixed|som %}Fixed salary: {{ f }}{% endblocktranslate %}</p>{% endif %}
+<a href="{% url 'salaries:mine' %}?oy={{ ctx.month|date:'m.Y' }}" class="notch-wrap">
+  <div class="tile tile-cyan notch h-full">
+    <p class="tile-sub pr-12 font-medium">{% blocktranslate with m=ctx.month|date:"F Y" %}My salary, {{ m }}{% endblocktranslate %}</p>
+    <p class="tile-num mt-3">{{ ctx.totals.total|som }}</p>
+    {% if ctx.totals.paid or not ctx.totals.fixed %}<p class="tile-sub">{% blocktranslate with p=ctx.totals.paid|som %}Students paid {{ p }} so far{% endblocktranslate %}</p>{% endif %}
+    {% if ctx.totals.fixed %}<p class="tile-sub">{% blocktranslate with f=ctx.totals.fixed|som %}Fixed salary: {{ f }}{% endblocktranslate %}</p>{% endif %}
+  </div>
+  <span class="arrow-dot notch-btn">{% icon "arrow-up-right" "w-5 h-5" %}</span>
 </a>

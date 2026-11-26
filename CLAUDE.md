@@ -243,17 +243,20 @@ Add new terms here before using them in the UI.
   reads the phone's GPS; `window.mmToast({text, kind, undo})` shows a toast from JS (with an
   optional "Ortga qaytarish" button); `[data-mark-all]` marks unmarked attendance rows. Never put translated text inside inline JavaScript: Uzbek
   apostrophes break the quotes. Pass it in a `data-` attribute instead.
-- **Look and brand**: soft gradient canvas, light "glass" cards with large radii, pill
-  buttons, round icon buttons, a dark floating sidebar (collapsible to icons) and a floating
-  dark tab bar on phones. Accents: ink `#121721` (primary buttons in light theme; yellow in
-  dark), blue `#3462ee` (= `sky-500`; `assets/app.css` redefines the whole `sky` scale, so use
-  `sky-*` for blue and never hard-code other blues), yellow `#efe347`, teal `#357a90`. Use
-  the accents only through classes (`.btn-primary`, `.tile-*`, `.chip-yellow`,
-  `.count-pill`). Font: Plus Jakarta Sans (self-hosted, `static/vendor/fonts`; its U+202F is
-  patched to the space width so money stays readable). The center's name keeps the logo's
-  own colours and Montserrat (`templates/components/brand_name.html`, `.brand-name`). Logo
-  files: `static/brand/mark.svg` (the symbol), `logo.png` (symbol + name),
-  `favicon-32.png`, `apple-touch-icon.png`, `icon-512.png` (e.g. the Telegram bot photo).
+- **Look and brand** (the owner's lime/black reference): light grey canvas, light cards with
+  large radii and a cut-out top-right corner holding a round "open" button, pill buttons
+  (primary = black, its leading icon in a soft circle), round icon buttons, a column of round
+  icons as the sidebar (labels beside them; collapsible), a black schedule bar and black phone
+  tab bar, lime highlight tiles. Accents: black `#000` (primary; lime in the dark theme), lime
+  `#b9ff66` (= `sky-400`; `assets/app.css` redefines the whole `sky` scale as a lime scale, so
+  `sky-*` means brand and its darker steps are readable text), cyan `#66ffed`, red `#f04949`.
+  Use accents only through classes (`.btn-primary`, `.tile-*`, `.delta-*`, `.sched`). Charts:
+  violet (charged) and green (collected), validated for colour-blind readers. Font: Urbanist
+  (self-hosted, `static/vendor/fonts/urbanist`; U+202F patched to the space width so money
+  stays readable). The center's name keeps the logo's own colours and Montserrat
+  (`templates/components/brand_name.html`, `.brand-name`). Logo files: `static/brand/mark.svg`
+  (the symbol), `logo.png` (symbol + name), `favicon-32.png`, `apple-touch-icon.png`,
+  `icon-512.png` (e.g. the Telegram bot photo).
 - URLs and slugs are Uzbek (`/sozlamalar/`, `/kirish/`); code identifiers stay English.
 
 ### UI kit (every screen uses these; see `assets/app.css` and `templates/base.html`)
@@ -274,8 +277,8 @@ Add new terms here before using them in the UI.
 - **Themes**: never write `dark:` classes, `bg-white` or `text-white`. Use `bg-canvas` (page),
   `bg-surface` (cards), `bg-surface-2` (table heads, hover), `border-line`, `text-fg`,
   `text-muted`, and the slate/sky/rose/emerald/amber/violet scales, which are mirrored for dark
-  mode. Solid fills with white text only through `.btn-primary`, `.btn-danger`, `.btn-success`,
-  `.chip[aria-current]`. Charts use `var(--color-chart-1/2)`. `tests/test_ui_tokens.py` fails
+  mode. Solid fills only through `.btn-primary`, `.btn-danger`, `.btn-success`, `.tile-*`,
+  `.sched`. Charts use `var(--color-chart-1/2)`. `tests/test_ui_tokens.py` fails
   on other hues and on any text colour below WCAG AA in either theme.
 - **Components** (CSS classes): `btn-primary | btn-secondary | btn-ghost | btn-danger |
   btn-danger-soft | btn-success` (+ `btn-icon` for square icon buttons; all ≥ 44 px), `input`,
@@ -284,10 +287,12 @@ Add new terms here before using them in the UI.
   + `table-head` / `table-cell` / `table-foot` (sticky header), `form-actions` (form buttons;
   sticky above the bottom bar on phones), `count-pill`, `link`, `kbd`, `menu` / `menu-item`,
   `card-head` + `card-title` + `arrow-dot` (card title with a round "open" arrow),
-  `tile tile-blue|tile-yellow|tile-teal|tile-ink` + `tile-num` / `tile-sub` / `tile-note`
-  (solid headline tiles; inside them never use slate/rose text classes), `stat` +
-  `stat-icon` / `stat-num` / `stat-label` (headline number with a round icon),
-  `chip-yellow` (change badge), `icon-dot` (round icon button).
+  `tile tile-lime|tile-cyan|tile-ink|tile-white` + `tile-num` / `tile-sub` / `tile-note`
+  (headline tiles; inside lime/cyan/ink never use slate/rose text classes), `notch-wrap` +
+  `notch` + `notch-btn` (the cut-out corner: `<a class="notch-wrap"><div class="card notch">…
+  </div><span class="arrow-dot notch-btn">…</span></a>`), `stat` + `stat-icon` / `stat-num` /
+  `stat-label`, `big-num`, `delta delta-up|delta-down` (change badges), `sched` (today's
+  schedule bar), `icon-dot` (round icon button). Active chips are white pills.
 - **Empty states**: `{% include "components/empty.html" with icon=".." title=_("..") text=_("..")
   url=.. label=_("..") reset=.. %}` — always offer the next action (or "clear filters").
 - **Messages** are toasts automatically (`components/messages.html`); just use

@@ -114,14 +114,15 @@ def test_buttons_and_charts(theme):
 
 @pytest.mark.parametrize("theme", ["light", "dark"])
 def test_accent_tiles_and_sidebar(theme):
-    """Solid accent tiles (.tile-*) and the dark sidebar carry their own text colours."""
+    """Solid accent tiles (.tile-*), the sidebar and the tab bar carry their own colours."""
     t = THEMES[theme]
     pairs = [
-        ("on-accent-blue", "accent-blue"),
-        ("on-accent-yellow", "accent-yellow"),
-        ("on-accent-teal", "accent-teal"),
+        ("on-accent-lime", "accent-lime"),
+        ("on-accent-cyan", "accent-cyan"),
+        ("on-accent-red", "accent-red"),
         ("on-ink", "ink"),
-        ("rail-fg", "rail"),
+        ("tabbar-fg", "rail"),  # the black phone tab bar
+        ("rail-fg", "canvas"),  # sidebar labels sit on the page
         ("on-rail-active", "rail-active"),
     ]
     for fg, bg in pairs:

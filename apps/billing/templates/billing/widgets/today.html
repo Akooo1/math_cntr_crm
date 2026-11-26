@@ -1,6 +1,9 @@
-<a href="{% url 'billing:cash' %}" class="tile tile-blue">
-  <div class="card-head"><p class="tile-sub font-medium">{% translate "Collected today" %}</p><span class="arrow-dot">{% icon "arrow-up-right" "w-5 h-5" %}</span></div>
-  <p class="tile-num mt-3">{{ ctx.total|som }}</p>
-  <ul class="tile-sub mt-2 space-y-1">{% for r in ctx.rows %}<li class="flex justify-between gap-2"><span>{{ r.method }}</span><span class="tabular-nums">{{ r.net|som }}</span></li>{% endfor %}</ul>
-  {% if ctx.unclosed %}<p class="tile-note">{% blocktranslate count n=ctx.unclosed|length %}{{ n }} day not closed{% plural %}{{ n }} days not closed{% endblocktranslate %}</p>{% endif %}
+<a href="{% url 'billing:cash' %}" class="notch-wrap">
+  <div class="tile tile-lime notch h-full">
+    <p class="tile-sub pr-12 font-medium">{% translate "Collected today" %}</p>
+    <p class="tile-num mt-3">{{ ctx.total|som }}</p>
+    <ul class="tile-sub mt-2 space-y-1">{% for r in ctx.rows %}<li class="flex justify-between gap-2"><span>{{ r.method }}</span><span class="tabular-nums">{{ r.net|som }}</span></li>{% endfor %}</ul>
+    {% if ctx.unclosed %}<p class="tile-note">{% blocktranslate count n=ctx.unclosed|length %}{{ n }} day not closed{% plural %}{{ n }} days not closed{% endblocktranslate %}</p>{% endif %}
+  </div>
+  <span class="arrow-dot notch-btn">{% icon "arrow-up-right" "w-5 h-5" %}</span>
 </a>

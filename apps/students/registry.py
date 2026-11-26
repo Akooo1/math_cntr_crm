@@ -86,15 +86,27 @@ for item in NAV:
 
 
 def _today_lessons(request):
+    """The black "today's schedule" bar: lessons in time order, each marked as done,
+    now or later (cancelled ones stay, struck through)."""
     from apps.core import dates
 
     from . import selectors
 
-    return {
-        "lessons": list(
-            selectors.lessons_on(request.user, dates.today(), request.branch_filter)[:8]
-        )
-    }
+    now = dates.now()
+    t = now.time().replace(second=0, microsecond=0)
+    lessons = list(
+        selectors.lessons_on(request.user, now.date(), request.branch_filter).select_related(
+            "group", "room"
+        )[:40]
+    )
+    for lesson in lessons:
+        if lesson.start_time <= t < lesson.end_time:
+            lesson.when = "now"
+        elif lesson.end_time <= t:
+            lesson.when = "past"
+        else:
+            lesson.when = "later"
+    return {"lessons": lessons, "today": now.date()}
 
 
 def _awaiting(request):
@@ -106,7 +118,11 @@ def _awaiting(request):
 
 registry.add_widget(
     DashboardWidget(
-        "today_lessons", "students/widgets/today_lessons.html", "attendance.mark", 5, _today_lessons
+        "today_lessons",
+        "students/widgets/today_lessons.html",
+        "attendance.mark",
+        -10,
+        _today_lessons,
     )
 )
 registry.add_widget(

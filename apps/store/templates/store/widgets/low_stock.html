@@ -1,6 +1,6 @@
 {% if ctx.rows %}
-<a href="{% url 'store:stock' %}" class="card block p-5">
-  <div class="card-head"><p class="card-title">{% translate "Low stock" %}</p><span class="arrow-dot">{% icon "arrow-up-right" "w-4 h-4" %}</span></div>
+<a href="{% url 'store:stock' %}" class="notch-wrap"><div class="card notch h-full p-5">
+  <p class="card-title pr-12">{% translate "Low stock" %}</p>
   <ul class="mt-2 space-y-1 text-sm">{% for r in ctx.rows %}<li class="flex justify-between gap-2"><span class="truncate">{{ r.product.name }} <span class="text-slate-500">· {{ r.branch.name }}</span></span><span class="shrink-0 font-semibold {% if r.on_hand <= 0 %}text-rose-700{% else %}text-amber-700{% endif %}">{{ r.on_hand }}</span></li>{% endfor %}</ul>
-</a>
+</div><span class="arrow-dot notch-btn">{% icon "arrow-up-right" "w-5 h-5" %}</span></a>
 {% endif %}
