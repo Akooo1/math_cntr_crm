@@ -244,6 +244,23 @@ def debtors(user, branch_filter=None, *, group=None, course=None, teacher=None, 
 # --- Payments journal and cash days ------------------------------------------------------
 
 
+def overdue_summary() -> dict[int, dict]:
+    """System-wide (no user scope; for scheduled jobs): {student_id: {"overdue", "oldest",
+    "branch_id"}} for every student with an overdue unpaid charge right now."""
+    rows = ChargeNet.objects.filter(net__gt=F("paid"), due_date__lt=overdue_cutoff())
+    out: dict[int, dict] = {}
+    for r in rows.values("student_id").annotate(
+        overdue=Sum(F("net") - F("paid")), oldest=Min("due_date")
+    ):
+        out[r["student_id"]] = {"overdue": int(r["overdue"]), "oldest": r["oldest"]}
+    branches = dict(
+        rows.filter(student_id__in=out).order_by("-due_date").values_list("student_id", "branch_id")
+    )
+    for sid, d in out.items():
+        d["branch_id"] = branches.get(sid)
+    return out
+
+
 def payments_for(user, branch_filter=None):
     require_perm(user, "billing.view")
     qs = Payment.objects.select_related("student", "method", "received_by", "branch", "reverses")

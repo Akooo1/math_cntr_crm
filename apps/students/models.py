@@ -301,6 +301,23 @@ class Enrollment(models.Model):
         return self.status in self.OPEN
 
 
+class LeaveReason(models.Model):
+    """Why a student left a group (editable list in Sozlamalar, like lead refusal reasons)."""
+
+    name = models.CharField(_("Name"), max_length=150, unique=True)
+    sort_order = models.PositiveIntegerField(_("Order"), default=100)
+    is_active = models.BooleanField(_("Active"), default=True)
+
+    class Meta:
+        db_table = "students_leave_reason"
+        ordering = ["sort_order", "name"]
+        verbose_name = _("Leave reason")
+        verbose_name_plural = _("Leave reasons")
+
+    def __str__(self):
+        return self.name
+
+
 class EnrollmentEvent(models.Model):
     class Kind(models.TextChoices):
         ENROLLED = "enrolled", _("Enrolled into the group")
@@ -315,6 +332,14 @@ class EnrollmentEvent(models.Model):
     kind = models.CharField(_("Action"), max_length=12, choices=Kind.choices)
     effective_date = models.DateField(_("Date"))
     reason = models.TextField(_("Reason"), blank=True)
+    leave_reason = models.ForeignKey(
+        LeaveReason,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Leave reason"),
+    )
     related_enrollment = models.ForeignKey(
         Enrollment, on_delete=models.PROTECT, null=True, blank=True, related_name="+"
     )

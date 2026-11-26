@@ -155,6 +155,11 @@ class Command(BaseCommand):
             with transaction.atomic():
                 self._seed_store(User)
             created = True
+        # Early warnings from the demo attendance, debts and leads (the cron job does this
+        # every 15 minutes in production). Idempotent.
+        from apps.alerts.services import run_checks
+
+        run_checks()
         if not created:
             self.stdout.write("Demo data already present.")
             return

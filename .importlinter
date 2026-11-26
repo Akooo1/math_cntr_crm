@@ -12,6 +12,7 @@ type = layers
 layers =
     apps.demo
     apps.reports | apps.salaries | apps.telegram | apps.store
+    apps.alerts
     apps.billing | apps.crm
     apps.students | apps.staff
     apps.settings
@@ -26,6 +27,7 @@ ignore_imports =
 name = Domain packages are pure Python
 type = forbidden
 source_modules =
+    apps.alerts.domain
     apps.billing.domain
     apps.salaries.domain
     apps.staff.domain

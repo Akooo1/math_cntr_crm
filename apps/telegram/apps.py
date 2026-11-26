@@ -8,4 +8,4 @@ class TelegramConfig(AppConfig):
     verbose_name = _("Telegram bot")
 
     def ready(self):
-        from . import registry  # noqa: F401
+        from . import handlers, registry  # noqa: F401

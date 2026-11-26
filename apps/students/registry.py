@@ -8,7 +8,10 @@ from apps.core.registry import DashboardWidget, NavItem, registry
 from apps.core.roles import Role
 from apps.core.system_settings import SettingDef, register_setting
 
-from . import import_kinds
+from . import (
+    import_kinds,
+    sections,  # noqa: F401 - registers Sozlamalar sections
+)
 from .extensions import register_list_action
 
 D, A, M, T = Role.DIRECTOR, Role.BRANCH_ADMIN, Role.SALES_MANAGER, Role.TEACHER
@@ -125,6 +128,27 @@ def _call_action(user, students):
 
 
 register_list_action(_call_action)
+
+
+def _register_reports():
+    from apps.core.reports import ReportDef, register_report
+
+    from . import selectors
+
+    register_report(
+        ReportDef(
+            "ketish-sabablari",
+            _("Why students leave"),
+            _("Students who left a group, by reason."),
+            "reports.view",
+            selectors.leave_reasons_report,
+            order=55,
+            group=_("Students"),
+        )
+    )
+
+
+_register_reports()
 
 register_audit_labels(
     {

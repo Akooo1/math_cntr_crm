@@ -12,6 +12,7 @@ urlpatterns = [
     path("", include("apps.staff.urls")),
     path("", include("apps.telegram.urls")),
     path("", include("apps.store.urls")),
+    path("", include("apps.alerts.urls")),
 ]
 
 handler400 = "apps.core.views.bad_request"

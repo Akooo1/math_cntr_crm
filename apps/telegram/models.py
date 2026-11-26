@@ -51,6 +51,7 @@ class Message(models.Model):
         CUSTOM = "custom", _("Message to parents")
         REPLY = "reply", _("Bot reply")
         BACKUP = "backup", _("Database backup")
+        ALERT = "alert", _("Warning")
 
     class Status(models.TextChoices):
         SENT = "sent", _("Sent")

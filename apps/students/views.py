@@ -24,6 +24,7 @@ from .forms import (
     EnrollForm,
     GroupForm,
     ImportForm,
+    LeaveForm,
     LessonCancelForm,
     MoveForm,
     ScheduleForm,
@@ -333,14 +334,30 @@ def unfreeze(request, pk):
 
 @perm_required("students.manage")
 def leave(request, pk):
-    return _simple_action(
+    e = _enrollment_for(request, pk)
+    form = LeaveForm(request.POST or None)
+    form.fields["date"].label = _("First day not attending")
+
+    def execute(d, ext):
+        services.leave(
+            actor=request.user,
+            enrollment=e,
+            end_date=d["date"],
+            reason=d["reason"],
+            leave_reason=d["leave_reason"],
+            extension_data=ext,
+        )
+
+    return _action_view(
         request,
-        pk,
-        "leave",
-        _("Leave the group"),
-        services.leave,
-        "end_date",
-        _("First day not attending"),
+        student=e.student,
+        form=form,
+        title=f"{_('Leave the group')}: {e.group.name}",
+        build_action=lambda d: services.EnrollmentAction(
+            "leave", e.student, d["date"], group=e.group, enrollment=e
+        ),
+        execute=execute,
+        back=reverse("students:detail", args=[e.student_id]),
     )
 
 

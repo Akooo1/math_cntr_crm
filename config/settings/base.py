@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "apps.crm",
     "apps.billing",
     "apps.staff",
+    "apps.alerts",
     "apps.reports",
     "apps.salaries",
     "apps.telegram",

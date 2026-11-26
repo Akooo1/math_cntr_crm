@@ -1,0 +1,12 @@
+{# Open warnings for this person, by type. #}
+{% if ctx.counts.total %}
+<a href="{% url 'alerts:list' %}" class="tile tile-ink">
+  <div class="card-head"><p class="tile-sub font-medium">{% translate "Warnings" %}</p><span class="arrow-dot">{% icon "arrow-up-right" "w-5 h-5" %}</span></div>
+  <p class="tile-num mt-3">{{ ctx.counts.total }}</p>
+  <ul class="tile-sub mt-1 space-y-0.5">
+    {% if ctx.counts.absence %}<li class="flex justify-between gap-2"><span>{% translate "Missed lessons" %}</span><span class="tabular-nums">{{ ctx.counts.absence }}</span></li>{% endif %}
+    {% if ctx.counts.debt %}<li class="flex justify-between gap-2"><span>{% translate "Overdue debt" %}</span><span class="tabular-nums">{{ ctx.counts.debt }}</span></li>{% endif %}
+    {% if ctx.counts.lead %}<li class="flex justify-between gap-2"><span>{% translate "Leads not contacted" %}</span><span class="tabular-nums">{{ ctx.counts.lead }}</span></li>{% endif %}
+  </ul>
+</a>
+{% endif %}

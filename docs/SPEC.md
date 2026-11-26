@@ -1351,3 +1351,42 @@ the database is well under 1 MB today). Each send is logged in `telegram_message
   `pg_dump` must be at least as new as the server.
 - Restore: docs/deploy-railway.md, section 6.
 
+
+---
+
+## 19. Leave reasons and early warnings (owner's request, after the redesign)
+
+Owner's decisions: the warning rules are settings the Direktor edits (Sozlamalar → Umumiy
+sozlamalar); the starting values are the ones proposed (below). Details:
+`docs/modules/alerts.md`.
+
+### 19.1 Leave reasons (students module)
+
+- `students_leave_reason` (name, order, active): an editable list in Sozlamalar → Ketish
+  sabablari, like lead refusal reasons. Starting list: Narxi qimmat, Dars vaqti to'g'ri
+  kelmadi, O'qituvchi yoqmadi, Natija bo'lmadi, Boshqa joyga ko'chib ketdi, Boshqa markazga
+  o'tdi, Kursni tugatdi, Boshqa sabab.
+- `students_enrollment_event.leave_reason` (nullable FK): "Guruhdan chiqish" now asks for a
+  reason from the list (required in the form); the free text becomes an optional note (the
+  reason's name when empty). Old leave events keep their text and have no reason.
+- Report "O'quvchilar nega ketadi": students who left a group in the period, by reason.
+
+### 19.2 Early warnings (`apps/alerts`)
+
+`manage.py run_alerts` runs every 15 minutes and makes one task per cause:
+
+| Warning | Rule (setting, default) | Goes to |
+|---|---|---|
+| Missed lessons | `alerts.absence_streak` (2) lessons in a row marked Kelmadi, the last within 14 days | branch administrators, or the group's teacher (`alerts.absence_assignee`) |
+| Overdue debt | oldest unpaid charge `alerts.debt_days` (7) days past its due date; again every `alerts.debt_repeat_days` (7; 0 = once) while unpaid and the earlier task was closed | branch administrators |
+| Lead not contacted | a lead still in "Yangi" with no call, note, stage change or trial `alerts.lead_hours` (2) working hours after it came in (`alerts.work_start` 9 – `alerts.work_end` 19); leads of the last 3 days only | the lead's manager, also in Telegram (`alerts.lead_telegram`) |
+
+0 switches a rule off. A task closes by itself when its cause goes away (the student came,
+the debt is paid, the lead was contacted); people close it with "Bajarildi" and can undo.
+
+### 19.3 Who sees what
+
+Missed lessons: whoever manages students, and the teacher a task was given to. Overdue
+debt: only people who see debts (never sales managers or teachers). Leads: lead staff; a
+sales manager sees their own leads' warnings and unassigned ones. Branch scope applies;
+another branch's warning is 404.

@@ -17,6 +17,7 @@ from apps.core.reports import reports
 from apps.core.roles import Role
 from apps.core.settings_panel import sections
 from apps.crm.models import LeadSource, LeadStage, RefusalReason
+from apps.students.models import LeaveReason
 from tests.factories import (
     BranchFactory,
     CourseFactory,
@@ -369,6 +370,7 @@ def objects(director, branch_a, branch_b, admin_a, teacher_a):
         "lid-bosqichlari": LeadStage.objects.filter(kind="custom").first()
         or LeadStage.objects.create(name="Qo'shimcha", kind="custom"),
         "rad-sabablari": RefusalReason.objects.first(),
+        "ketish-sabablari": LeaveReason.objects.first(),
         "chek": branch_a,
         "umumiy": branch_a,
         "stavkalar": leads["rate"],
@@ -600,6 +602,38 @@ def salaries_cases(o) -> dict[str, list[Case]]:
     }
 
 
+def alerts_cases(o) -> dict[str, list[Case]]:
+    """Warnings: everyone signed in has the list (each sees only their kinds); a warning
+    in another branch is 404 for branch staff. A teacher closes only warnings given to them."""
+    from apps.alerts.models import Task
+
+    def task(branch_key):
+        return Task.objects.create(
+            kind=Task.Kind.LEAD,
+            key=f"lead:test:{branch_key}",
+            branch=o[f"lead_{branch_key}"].branch,
+            lead=o[f"lead_{branch_key}"],
+        )
+
+    ta, tb = task("a"), task("b")
+    same = expect({D: 302, A: 302, M: 302}, default=404)
+    other = expect({D: 302}, default=404)
+    return {
+        "alerts:list": [
+            Case("/ogohlantirishlar/", expect=expect({D: 200, A: 200, M: 200, T: 200})),
+            Case("/ogohlantirishlar/?tur=qarz", expect=expect({D: 200, A: 200, M: 200, T: 200})),
+        ],
+        "alerts:done": [
+            Case(f"/ogohlantirishlar/{ta.pk}/bajarildi/", "post", same),
+            Case(f"/ogohlantirishlar/{tb.pk}/bajarildi/", "post", other),
+        ],
+        "alerts:reopen": [
+            Case(f"/ogohlantirishlar/{ta.pk}/qayta-ochish/", "post", same),
+            Case(f"/ogohlantirishlar/{tb.pk}/qayta-ochish/", "post", other),
+        ],
+    }
+
+
 def cases(objects) -> dict[str, list[Case]]:
     c: dict[str, list[Case]] = {
         "core:home": [Case("/", expect={**EVERYONE, "anon": 302})],
@@ -630,6 +664,7 @@ def cases(objects) -> dict[str, list[Case]]:
     c.update(staff_cases(objects))
     c.update(telegram_cases(objects))
     c.update(store_cases(objects))
+    c.update(alerts_cases(objects))
     for s in sections():
         base = f"/sozlamalar/{s.slug}/"
         obj = objects[s.slug]

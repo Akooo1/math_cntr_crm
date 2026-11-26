@@ -238,9 +238,22 @@ def unfreeze(*, actor, enrollment: Enrollment, effective_date, reason: str, exte
     return e
 
 
-def leave(*, actor, enrollment: Enrollment, end_date, reason: str, extension_data=None):
-    """`end_date` is the first day the student no longer attends."""
+def leave(
+    *,
+    actor,
+    enrollment: Enrollment,
+    end_date,
+    reason: str = "",
+    leave_reason=None,
+    extension_data=None,
+):
+    """`end_date` is the first day the student no longer attends. `leave_reason` (from the
+    Sozlamalar list) says why; the free-text `reason` is then an optional note."""
     _check(actor, enrollment.group.branch_id)
+    if leave_reason is not None:
+        if not leave_reason.is_active:
+            raise ValidationError(_("Choose a reason from the list."))
+        reason = (reason or "").strip() or leave_reason.name
     reason = _need_reason(reason)
     with transaction.atomic():
         e = _lock_enrollment(enrollment)
@@ -253,7 +266,10 @@ def leave(*, actor, enrollment: Enrollment, end_date, reason: str, extension_dat
         e.end_date = end_date
         e.save(update_fields=["status", "end_date"])
         e.freezes.filter(to_date__isnull=True).update(to_date=max(end_date, e.start_date))
-        _event(e, Kind.LEFT, end_date, reason, actor)
+        event = _event(e, Kind.LEFT, end_date, reason, actor)
+        if leave_reason is not None:
+            event.leave_reason = leave_reason
+            event.save(update_fields=["leave_reason"])
         _audit(actor, "leave", e, before, reason)
         action = EnrollmentAction("leave", e.student, end_date, group=e.group, enrollment=e)
         _run_extensions(action, extension_data, actor, ActionResult(enrollment=e), False)

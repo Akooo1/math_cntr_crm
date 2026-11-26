@@ -10,7 +10,7 @@ from apps.core.forms import PhoneField, StyledForm, StyledModelForm, UzDateField
 from apps.core.roles import Role
 from apps.settings.models import Branch, Course, Room
 
-from .models import Group, ImportBatch, ScheduleSlot
+from .models import Group, ImportBatch, LeaveReason, ScheduleSlot
 
 
 def _branches(branch_ids):
@@ -145,6 +145,26 @@ class ActionForm(StyledForm):
         super().__init__(*args, **kwargs)
         self.fields["reason"].required = require_reason
         self.fields["date"].initial = dates.today()
+
+
+class LeaveForm(ActionForm):
+    leave_reason = forms.ModelChoiceField(
+        label=_("Why is the student leaving?"),
+        queryset=LeaveReason.objects.filter(is_active=True),
+        empty_label=None,
+        widget=forms.RadioSelect,
+    )
+    field_order = ["date", "leave_reason", "reason"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, require_reason=False, **kwargs)
+        self.fields["reason"].label = _("Note")
+
+
+class LeaveReasonForm(StyledModelForm):
+    class Meta:
+        model = LeaveReason
+        fields = ["name", "sort_order"]
 
 
 class EnrollForm(ActionForm):

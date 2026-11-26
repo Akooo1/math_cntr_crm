@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-26 13:08+0500\n"
+"POT-Creation-Date: 2026-11-26 13:54+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -78,6 +78,179 @@ msgstr "Telefon raqami yoki parol noto'g'ri."
 msgid "Password changed."
 msgstr "Parol o'zgartirildi."
 
+msgid "Warnings"
+msgstr "Ogohlantirishlar"
+
+msgid "Missed lessons"
+msgstr "Darsga kelmaganlar"
+
+msgid "Overdue debt"
+msgstr "Muddati o'tgan qarz"
+
+msgid "Lead not contacted"
+msgstr "Lid bilan bog'lanilmagan"
+
+msgid "Done"
+msgstr "Bajarildi"
+
+msgid "Resolved by itself"
+msgstr "O'z-o'zidan hal bo'ldi"
+
+msgid "Type"
+msgstr "Turi"
+
+msgid "Branch"
+msgstr "Filial"
+
+msgid "Student"
+msgstr "O'quvchi"
+
+msgid "Group"
+msgstr "Guruh"
+
+msgid "Lead"
+msgstr "Lid"
+
+msgid "Assignee"
+msgstr "Mas'ul"
+
+msgid "Details"
+msgstr "Batafsil"
+
+msgid "Due"
+msgstr "Muddat"
+
+msgid "Created at"
+msgstr "Kiritilgan vaqt"
+
+msgid "Closed at"
+msgstr "Yopilgan vaqt"
+
+msgid "Closed by"
+msgstr "Yopgan"
+
+msgid "How closed"
+msgstr "Qanday yopildi"
+
+msgid "Warning"
+msgstr "Ogohlantirish"
+
+msgid "See and close warnings"
+msgstr "Ogohlantirishlarni ko'rish va yopish"
+
+msgid "Warning: missed lessons in a row"
+msgstr "Ogohlantirish: ketma-ket qoldirilgan darslar"
+
+msgid ""
+"After this many missed lessons in a row a task 'call the parent' appears. 0 "
+"= off."
+msgstr ""
+"Shuncha dars ketma-ket qoldirilsa, \"ota-onaga qo'ng'iroq qilish\" vazifasi "
+"chiqadi. 0 = o'chiq."
+
+msgid "Warning about missed lessons goes to"
+msgstr "Qoldirilgan darslar haqidagi ogohlantirish kimga"
+
+msgid "Branch administrators"
+msgstr "Filial administratorlari"
+
+msgid "The group's teacher"
+msgstr "Guruh o'qituvchisi"
+
+msgid "Warning: debt overdue (days)"
+msgstr "Ogohlantirish: qarz muddati o'tgan (kun)"
+
+msgid ""
+"A task for the branch administrators when a debt is this many days overdue. "
+"0 = off."
+msgstr ""
+"Qarz muddati shuncha kun o'tganda filial administratorlariga vazifa chiqadi. "
+"0 = o'chiq."
+
+msgid "Repeat the debt warning every (days)"
+msgstr "Qarz haqidagi ogohlantirishni takrorlash (har necha kunda)"
+
+msgid ""
+"A new task if the debt is still unpaid after this many more days. 0 = only "
+"once."
+msgstr ""
+"Qarz shuncha kundan keyin ham to'lanmasa, yangi vazifa chiqadi. 0 = faqat "
+"bir marta."
+
+msgid "Warning: new lead not contacted within (working hours)"
+msgstr "Ogohlantirish: yangi lid bilan bog'lanish muddati (ish soati)"
+
+msgid "Counted only during working hours. 0 = off."
+msgstr "Faqat ish vaqtida hisoblanadi. 0 = o'chiq."
+
+msgid "Working hours start (hour)"
+msgstr "Ish vaqti boshlanishi (soat)"
+
+msgid "Working hours end (hour)"
+msgstr "Ish vaqti tugashi (soat)"
+
+msgid "Also send the lead warning to the manager's Telegram"
+msgstr "Lid haqidagi ogohlantirishni menejerning Telegramiga ham yuborish"
+
+msgid "Yes"
+msgstr "Ha"
+
+msgid "No"
+msgstr "Yo'q"
+
+msgid "Filter"
+msgstr "Saralash"
+
+#, python-format
+msgid "Missed %(n)s lesson in a row"
+msgid_plural "Missed %(n)s lessons in a row"
+msgstr[0] "Ketma-ket %(n)s ta dars qoldirdi"
+msgstr[1] "Ketma-ket %(n)s ta dars qoldirdi"
+
+msgid "Call the parent and find out why."
+msgstr "Ota-onaga qo'ng'iroq qilib, sababini bilib oling."
+
+#, python-format
+msgid "%(a)s overdue for %(d)s day"
+msgid_plural "%(a)s overdue for %(d)s days"
+msgstr[0] "%(a)s, muddati %(d)s kun o'tgan"
+msgstr[1] "%(a)s, muddati %(d)s kun o'tgan"
+
+msgid "Remind the parent about the payment."
+msgstr "Ota-onaga to'lovni eslatib qo'ying."
+
+msgid "New lead not contacted yet"
+msgstr "Yangi lid bilan hali bog'lanilmagan"
+
+#, python-format
+msgid "Should have been contacted by %(d)s"
+msgstr "%(d)s gacha bog'lanish kerak edi"
+
+msgid "Call"
+msgstr "Qo'ng'iroq"
+
+msgid "No warnings"
+msgstr "Ogohlantirishlar yo'q"
+
+msgid ""
+"Missed lessons, overdue debts and uncontacted leads appear here "
+"automatically."
+msgstr ""
+"Qoldirilgan darslar, muddati o'tgan qarzlar va bog'lanilmagan lidlar bu "
+"yerda avtomatik paydo bo'ladi."
+
+msgid "Leads not contacted"
+msgstr "Bog'lanilmagan lidlar"
+
+msgid "All"
+msgstr "Hammasi"
+
+msgid "Leads"
+msgstr "Lidlar"
+
+msgid "Marked as done."
+msgstr "Bajarildi deb belgilandi."
+
 msgid "Payments"
 msgstr "To'lovlar"
 
@@ -104,14 +277,8 @@ msgstr "Kursni tark etdi"
 msgid "Course"
 msgstr "Kurs"
 
-msgid "Branch"
-msgstr "Filial"
-
 msgid "All branches"
 msgstr "Barcha filiallar"
-
-msgid "Group"
-msgstr "Guruh"
 
 msgid "All groups"
 msgstr "Barcha guruhlar"
@@ -297,9 +464,6 @@ msgstr "Narx turi"
 msgid "Created by"
 msgstr "Kiritgan"
 
-msgid "Created at"
-msgstr "Kiritilgan vaqt"
-
 msgid "Price"
 msgstr "Narx"
 
@@ -414,12 +578,6 @@ msgstr "To'lov qismi"
 msgid "Additional charge"
 msgstr "Qo'shimcha hisob"
 
-msgid "Student"
-msgstr "O'quvchi"
-
-msgid "Type"
-msgstr "Turi"
-
 msgid "Month"
 msgstr "Oy"
 
@@ -491,12 +649,6 @@ msgstr "Qabul qilgan"
 
 msgid "Receipt"
 msgstr "Chek"
-
-msgid "Closed by"
-msgstr "Yopgan"
-
-msgid "Closed at"
-msgstr "Yopilgan vaqt"
 
 msgid "Closed cash day"
 msgstr "Yopilgan kassa kuni"
@@ -842,9 +994,6 @@ msgstr "Barcha o'qituvchilar"
 msgid "At least N days overdue"
 msgstr "Kamida N kun kechikkan"
 
-msgid "Filter"
-msgstr "Saralash"
-
 #, python-format
 msgid "%(d)s day overdue"
 msgid_plural "%(d)s days overdue"
@@ -975,9 +1124,6 @@ msgstr ""
 msgid "Save and print receipt"
 msgstr "Saqlash va chek chiqarish"
 
-msgid "All"
-msgstr "Hammasi"
-
 msgid "No payments in this period."
 msgstr "Bu davrda to'lovlar yo'q."
 
@@ -1061,9 +1207,6 @@ msgstr "Orqaga"
 
 msgid "Cancel"
 msgstr "Bekor qilish"
-
-msgid "Overdue debt"
-msgstr "Muddati o'tgan qarz"
 
 #, python-format
 msgid "%(n)s debtor"
@@ -1218,9 +1361,6 @@ msgstr "Muzlatilgan"
 msgid "Unfrozen"
 msgstr "Muzlatish to'xtatildi"
 
-msgid "Done"
-msgstr "Bajarildi"
-
 msgid "System setting"
 msgstr "Tizim sozlamasi"
 
@@ -1233,9 +1373,6 @@ msgstr "O'zgartirilgan vaqt"
 msgid "Branches"
 msgstr "Filiallar"
 
-msgid "Lead"
-msgstr "Lid"
-
 msgid "Lesson"
 msgstr "Dars"
 
@@ -1247,12 +1384,6 @@ msgstr "Oldin"
 
 msgid "After"
 msgstr "Keyin"
-
-msgid "Yes"
-msgstr "Ha"
-
-msgid "No"
-msgstr "Yo'q"
 
 msgid "Monday"
 msgstr "Dushanba"
@@ -1472,12 +1603,6 @@ msgstr "Barcha obyektlar"
 msgid "System"
 msgstr "Tizim"
 
-msgid "Details"
-msgstr "Batafsil"
-
-msgid "Leads"
-msgstr "Lidlar"
-
 msgid "Extra phone"
 msgstr "Qo'shimcha telefon"
 
@@ -1504,9 +1629,6 @@ msgstr "Baribir saqlash"
 
 msgid "Refusal reason"
 msgstr "Rad etish sababi"
-
-msgid "Call"
-msgstr "Qo'ng'iroq"
 
 msgid "Text"
 msgstr "Matn"
@@ -1633,9 +1755,6 @@ msgstr "Lid tarixi yozuvi"
 
 msgid "Lead activities"
 msgstr "Lid tarixi"
-
-msgid "Due"
-msgstr "Muddat"
 
 msgid "Done at"
 msgstr "Bajarilgan vaqt"
@@ -3096,6 +3215,9 @@ msgstr ""
 msgid "Add at least one lesson to the weekly schedule."
 msgstr "Haftalik jadvalga kamida bitta dars qo'shing."
 
+msgid "Why is the student leaving?"
+msgstr "O'quvchi nega ketmoqda?"
+
 msgid "Over capacity"
 msgstr "Sig'imdan oshirish"
 
@@ -3289,6 +3411,12 @@ msgstr "Guruhlardagi o'qish"
 msgid "The student is already in this group."
 msgstr "O'quvchi allaqachon shu guruhda."
 
+msgid "Leave reason"
+msgstr "Ketish sababi"
+
+msgid "Leave reasons"
+msgstr "Ketish sabablari"
+
 msgid "Enrolled into the group"
 msgstr "Guruhga qo'shildi"
 
@@ -3335,6 +3463,12 @@ msgid "How many days back a teacher may mark or change attendance."
 msgstr ""
 "O'qituvchi necha kun oldingi davomatni belgilashi yoki o'zgartirishi mumkin."
 
+msgid "Why students leave"
+msgstr "O'quvchilar nega ketadi"
+
+msgid "Students who left a group, by reason."
+msgstr "Guruhdan chiqqan o'quvchilar, sabablar bo'yicha."
+
 msgid "Groups created"
 msgstr "Yaratilgan guruhlar"
 
@@ -3358,6 +3492,22 @@ msgstr "Belgilagan"
 
 msgid "Marked at"
 msgstr "Belgilangan vaqt"
+
+msgid ""
+"Why students leave a group. Chosen when a student leaves; see the report."
+msgstr ""
+"O'quvchilar guruhdan nega chiqadi. O'quvchi chiqarilganda tanlanadi; "
+"hisobotda ko'rinadi."
+
+msgid "Not given"
+msgstr "Ko'rsatilmagan"
+
+msgid ""
+"Students who left a group in the period (a student who left two groups "
+"counts twice)."
+msgstr ""
+"Davr ichida guruhdan chiqqan o'quvchilar (ikki guruhdan chiqqan o'quvchi "
+"ikki marta sanaladi)."
 
 msgid "Attendance for this lesson can no longer be changed."
 msgstr "Bu dars davomatini endi o'zgartirib bo'lmaydi."
@@ -3395,6 +3545,9 @@ msgstr "O'quvchi muzlatilmagan."
 
 msgid "The date must be after the freeze started."
 msgstr "Sana muzlatish boshlanganidan keyin bo'lishi kerak."
+
+msgid "Choose a reason from the list."
+msgstr "Ro'yxatdan sababni tanlang."
 
 msgid "The student is no longer in this group."
 msgstr "O'quvchi endi bu guruhda emas."
@@ -3683,6 +3836,12 @@ msgstr "Guruhni tanlang."
 
 msgid "Open the student's profile and send from there."
 msgstr "O'quvchi sahifasini oching va o'sha yerdan yuboring."
+
+#, python-format
+msgid "New lead not contacted yet: %(name)s, %(phone)s. Please call now."
+msgstr ""
+"Yangi lid bilan hali bog'lanilmagan: %(name)s, %(phone)s. Iltimos, hozir "
+"qo'ng'iroq qiling."
 
 msgid "Telegram chat"
 msgstr "Telegram chat"

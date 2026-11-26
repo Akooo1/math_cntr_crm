@@ -36,7 +36,7 @@ npm run build:css                              # Tailwind -> static/dist/app.css
 ## Layout and module boundaries
 
 ```
-config/   apps/{core,accounts,settings,crm,students,staff,billing,reports,salaries,telegram,store,demo}/   templates/   static/   locale/   scripts/   docs/   tests/
+config/   apps/{core,accounts,settings,crm,students,staff,billing,alerts,reports,salaries,telegram,store,demo}/   templates/   static/   locale/   scripts/   docs/   tests/
 ```
 
 `apps/demo` holds the demo seed command only; it sits above every module and nothing imports it.
@@ -44,7 +44,7 @@ config/   apps/{core,accounts,settings,crm,students,staff,billing,reports,salari
 Dependency direction (enforced by `.importlinter`; CI fails on violations):
 
 ```
-core ← accounts ← settings ← crm, students, staff ;  students ← billing ← reports, salaries, telegram, store ;  staff ← telegram ;  crm → students
+core ← accounts ← settings ← crm, students, staff ;  students ← billing ← alerts ← reports, salaries, telegram, store ;  crm ← alerts ;  staff ← telegram ;  crm → students
 ```
 
 - Import another module only through `services`, `selectors`, `events`, or `models` (models only for FK targets and types).
@@ -187,6 +187,8 @@ Inside a module:
 | Undo (toast button; not a money reversal) | Ortga qaytarish |
 | Everyone came (attendance) | Hammasi keldi |
 | Payment received (success screen) / take another payment | To'lov qabul qilindi / Yana to'lov qabul qilish |
+| Warnings (early-warning tasks) / missed lessons | Ogohlantirishlar / Darsga kelmaganlar |
+| Leave reason(s) / why students leave (report) | Ketish sababi (sabablari) / O'quvchilar nega ketadi |
 | Database backup (nightly / before an update) | Zaxira nusxa (kechki / yangilanishdan oldin) |
 
 Add new terms here before using them in the UI.

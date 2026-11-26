@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}{% translate "Warnings" %}{% endblock %}
+{% block heading %}{% translate "Warnings" %}{% endblock %}
+{% block content %}
+  <nav class="chip-row mb-4" aria-label="{% translate 'Filter' %}">
+    {% for key, label, n in chips %}
+      <a href="{% url 'alerts:list' %}{% if key %}?tur={{ key }}{% endif %}" class="chip" {% if slug == key %}aria-current="page"{% endif %}>{{ label }}{% if n %} <span class="tabular-nums opacity-80">{{ n }}</span>{% endif %}</a>
+    {% endfor %}
+  </nav>
+  {% if page.object_list %}
+    <ul class="space-y-2">
+      {% for t in page %}
+        <li class="card flex items-start gap-3 p-4">
+          <span class="stat-icon {% if t.kind == 'debt' %}text-rose-700{% elif t.kind == 'lead' %}text-sky-700{% else %}text-amber-700{% endif %}">{% if t.kind == 'absence' %}{% icon "calendar" "w-5 h-5" %}{% elif t.kind == 'debt' %}{% icon "wallet" "w-5 h-5" %}{% else %}{% icon "user-plus" "w-5 h-5" %}{% endif %}</span>
+          <div class="min-w-0 flex-1">
+            {% if t.kind == 'absence' %}
+              <p class="font-semibold">{% blocktranslate count n=t.details.missed %}Missed {{ n }} lesson in a row{% plural %}Missed {{ n }} lessons in a row{% endblocktranslate %}</p>
+              <p class="text-sm"><a class="link" href="{% url 'students:detail' t.student_id %}">{{ t.student.full_name }}</a> · {{ t.group.name }}</p>
+              <p class="text-sm text-muted">{% translate "Call the parent and find out why." %}{% if t.assigned_to %} · {{ t.assigned_to.full_name }}{% endif %}</p>
+            {% elif t.kind == 'debt' %}
+              <p class="font-semibold">{% blocktranslate with a=t.details.overdue|som count d=t.details.days %}{{ a }} overdue for {{ d }} day{% plural %}{{ a }} overdue for {{ d }} days{% endblocktranslate %}</p>
+              <p class="text-sm"><a class="link" href="{% url 'students:detail' t.student_id %}">{{ t.student.full_name }}</a></p>
+              <p class="text-sm text-muted">{% translate "Remind the parent about the payment." %}</p>
+            {% else %}
+              <p class="font-semibold">{% translate "New lead not contacted yet" %}</p>
+              <p class="text-sm"><a class="link" href="{% url 'crm:lead' t.lead_id %}">{% if t.lead.full_name %}{{ t.lead.full_name }}{% else %}{{ t.lead.phone|telefon }}{% endif %}</a></p>
+              <p class="text-sm text-muted">{% blocktranslate with d=t.due_at|sana_vaqt %}Should have been contacted by {{ d }}{% endblocktranslate %}{% if t.assigned_to %} · {{ t.assigned_to.full_name }}{% endif %}</p>
+            {% endif %}
+            <p class="mt-1 text-xs text-muted">{% relative_time t.created_at %}{% if not request.branch_filter %} · {{ t.branch.name }}{% endif %}</p>
+          </div>
+          <div class="flex shrink-0 gap-2">
+            {% if t.kind == 'lead' %}{% if t.lead.phone %}<a href="tel:{{ t.lead.phone }}" class="icon-dot" aria-label="{% translate 'Call' %}" title="{% translate 'Call' %}">{% icon "phone" "w-5 h-5" %}</a>{% endif %}
+            {% else %}{% with p=t.student.parent_phone|default:t.student.phone %}{% if p %}<a href="tel:{{ p }}" class="icon-dot" aria-label="{% translate 'Call' %}" title="{% translate 'Call' %}">{% icon "phone" "w-5 h-5" %}</a>{% endif %}{% endwith %}{% endif %}
+            <form method="post" action="{% url 'alerts:done' t.pk %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}">
+              <button class="icon-dot" aria-label="{% translate 'Done' %}" title="{% translate 'Done' %}">{% icon "check" "w-5 h-5" %}</button>
+            </form>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+    {% include "components/pagination.html" %}
+  {% else %}
+    <div class="card">{% include "components/empty.html" with icon="check-circle" title=_("No warnings") text=_("Missed lessons, overdue debts and uncontacted leads appear here automatically.") %}</div>
+  {% endif %}
+{% endblock %}

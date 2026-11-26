@@ -186,3 +186,36 @@ def planned_lesson_dates(group: Group, first: dt.date, last: dt.date) -> list[dt
     return [
         p.date for p in lesson_plan(slots, first, last) if (p.date, p.start_time) not in cancelled
     ]
+
+
+def leave_reasons_report(user, p):
+    """Report "Why students leave": students who left a group in the period, by reason."""
+    from django.utils.translation import gettext as _
+
+    from apps.core.reports import Col, Result
+
+    from .models import EnrollmentEvent
+
+    require_perm(user, "students.view")
+    events = EnrollmentEvent.objects.filter(
+        kind=EnrollmentEvent.Kind.LEFT,
+        effective_date__gte=p.date_from,
+        effective_date__lte=p.date_to,
+    )
+    events = scope_by_branch(events, user, field="enrollment__group__branch")
+    if p.branch_id:
+        events = events.filter(enrollment__group__branch_id=p.branch_id)
+    counts = list(events.values("leave_reason__name").annotate(n=Count("id")).order_by("-n"))
+    total = sum(r["n"] for r in counts)
+    rows = [
+        [r["leave_reason__name"] or _("Not given"), r["n"], (r["n"] / total) if total else 0]
+        for r in counts
+    ]
+    return Result(
+        columns=[Col(_("Reason")), Col(_("Students"), "int"), Col(_("Share"), "percent")],
+        rows=rows,
+        totals=[_("Total"), total, 1 if total else 0],
+        note=_(
+            "Students who left a group in the period (a student who left two groups counts twice)."
+        ),
+    )

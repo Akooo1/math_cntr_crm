@@ -199,3 +199,30 @@ class TestGlobalSearch:
         resp = client.get("/qidiruv/?q=a", HTTP_HX_REQUEST="true")
         assert resp.context["groups"] == []
         assert "<html" not in resp.content.decode()
+
+
+class TestWarnings:
+    def test_total_and_filtered_by_kind(self, client, admin_a, branch_a):
+        from apps.alerts.models import Task
+
+        for i in range(2):
+            Task.objects.create(
+                kind=Task.Kind.LEAD,
+                key=f"lead:t{i}",
+                branch=branch_a,
+                lead=make_lead(admin_a, branch_a),
+            )
+        Task.objects.create(
+            kind=Task.Kind.ABSENCE,
+            key="absence:t",
+            branch=branch_a,
+            student=make_student(admin_a, branch_a),
+            details={"missed": 2},
+        )
+        login(client, admin_a)
+        resp = client.get("/ogohlantirishlar/")
+        assert count_pill(resp) == "3"
+        resp = client.get("/ogohlantirishlar/?tur=lid")
+        t = resp.context["totals"]
+        assert (t.total, t.shown, t.filtered) == (3, 2, True)
+        assert count_pill(resp) == "2/3"
