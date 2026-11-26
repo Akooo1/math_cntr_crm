@@ -364,3 +364,53 @@ class TestParentMessages:
             },
         )
         assert bot.texts(100)[-1] == "Salom"
+
+
+class TestParentMenu:
+    """docs/SPEC.md §21: the parent's menu (balance, attendance, payments, schedule)."""
+
+    def test_menu_after_connecting_and_each_button(self, bot, debtor, admin_a, cash):
+        from apps.telegram.services import parent_menu
+
+        share(100, "998951112233")
+        keyboard = bot.sent[-1]["reply_markup"]["keyboard"]
+        labels = [b["text"] for row in keyboard for b in row]
+        assert labels == ["💰 Balans", "📅 Davomat", "🧾 To'lovlar", "🗓 Dars jadvali"]
+
+        services.handle_update(update(100, "💰 Balans"))
+        text = bot.texts(100)[-1]
+        assert debtor.full_name in text and "Qarz:" in text and "Muddati o'tgan:" in text
+
+        billing.payments.record_payment(
+            actor=admin_a, student=debtor, amount=100_000, method=cash, paid_on=D(2026, 11, 16)
+        )
+        services.handle_update(update(100, "🧾 To'lovlar"))
+        assert (
+            "16.11.2026" in bot.texts(100)[-1] and money.format_som(100_000) in bot.texts(100)[-1]
+        )
+
+        group = debtor.enrollments.get().group
+        lesson = group.lessons.get(date=D(2026, 11, 13))
+        st.mark_attendance(actor=admin_a, lesson=lesson, student_id=debtor.pk, status="absent")
+        services.handle_update(update(100, "davomat"))  # typed by hand also works
+        assert "13.11.2026" in bot.texts(100)[-1]
+
+        services.handle_update(update(100, "🗓 Dars jadvali"))
+        assert group.name in bot.texts(100)[-1]
+
+        services.handle_update(update(100, "salom"))  # anything else: the menu again
+        assert bot.sent[-1]["reply_markup"] == parent_menu.keyboard()
+        services.handle_update(update(100, "/start"))  # already connected: menu, no phone ask
+        assert "request_contact" not in str(bot.sent[-1]["reply_markup"])
+
+    def test_two_children_in_one_answer_and_strangers_see_nothing(
+        self, bot, debtor, admin_a, branch_a
+    ):
+        sister = make_student(admin_a, branch_a, first_name="Malika", parent_phone=PARENT_PHONE)
+        make_student(admin_a, branch_a, first_name="Boshqa", parent_phone="+998951110000")
+        share(100, "998951112233")
+        services.handle_update(update(100, "💰 Balans"))
+        text = bot.texts(100)[-1]
+        assert debtor.full_name in text and sister.full_name in text and "Boshqa" not in text
+        services.handle_update(update(555, "💰 Balans"))  # not connected: asked for a phone
+        assert bot.sent[-1]["reply_markup"]["keyboard"][0][0]["request_contact"] is True

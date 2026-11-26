@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **Design refresh + interactions** (undo toasts, quick actions on student cards, payment success screen, "Hammasi keldi", motion) on the work branch; waiting for the owner's review before `main`. Update this line at the end of each phase.
+- Current phase: **Leave reasons + early warnings (§19), expenses + staff salaries + branch profit (§20), parent menu in the bot (§21)** on the work branch, on top of the design refresh; waiting for the owner's review before `main`. Update this line at the end of each phase.
 
 ## Ask the owner before
 
@@ -193,6 +193,7 @@ Inside a module:
 | Whole center (center-wide) / share of center-wide costs | Butun markaz / Umumiy xarajatlardan ulushi |
 | Branch profit / profit | Filial foydasi / Foyda |
 | Fixed salary (staff) / staff salaries | Belgilangan maosh / Xodimlar maoshi |
+| Parent menu (bot) / next payment / next lesson | Menyu / Keyingi to'lov / Keyingi dars |
 | Database backup (nightly / before an update) | Zaxira nusxa (kechki / yangilanishdan oldin) |
 
 Add new terms here before using them in the UI.

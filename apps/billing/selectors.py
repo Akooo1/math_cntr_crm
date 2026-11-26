@@ -244,6 +244,36 @@ def debtors(user, branch_filter=None, *, group=None, course=None, teacher=None, 
 # --- Payments journal and cash days ------------------------------------------------------
 
 
+def parent_view(student_id: int) -> dict:
+    """What a connected parent may see about their own child in the Telegram bot (no user
+    scope; the bot matched the parent by phone): balance, overdue amount, the next unpaid
+    charge and the last payments."""
+    cutoff = overdue_cutoff()
+    unpaid = ChargeNet.objects.filter(student_id=student_id, net__gt=F("paid"))
+    overdue = unpaid.filter(due_date__lt=cutoff).aggregate(t=Sum(F("net") - F("paid")))["t"]
+    nxt = (
+        unpaid.filter(due_date__gte=cutoff)
+        .order_by("due_date", "charge_id")
+        .values("due_date", "net", "paid")
+        .first()
+    )
+    payments = list(
+        Payment.objects.filter(student_id=student_id, kind="payment", status="confirmed")
+        .select_related("method")
+        .order_by("-paid_on", "-id")[:5]
+    )
+    reversed_ids = set(
+        Payment.objects.filter(reverses__in=payments).values_list("reverses_id", flat=True)
+    )
+    return {
+        "balance": balance(student_id),
+        "overdue": int(overdue or 0),
+        "next_due": nxt["due_date"] if nxt else None,
+        "next_amount": int(nxt["net"] - nxt["paid"]) if nxt else 0,
+        "payments": [(p, p.pk in reversed_ids) for p in payments],
+    }
+
+
 def overdue_summary() -> dict[int, dict]:
     """System-wide (no user scope; for scheduled jobs): {student_id: {"overdue", "oldest",
     "branch_id"}} for every student with an overdue unpaid charge right now."""

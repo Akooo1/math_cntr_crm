@@ -1432,3 +1432,22 @@ by students' payments (equally when nobody paid); the split adds up exactly
 (`apps/expenses/domain.split`, rounded with `round_amount`). Salaries count for the months
 that start inside the period; an open month counts as calculated so far. Books given "pay
 later" count when the parent pays (they are billing charges).
+
+---
+
+## 21. Parent menu in the Telegram bot (owner's request)
+
+After a parent connects (shares their phone), the bot shows a menu under the message box:
+
+| Button | Answer, for every child with the parent's phone |
+|---|---|
+| 💰 Balans | debt or advance, the overdue part, the next unpaid charge and its due date |
+| 📅 Davomat | the last 30 days: came N of M marked lessons, the dates missed (up to 10) |
+| 🧾 To'lovlar | the last 5 payments: date, amount, receipt number, "bekor qilingan" if reversed |
+| 🗓 Dars jadvali | each open group: weekdays and times, teacher, the next lesson |
+
+A connected parent who sends /start or any other text gets the menu again; typing the
+button's word by hand also works. People who are not connected are asked for their phone, as
+before. Parents see only the students whose phone, parent phone or extra phone equals the
+number they shared (`students.selectors.find_by_phones`); billing data comes from
+`billing.selectors.parent_view(student_id)`. Answers are logged as bot replies.

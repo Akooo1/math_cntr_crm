@@ -45,3 +45,15 @@ Consumes none (jobs read billing and staff directly). Publishes none.
 
 ## Testing without Telegram
 `client.set_client(fake)` installs a fake; see `apps/telegram/tests/test_bot.py`.
+
+## Parent menu (SPEC §21)
+
+`services/parent_menu.py`: the reply keyboard (`keyboard()`), which button a text means
+(`which()`), and the answers (`answer(chat, key)`), using `billing.selectors.parent_view` and
+the students' attendance, groups and schedule. `linking.handle_update` shows the menu after a
+parent connects, on /start and on any unknown text from a connected parent.
+
+## Warnings (SPEC §19)
+
+`handlers.py` subscribes to `alerts.created`: a lead that was not contacted in time is sent to
+its manager's staff chat after commit (message kind `alert`; setting `alerts.lead_telegram`).

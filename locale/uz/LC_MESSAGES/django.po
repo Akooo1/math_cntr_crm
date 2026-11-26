@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-26 14:11+0500\n"
+"POT-Creation-Date: 2026-11-26 14:18+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -4204,6 +4204,11 @@ msgstr ""
 "Ulandingiz. Eslatmalar quyidagilar haqida keladi: %(names)s. Uzish uchun /"
 "stop yuboring."
 
+msgid ""
+"Use the menu below to see the balance, attendance, payments and schedule."
+msgstr ""
+"Balans, davomat, to'lovlar va dars jadvalini pastdagi menyudan ko'ring."
+
 msgid "This link has expired. Open a new one in Sozlamalar → Telegram."
 msgstr ""
 "Bu havolaning muddati o'tgan. Sozlamalar → Telegram bo'limidan yangisini "
@@ -4215,8 +4220,61 @@ msgstr ""
 "Ulandingiz, %(name)s. Hisobotlar shu yerga keladi. Uzish uchun /stop "
 "yuboring."
 
+msgid "Choose from the menu below."
+msgstr "Pastdagi menyudan tanlang."
+
 msgid "Disconnected. Send /start to connect again."
 msgstr "Uzildi. Qayta ulanish uchun /start yuboring."
+
+msgid "Lesson schedule"
+msgstr "Dars jadvali"
+
+#, python-format
+msgid "Debt: %(a)s"
+msgstr "Qarz: %(a)s"
+
+#, python-format
+msgid "Paid in advance: %(a)s"
+msgstr "Avans: %(a)s"
+
+msgid "Everything is paid."
+msgstr "Hammasi to'langan."
+
+#, python-format
+msgid "Overdue: %(a)s"
+msgstr "Muddati o'tgan: %(a)s"
+
+#, python-format
+msgid "Next payment: %(a)s by %(d)s"
+msgstr "Keyingi to'lov: %(a)s, %(d)s gacha"
+
+msgid "No marked lessons in the last 30 days."
+msgstr "Oxirgi 30 kunda belgilangan dars yo'q."
+
+#, python-format
+msgid "Last 30 days: came %(c)s of %(n)s lessons."
+msgstr "Oxirgi 30 kun: %(n)s ta darsdan %(c)s tasiga keldi."
+
+#, python-format
+msgid "Missed: %(dates)s"
+msgstr "Kelmagan kunlar: %(dates)s"
+
+msgid "cancelled"
+msgstr "bekor qilingan"
+
+msgid "Not in a group now."
+msgstr "Hozir guruhda emas."
+
+#, python-format
+msgid "Next lesson: %(d)s at %(t)s"
+msgstr "Keyingi dars: %(d)s, soat %(t)s"
+
+msgid ""
+"We couldn't find a student with your phone number any more. Please ask the "
+"center's administrator."
+msgstr ""
+"Telefon raqamingiz bo'yicha o'quvchi topilmadi. Iltimos, markaz "
+"administratoriga murojaat qiling."
 
 #, python-format
 msgid ""

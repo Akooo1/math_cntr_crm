@@ -13,6 +13,7 @@ from apps.students import selectors as student_selectors
 
 from ..client import TelegramError, get_client
 from ..models import Chat, Message
+from . import parent_menu
 
 log = logging.getLogger(__name__)
 
@@ -125,9 +126,11 @@ def link_parent(chat_id: int, contact: dict, sender: dict) -> Chat | None:
     _reply(
         chat_id,
         _("Connected. You will get reminders about: %(names)s. Send /stop to disconnect.")
-        % {"names": names},
+        % {"names": names}
+        + "\n\n"
+        + _("Use the menu below to see the balance, attendance, payments and schedule."),
         chat,
-        reply_markup={"remove_keyboard": True},
+        reply_markup=parent_menu.keyboard(),
     )
     return chat
 
@@ -167,8 +170,16 @@ def handle_update(update: dict) -> None:
         link_parent(chat_id, msg["contact"], sender)
     elif text.startswith("/start"):
         param = text.split(maxsplit=1)[1].strip() if " " in text else ""
+        parent = Chat.objects.filter(chat_id=chat_id, kind=Chat.Kind.PARENT, is_active=True).first()
         if param:
             link_staff(chat_id, param, sender)
+        elif parent is not None:  # already connected: just show the menu
+            _reply(
+                chat_id,
+                _("Choose from the menu below."),
+                parent,
+                reply_markup=parent_menu.keyboard(),
+            )
         else:
             _ask_phone(chat_id)
     elif text == "/stop":
@@ -176,6 +187,28 @@ def handle_update(update: dict) -> None:
         if chat:
             with transaction.atomic():
                 disconnect(chat)
-        _reply(chat_id, _("Disconnected. Send /start to connect again."))
+        _reply(
+            chat_id,
+            _("Disconnected. Send /start to connect again."),
+            reply_markup={"remove_keyboard": True},
+        )
     else:
-        _ask_phone(chat_id)
+        parent = Chat.objects.filter(chat_id=chat_id, kind=Chat.Kind.PARENT, is_active=True).first()
+        if parent is None:
+            _ask_phone(chat_id)
+            return
+        key = parent_menu.which(text)
+        if key is None:  # /menu or anything else: show the menu again
+            _reply(
+                chat_id,
+                _("Choose from the menu below."),
+                parent,
+                reply_markup=parent_menu.keyboard(),
+            )
+        else:
+            _reply(
+                chat_id,
+                parent_menu.answer(parent, key),
+                parent,
+                reply_markup=parent_menu.keyboard(),
+            )
