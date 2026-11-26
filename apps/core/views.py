@@ -1,3 +1,5 @@
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
+
 from django import forms
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
@@ -9,7 +11,7 @@ from django.views.decorators.http import require_POST
 
 from . import audit_display, excel, global_search, listing
 from .forms import StyledForm, UzDateField
-from .middleware import BRANCH_FILTER_SESSION_KEY
+from .middleware import BRANCH_FILTER_SESSION_KEY, BRANCH_PARAM
 from .models import AuditLog
 from .permissions import accessible_branch_ids, has_perm, login_required, perm_required
 from .registry import registry
@@ -62,7 +64,19 @@ def switch_branch(request):
     target = request.POST.get("next") or "/"
     if not url_has_allowed_host_and_scheme(target, allowed_hosts={request.get_host()}):
         target = "/"
-    return redirect(target)
+    return redirect(_without_branch_params(target))
+
+
+def _without_branch_params(url: str) -> str:
+    """The page to go back to after a switch, minus what pinned it to the old branch: its
+    own ?filial= and the page number (page 3 of another branch's list means nothing)."""
+    parts = urlsplit(url)
+    query = [
+        (k, v)
+        for k, v in parse_qsl(parts.query, keep_blank_values=True)
+        if k not in (BRANCH_PARAM, "page")
+    ]
+    return urlunsplit(parts._replace(query=urlencode(query)))
 
 
 class AuditFilterForm(StyledForm):
@@ -96,7 +110,10 @@ def _blank(value) -> str:
 
 @perm_required("audit.view")
 def audit_log(request):
-    form = AuditFilterForm(request.GET or None)
+    data = request.GET.copy()
+    if "branch" not in data and request.branch_filter:
+        data["branch"] = str(request.branch_filter)  # no branch chosen here: the top bar's
+    form = AuditFilterForm(data or None)
     qs = AuditLog.objects.select_related("actor")
     if form.is_valid():
         data = form.cleaned_data

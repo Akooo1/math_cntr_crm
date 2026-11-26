@@ -56,7 +56,9 @@ def test_split_adds_up_and_follows_weights():
 
 
 class TestExpenses:
-    def test_cash_expense_lowers_kassa_and_closed_day_blocks(self, clock, admin_a, branch_a, cash):
+    def test_cash_expense_lowers_kassa_and_closed_day_blocks(
+        self, director, clock, admin_a, branch_a, cash
+    ):
         e = spend(admin_a, branch_a, 200_000, cash=cash)
         report = day_report(branch_a.pk, TODAY)
         naqd = next(b for b in report["methods"] if b["method"] == cash)
@@ -64,7 +66,7 @@ class TestExpenses:
         source = next(s for s in report["sources"] if s["code"] == "expenses")
         assert source["out"] == 200_000
         assert AuditLog.objects.filter(action="expenses.expense.create").exists()
-        close_day(actor=admin_a, branch=branch_a, day=TODAY)
+        close_day(actor=director, branch=branch_a, day=TODAY)
         with pytest.raises(ValidationError):
             spend(admin_a, branch_a, 1000, cash=cash)
         spend(admin_a, branch_a, 1000)  # not from the cash desk: allowed

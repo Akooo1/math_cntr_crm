@@ -205,12 +205,10 @@ class Command(BaseCommand):
         director = User.objects.get(phone=USERS[0][0])
         today = dates.today()
         now = dates.now()
-        # Bekzod (Yunusobod administrator) may record Kirim; Aziza may not.
-        UserPermissionGrant.objects.create(
-            user=User.objects.get(phone=USERS[5][0]),
-            code="store.stock.receive",
-            granted_by=director,
-        )
+        # Bekzod (Yunusobod administrator) may record Kirim and import; Aziza may not.
+        bekzod = User.objects.get(phone=USERS[5][0])
+        for code in ("store.stock.receive", "import.run"):
+            UserPermissionGrant.objects.create(user=bekzod, code=code, granted_by=director)
         # Students who left with a reason (for "O'quvchilar nega ketadi").
         reasons = list(LeaveReason.objects.filter(is_active=True).order_by("sort_order"))
         for i, branch in enumerate(Branch.objects.order_by("pk")):
@@ -687,9 +685,7 @@ class Command(BaseCommand):
             }
         )
         for branch_id, day in days:
-            billing.cash.close_day(
-                actor=admins[branch_id], branch=Branch.objects.get(pk=branch_id), day=day
-            )
+            billing.cash.close_day(actor=director, branch=Branch.objects.get(pk=branch_id), day=day)
 
     def _seed_groups(self, User):
         """9 groups with schedules and lessons, ~52 students, attendance, lifecycle examples."""

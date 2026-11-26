@@ -422,7 +422,7 @@ Rules marked **[Q-n]** depend on an answer in section 9. The text states my reco
 
 **6.4.9 Daily cash close (Kassa hisoboti).**
 - **The report** is per branch and date. For each method it shows payments in, refunds and reversals out, net and count, plus the list of transactions. Only methods with `included_in_cash_close` are part of the close.
-- **Closing the day:** the admin (or Direktor) closes the day. The totals snapshot is stored, and from then on **no payment, reversal or refund dated that day can be created in that branch**. This is enforced in the service and by a database trigger that checks `billing_cash_day_close`.
+- **Closing the day:** the Direktor closes the day (owner's request, §23; before: administrators too). The totals snapshot is stored, and from then on **no payment, reversal or refund dated that day can be created in that branch**. This is enforced in the service and by a database trigger that checks `billing_cash_day_close`.
 - **Reopening:** there is no reopening **[Q-16]**. Errors are corrected through reversals dated on an open day.
 - **Late reversals:** a Direktor reversal on a day that is already closed is refused, with the message to make it the next day.
 - Unclosed past days are highlighted on the admin's dashboard.
@@ -482,11 +482,11 @@ Layout:
 3. **Guruhlar**: create and edit groups, schedule, cancel lessons.
 4. **To'lov qabul qilish** (take payment): search the student by name or phone → amount → method → save → receipt.
 5. **Qarzdorlar**.
-6. **Kassa hisoboti** with "Kunni yopish" (close the day).
+6. **Kassa hisoboti** (closing the day is the Direktor's, §23).
 7. **Hisobotlar**: own branch.
 8. **Lidlar**: view and edit (the admin is often the one at the front desk).
 9. **Davomat**: view and edit.
-10. **Import**: own branch.
+10. **Import**: only when the Direktor gave it to this person (§23); own branch.
 
 ### 7.3 Sotuv menejeri (own branch only)
 1. **Mening vazifalarim** (default page): overdue (red), today, upcoming.
@@ -1483,3 +1483,24 @@ manual time). The monthly report counts a teacher's workdays as days with lesson
 Staff and students sit on the same layer, so the link is a core extension point:
 `core.day_plans.register_day_start_provider(provider)` / `day_starts(user_ids, start, end)`;
 the students module registers teachers' first lesson per day.
+
+---
+
+## 23. Kunni yopish and Import are the Direktor's; the branch switcher (owner's request)
+
+- **Kunni yopish** (`billing.cash.close`) is Direktor-only. Administrators still see the
+  Kassa report for their branch and take payments; they no longer see the close button.
+- **Import** (`import.run`) is Direktor-only and grantable: the Direktor can give it to an
+  individual person in Sozlamalar → Foydalanuvchilar → "Qo'shimcha ruxsatlar" (§22.1). A
+  person given it imports only into their own branches and sees only those uploads.
+- **Branch switcher.** The top-bar branch (`request.branch_filter`) drives every page.
+  Kassa, Ombor and Savdo work on one branch and carry `?filial=` in their links. Opening a
+  page with `?filial=` now also sets the top-bar branch, and switching in the top bar drops
+  `filial` and the page number from the address it returns to. Before, the old `?filial=`
+  stayed in the address and the page didn't change. The audit log and "Ota-onalarga xabar"
+  (its group list) now follow the switcher too. **Maosh** stays center-wide by design (one
+  sheet and one payout per person for all branches, and the month closes for everyone), and
+  says so when a branch is picked. Each branch's salary cost is in the Filial foydasi report.
+  `tests/test_branch_switcher.py` loads every page with branch A picked and fails if a
+  student, group or lead of branch B shows up.
+

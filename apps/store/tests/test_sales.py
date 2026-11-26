@@ -112,7 +112,7 @@ class TestKassa:
         assert (sources["store"]["in"], sources["store"]["out"]) == (16_000, 10_000)
         assert len(report["extra_lines"]) == 3
 
-        close = billing.cash.close_day(actor=admin_a, branch=branch_a, day=TODAY)
+        close = billing.cash.close_day(actor=director, branch=branch_a, day=TODAY)
         store = next(s for s in close.totals["sources"] if s["code"] == "store")
         assert store["net"] == 6_000
         assert close.totals["total_net"] == 106_000
@@ -121,7 +121,7 @@ class TestKassa:
         self, shop, admin_a, director, branch_a, cash
     ):
         sale = sell(admin_a, branch_a, cash, (shop["small"], 1))
-        billing.cash.close_day(actor=admin_a, branch=branch_a, day=TODAY)
+        billing.cash.close_day(actor=director, branch=branch_a, day=TODAY)
         with pytest.raises(ValidationError, match="yopilgan|closed"):
             sell(admin_a, branch_a, cash, (shop["small"], 1))
         with pytest.raises(ValidationError):  # reversal of a paid sale is dated today: locked
@@ -183,7 +183,7 @@ class TestReversal:
         import datetime as dt
 
         sale = sell(admin_a, branch_a, cash, (shop["small"], 1))
-        billing.cash.close_day(actor=admin_a, branch=branch_a, day=TODAY)
+        billing.cash.close_day(actor=director, branch=branch_a, day=TODAY)
         clock.shift(dt.timedelta(days=1))
         services.reverse_sale(actor=director, sale=sale, reason="x")
         tomorrow = TODAY + dt.timedelta(days=1)
@@ -247,7 +247,7 @@ def test_a_sale_racing_the_close_is_in_the_snapshot_or_refused(
     receive(director, branch_a, item, 10)
     outcome = _run_together(
         lambda: sell(admin_a, branch_a, cash, (item, 1)),
-        lambda: billing.cash.close_day(actor=admin_a, branch=branch_a, day=TODAY),
+        lambda: billing.cash.close_day(actor=director, branch=branch_a, day=TODAY),
     )
     assert outcome[1] == "ok"
     close = CashDayClose.objects.get(branch=branch_a, date=TODAY)

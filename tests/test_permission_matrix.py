@@ -101,6 +101,8 @@ def students_cases(o) -> dict[str, list[Case]]:
     post_manage = expect({D: 302, A: 302})
     post_manage_other = expect({D: 302, A: 404})
     marker = expect({D: 200, A: 200, T: 200})
+    director_only = expect({D: 200})
+    post_director_only = expect({D: 302})
 
     def two(name, fmt, key, same, other, method="get", data=None):
         return name, [
@@ -189,15 +191,17 @@ def students_cases(o) -> dict[str, list[Case]]:
                     ),
                 ],
             ),
-            ("students:import", [Case("/import/", expect=manage)]),
-            ("students:import_template", [Case("/import/namuna/groups/", expect=manage)]),
-            two("students:import_batch", "/import/{}/", "batch", manage, manage_other),
+            # Import is the Direktor's; others only with a per-person grant
+            # (tests/test_permission_grants.py).
+            ("students:import", [Case("/import/", expect=director_only)]),
+            ("students:import_template", [Case("/import/namuna/groups/", expect=director_only)]),
+            two("students:import_batch", "/import/{}/", "batch", director_only, director_only),
             two(
                 "students:import_commit",
                 "/import/{}/tasdiqlash/",
                 "batch",
-                post_manage,
-                post_manage_other,
+                post_director_only,
+                post_director_only,
                 "post",
             ),
         ]
@@ -243,7 +247,7 @@ def billing_cases(o) -> dict[str, list[Case]]:
             ("billing:cash", [Case("/kassa/", expect=fin)]),
             (
                 "billing:cash_close",
-                [Case("/kassa/yopish/", "post", expect({D: 302, A: 302}), {"sana": "01.01.2020"})],
+                [Case("/kassa/yopish/", "post", expect({D: 302}), {"sana": "01.01.2020"})],
             ),
         ]
     )

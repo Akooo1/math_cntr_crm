@@ -51,3 +51,13 @@ def login(client):
         return client
 
     return _login
+
+
+@pytest.fixture
+def import_granted(admin_a, director):
+    """Import is the Direktor's; this administrator was given it in Sozlamalar."""
+    from apps.settings.models import UserPermissionGrant
+
+    UserPermissionGrant.objects.create(user=admin_a, code="import.run", granted_by=director)
+    admin_a.clear_grants_cache()
+    return admin_a

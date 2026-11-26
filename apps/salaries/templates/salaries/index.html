@@ -8,6 +8,7 @@
 {% endblock %}
 {% block content %}
   <div class="mb-4 flex flex-wrap items-center gap-3">{% include "salaries/_month_picker.html" %}{% include "salaries/_state.html" %}</div>
+  {% if request.branch_filter %}<p class="mb-4 rounded-xl bg-surface-2 px-4 py-3 text-sm text-muted">{% icon "info" "w-4 h-4 inline" %} {% translate "Salaries are for the whole center: one sheet per person, for all branches. Each branch's salary cost is in the Branch profit report." %}</p>{% endif %}
 
   <div class="card mb-4 grid grid-cols-2 gap-x-3 gap-y-4 p-4 md:grid-cols-4">
     <div class="min-w-0"><p class="text-sm text-slate-500">{% translate "Money paid" %}</p><p class="text-lg font-semibold tabular-nums sm:text-xl">{{ grand.paid|som }}</p></div>

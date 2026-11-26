@@ -171,7 +171,7 @@ class TestCashClose:
         self, admin_a, director, student, enrolled, cash, branch_a
     ):
         pay(admin_a, student, 100_000, cash)
-        close = services.cash.close_day(actor=admin_a, branch=branch_a, day=D(2026, 11, 16))
+        close = services.cash.close_day(actor=director, branch=branch_a, day=D(2026, 11, 16))
         assert close.totals["total_in"] == 100_000
         with pytest.raises(ValidationError):  # service
             pay(admin_a, student, 1000, cash)
@@ -190,13 +190,13 @@ class TestCashClose:
                 receipt_number="CH-000999",
             )
         with pytest.raises(ValidationError):
-            services.cash.close_day(actor=admin_a, branch=branch_a, day=D(2026, 11, 16))
+            services.cash.close_day(actor=director, branch=branch_a, day=D(2026, 11, 16))
         pay(admin_a, student, 1000, cash, D(2026, 11, 15))  # other days stay open
 
     def test_closed_day_does_not_block_methods_outside_the_cash_report(
-        self, admin_a, student, enrolled, branch_a
+        self, director, admin_a, student, enrolled, branch_a
     ):
-        services.cash.close_day(actor=admin_a, branch=branch_a, day=D(2026, 11, 16))
+        services.cash.close_day(actor=director, branch=branch_a, day=D(2026, 11, 16))
         online = PaymentMethod.objects.create(name="Onlayn", included_in_cash_close=False)
         pay(admin_a, student, 1000, online)  # e.g. a future online provider's settlement
 
@@ -215,11 +215,10 @@ class TestCashClose:
         assert (by["Terminal (karta)"]["in"], by["Terminal (karta)"]["out"]) == (300_000, 300_000)
         assert report["total_net"] == 950_000
 
-    def test_admin_cannot_close_other_branch(self, admin_a, branch_b):
-        from django.http import Http404
-
-        with pytest.raises(Http404):
-            services.cash.close_day(actor=admin_a, branch=branch_b, day=D(2026, 11, 16))
+    def test_only_the_director_closes_the_day(self, admin_a, branch_a, branch_b):
+        for branch in (branch_a, branch_b):
+            with pytest.raises(PermissionDenied):
+                services.cash.close_day(actor=admin_a, branch=branch, day=D(2026, 11, 16))
 
 
 class TestImmutability:
@@ -235,7 +234,9 @@ class TestImmutability:
             "DELETE FROM billing_cash_day_close",
         ],
     )
-    def test_ledger_rows_cannot_change(self, admin_a, student, enrolled, cash, branch_a, sql):
+    def test_ledger_rows_cannot_change(
+        self, director, admin_a, student, enrolled, cash, branch_a, sql
+    ):
         from .helpers import percent
 
         services.discounts.assign(
@@ -256,7 +257,7 @@ class TestImmutability:
             enrollment=enrolled,
         )
         pay(admin_a, student, 1000, cash)
-        services.cash.close_day(actor=admin_a, branch=branch_a, day=D(2026, 11, 15))
+        services.cash.close_day(actor=director, branch=branch_a, day=D(2026, 11, 15))
         with pytest.raises((InternalError, IntegrityError)), transaction.atomic():
             with connection.cursor() as cur:
                 cur.execute(sql)

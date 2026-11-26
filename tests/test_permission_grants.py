@@ -1,5 +1,5 @@
 """Per-person extra permissions (docs/SPEC.md §22): the Direktor gives an administrator
-Ombor rights in Sozlamalar -> Foydalanuvchilar."""
+Ombor or Import rights in Sozlamalar -> Foydalanuvchilar."""
 
 import pytest
 
@@ -29,12 +29,36 @@ def edit(client, user, branch, perms):
     )
 
 
-def test_only_store_rights_are_grantable():
+def test_only_store_and_import_rights_are_grantable():
     assert {p.code for p in grantable_permissions()} == {
         "store.catalog.manage",
         "store.stock.receive",
         "store.stock.correct",
+        "import.run",
     }
+
+
+def test_import_given_to_an_administrator_stays_in_their_branch(
+    login, director, admin_a, branch_a, branch_b
+):
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    from apps.students.services import importing
+
+    a = login(admin_a)
+    assert a.get("/import/").status_code == 403
+    assert "/import/" not in a.get("/").content.decode()  # no menu item
+    edit(login(director), admin_a, branch_a, ["import.run"])
+    other = importing.validate_upload(
+        actor=director,
+        kind_key="groups",
+        branch=branch_b,
+        uploaded_file=SimpleUploadedFile("x.xlsx", b"not an excel file"),
+    )
+    a = login(fresh(admin_a))
+    assert a.get("/import/").status_code == 200
+    assert 'href="/import/"' in a.get("/").content.decode()
+    assert a.get(f"/import/{other.pk}/").status_code == 404  # another branch's upload
 
 
 def test_director_gives_and_takes_back(login, director, admin_a, branch_a):

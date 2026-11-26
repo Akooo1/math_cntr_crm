@@ -13,7 +13,7 @@ All passwords: **demo12345**
 | +998 90 000 00 12 | Sotuv menejeri | Sardor Rahimov | Chilonzor |
 | +998 90 000 00 13 | O'qituvchi | Nodir Tursunov | Chilonzor |
 | +998 90 000 00 14 | O'qituvchi | Malika Ergasheva | Chilonzor |
-| +998 90 000 00 21 | Filial administratori | Bekzod Aliyev (may record Kirim) | Yunusobod |
+| +998 90 000 00 21 | Filial administratori | Bekzod Aliyev (may record Kirim and import) | Yunusobod |
 | +998 90 000 00 22 | Sotuv menejeri | Kamola Saidova | Yunusobod |
 | +998 90 000 00 23 | O'qituvchi | Jasur Xolmatov | Yunusobod |
 | +998 90 000 00 24 | O'qituvchi | Shahnoza Qodirova | Yunusobod |
@@ -29,16 +29,18 @@ center-wide Instagram budget), fixed salaries for administrators and managers, a
 - **Warnings** (Ogohlantirishlar): overdue debts, students who missed their last two lessons,
   and new leads nobody called.
 - **Students who left with a reason** (report "O'quvchilar nega ketadi").
-- **Bekzod Aliyev** was given "Kirim" in Sozlamalar → Foydalanuvchilar; Aziza Yusupova was not.
+- **Bekzod Aliyev** was given "Kirim" and "Import" in Sozlamalar → Foydalanuvchilar; Aziza
+  Yusupova was not. Only the Direktor closes the day in the Kassa (past days are closed).
 
 ## A short tour
 
 - **Direktor:** Bosh sahifa (schedule bar, tiles, chart) → Ogohlantirishlar → Hisobotlar →
   Filial foydasi → Xarajatlar → Maoshlar (fixed staff pay next to teachers) → Sozlamalar →
-  Foydalanuvchilar → Bekzod (Qo'shimcha ruxsatlar).
+  Foydalanuvchilar → Bekzod (Qo'shimcha ruxsatlar). Switch the branch in the top bar on
+  Kassa or Ombor: the page follows.
 - **Administrator (Aziza):** To'lov qabul qilish (success screen) → O'quvchilar on a phone
-  (call / pay buttons) → Davomat → "Hammasi keldi" → Ombor (no Kirim button). Then log in
-  as **Bekzod**: Ombor has "Kirim".
+  (call / pay buttons) → Davomat → "Hammasi keldi" → Ombor (no Kirim button) → Kassa
+  (no "Kunni yopish"). Then log in as **Bekzod**: Ombor has "Kirim", the menu has Import.
 - **Sales manager (Sardor):** Lidlar board (drag a card, then "Ortga qaytarish") →
   Ogohlantirishlar (leads only, no money) → Vazifalar.
 - **Teacher (Nodir):** Bosh sahifa (Keldim with "your first lesson starts at …", Maoshim

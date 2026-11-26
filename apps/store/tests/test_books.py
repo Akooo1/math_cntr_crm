@@ -98,8 +98,10 @@ class TestPayLater:
         report = billing.cash.day_report(student.branch_id, TODAY)
         assert report["total_out"] == 0  # no cash moved
 
-    def test_on_account_book_is_not_blocked_by_a_closed_day(self, shop, admin_a, student, branch_a):
-        billing.cash.close_day(actor=admin_a, branch=branch_a, day=TODAY)
+    def test_on_account_book_is_not_blocked_by_a_closed_day(
+        self, director, shop, admin_a, student, branch_a
+    ):
+        billing.cash.close_day(actor=director, branch=branch_a, day=TODAY)
         assert give(admin_a, student, shop["book"]).settlement == "on_account"
 
 
@@ -113,8 +115,8 @@ class TestPayNow:
         assert report["total_in"] == 60_000
         assert selectors.student_books(admin_a, student)[0]["status"] == "paid"
 
-    def test_closed_day_blocks_pay_now(self, shop, admin_a, student, cash, branch_a):
-        billing.cash.close_day(actor=admin_a, branch=branch_a, day=TODAY)
+    def test_closed_day_blocks_pay_now(self, director, shop, admin_a, student, cash, branch_a):
+        billing.cash.close_day(actor=director, branch=branch_a, day=TODAY)
         with pytest.raises(ValidationError):
             give(admin_a, student, shop["book"], method=cash)
 

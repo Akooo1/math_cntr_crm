@@ -22,7 +22,7 @@ from tests.factories import (
     page_text,
 )
 
-pytestmark = pytest.mark.django_db
+pytestmark = [pytest.mark.django_db, pytest.mark.usefixtures("import_granted")]
 
 
 @pytest.fixture(autouse=True)

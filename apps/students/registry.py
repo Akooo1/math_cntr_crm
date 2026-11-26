@@ -23,7 +23,8 @@ register_permission("students.manage", _("Manage students and enrollments"), {D,
 register_permission("groups.view", _("View groups"), {D, A, M, T})
 register_permission("groups.manage", _("Manage groups and lessons"), {D, A})
 register_permission("attendance.mark", _("Mark attendance"), {D, A, T})
-register_permission("import.run", _("Import from Excel"), {D, A})
+# The Direktor's; can be given to individual people (Sozlamalar -> Foydalanuvchilar).
+register_permission("import.run", _("Import from Excel"), {D}, grantable=True)
 
 register_setting(
     SettingDef(

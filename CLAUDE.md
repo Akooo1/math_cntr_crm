@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **§19–§22 on the work branch** (warnings, expenses and profit, parent bot menu, Ombor rights per person, teachers' arrival from lessons) with the lime/black design; waiting for the owner's review before `main`. Update this line at the end of each phase.
+- Current phase: **§19–§23 on the work branch** (warnings, expenses and profit, parent bot menu, Ombor and Import rights per person, Kunni yopish Direktor-only, branch switcher fixes, teachers' arrival from lessons) with the lime/black design; waiting for the owner's review before `main`. Update this line at the end of each phase.
 
 ## Ask the owner before
 
@@ -208,7 +208,10 @@ Add new terms here before using them in the UI.
   each Sozlamalar page.
 - `core.day_plans`: `register_day_start_provider` / `day_starts` — when a person is expected
   on a day (students provides teachers' first lesson; staff uses it for "Keldim").
-  `request.branch_filter` is the branch picked in the top-bar switcher (None = all).
+  `request.branch_filter` is the branch picked in the top-bar switcher (None = all). Every
+  list, widget and form choice list passes it to its selector; a page that works on one
+  branch reads `?filial=` (which also sets the switcher). `tests/test_branch_switcher.py`
+  sweeps every page for other-branch data.
 - `core.audit.record(...)` / `core.audit.snapshot(obj)`; `core.crud.save_form` / `set_active`
   for audited reference-data writes.
 - `core.events.DomainEvent`, `publish`, `subscribe` (+ outbox).

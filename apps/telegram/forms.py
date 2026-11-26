@@ -32,13 +32,15 @@ class SendForm(StyledForm):
     day = UzDateField(label=_("Date"), required=False)
     student = forms.IntegerField(widget=forms.HiddenInput, required=False)
 
-    def __init__(self, *args, user=None, **kwargs):
+    def __init__(self, *args, user=None, branch_filter=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["template"].queryset = selectors.templates()
         self.fields["template"].empty_label = _("Choose")
         self.fields["template"].widget.attrs["data-fill-target"] = "id_text"
         self.fields["group"].queryset = (
-            student_selectors.groups_for(user).exclude(status="finished").order_by("name")
+            student_selectors.groups_for(user, branch_filter)
+            .exclude(status="finished")
+            .order_by("name")
         )
         self.fields["group"].empty_label = _("Choose")
         # "One student" only when coming from a student's profile.

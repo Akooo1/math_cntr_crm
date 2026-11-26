@@ -22,7 +22,12 @@ def send(request):
             initial.update(mode="student", student=int(request.GET["oquvchi"]))
         except ValueError:
             pass
-    form = SendForm(request.POST or None, user=request.user, initial=initial)
+    form = SendForm(
+        request.POST or None,
+        user=request.user,
+        branch_filter=request.branch_filter,
+        initial=initial,
+    )
     targets, result, preview = [], None, None
     if request.method == "POST" and form.is_valid():
         d = form.cleaned_data

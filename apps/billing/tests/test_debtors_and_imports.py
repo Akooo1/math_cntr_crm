@@ -91,6 +91,7 @@ def xlsx(kind_key, rows):
     return SimpleUploadedFile("f.xlsx", buf.getvalue())
 
 
+@pytest.mark.usefixtures("import_granted")
 class TestImports:
     def test_opening_balances_debt_and_credit(self, admin_a, branch_a, clock):
         debtor = make_student(admin_a, branch_a, phone="+998901110001", parent_phone="")
@@ -206,10 +207,14 @@ class TestPages:
         text = page_text(login(teacher_a).get(f"/oquvchilar/{s.pk}/"))
         assert "so'm" not in text and "Qarzi bor" not in text and "To'lov" not in text
 
-    def test_cash_close_page(self, login, admin_a, branch_a, student, group, cash):
+    def test_cash_close_page(self, login, admin_a, director, branch_a, student, group, cash):
         st.enroll(actor=admin_a, student=student, group=group, start_date=D(2026, 11, 2))
         pay(admin_a, student, 100_000, cash)
         c = login(admin_a)
         assert "100 000 so'm" in page_text(c.get("/kassa/"))
+        assert "Kunni yopish" not in page_text(c.get("/kassa/"))  # the Direktor's
+        resp = c.post("/kassa/yopish/", {"filial": branch_a.pk, "sana": "16.11.2026"})
+        assert resp.status_code == 403
+        c = login(director)
         c.post("/kassa/yopish/", {"filial": branch_a.pk, "sana": "16.11.2026"})
         assert services.payments.is_closed(branch_a.pk, D(2026, 11, 16))

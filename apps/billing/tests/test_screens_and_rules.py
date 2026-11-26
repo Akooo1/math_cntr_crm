@@ -253,7 +253,7 @@ class TestServiceRules:
                 actor=director, student=student, amount=0, method=cash, reason="x"
             )
         with pytest.raises(ValidationError):
-            services.cash.close_day(actor=admin_a, branch=branch_a, day=D(2026, 11, 17))
+            services.cash.close_day(actor=director, branch=branch_a, day=D(2026, 11, 17))
 
     def test_installment_needs_template_and_price(
         self, director, admin_a, branch_a, student, clock
@@ -292,6 +292,7 @@ class TestServiceRules:
         assert Charge.objects.filter(enrollment=back).exists()
 
 
+@pytest.mark.usefixtures("import_granted")
 class TestImportErrors:
     def _upload(self, actor, branch, kind, rows):
         from apps.students.services import importing
