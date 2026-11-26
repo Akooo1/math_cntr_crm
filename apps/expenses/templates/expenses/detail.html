@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}{{ expense.category.name }}{% endblock %}
+{% block heading %}{{ expense.category.name }}{% endblock %}
+{% block count %}{% if reversal %}<span class="badge bg-rose-100 text-rose-800">{% translate "Cancelled" %}</span>{% endif %}{% endblock %}
+{% block breadcrumbs %}<a href="{% url 'expenses:list' %}">{% translate "Expenses" %}</a>{% endblock %}
+{% block content %}
+  <div class="max-w-xl space-y-4">
+    <section class="card p-5">
+      <p class="text-sm text-slate-500">{% translate "Amount" %}</p>
+      <p class="text-3xl font-semibold tabular-nums {% if reversal %}text-muted line-through{% endif %}">{{ expense.amount|som }}</p>
+      <dl class="mt-4 space-y-2 text-sm">
+        <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Date" %}</dt><dd>{{ expense.spent_on|sana }}</dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Branch" %}</dt><dd>{% if expense.branch %}{{ expense.branch.name }}{% else %}{% translate "Whole center" %}{% endif %}</dd></div>
+        <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Paid from" %}</dt><dd>{% if expense.method %}{% blocktranslate with m=expense.method.name %}Cash desk: {{ m }}{% endblocktranslate %}{% else %}{% translate "Not from the cash desk (bank, owner)" %}{% endif %}</dd></div>
+        {% if expense.note %}<div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Note" %}</dt><dd class="text-right">{{ expense.note }}</dd></div>{% endif %}
+        <div class="flex justify-between gap-3"><dt class="text-slate-500">{% translate "Created by" %}</dt><dd>{{ expense.created_by.full_name }} <span class="text-slate-500">({% relative_time expense.created_at %})</span></dd></div>
+      </dl>
+      {% if reversal %}<p class="mt-4 rounded-2xl bg-rose-50 p-3 text-sm text-rose-800">{% blocktranslate with d=reversal.spent_on|sana n=reversal.created_by.full_name %}Cancelled on {{ d }} by {{ n }}.{% endblocktranslate %} {{ reversal.reason }}</p>{% endif %}
+    </section>
+    {% if form %}
+      {% translate "Cancel this expense? A cash desk expense's money goes back into today's Kassa." as q %}
+      <form method="post" action="{% url 'expenses:reverse' expense.pk %}" class="card space-y-3 p-5" data-confirm="{{ q }}">{% csrf_token %}
+        <p class="font-semibold">{% translate "Cancel the expense" %}</p>
+        {% for f in form %}{% field f %}{% endfor %}
+        <div class="form-actions justify-end"><button class="btn-danger-soft">{% icon "x-circle" "w-4 h-4" %}{% translate "Cancel the expense" %}</button></div>
+      </form>
+    {% endif %}
+  </div>
+{% endblock %}

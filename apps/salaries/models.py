@@ -45,6 +45,40 @@ class Rate(models.Model):
         return f"{self.teacher_id}: {self.rate_bp} from {self.effective_from}"
 
 
+class StaffPay(models.Model):
+    """A fixed monthly salary from a month on (administrators, sales managers; also a teacher
+    who gets a fixed part). Append-only: a change is a new row; 0 stops the fixed pay."""
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="fixed_pay",
+        verbose_name=_("Employee"),
+    )
+    amount = MoneyField(_("Monthly salary"))
+    effective_from = models.DateField(_("Effective from"))
+    reason = models.TextField(_("Reason"), blank=True)
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name=_("Created by"),
+    )
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
+
+    class Meta:
+        db_table = "salaries_staff_pay"
+        verbose_name = _("Fixed salary")
+        ordering = ["user_id", "-effective_from", "-created_at"]
+        constraints = [
+            models.CheckConstraint(condition=Q(amount__gte=0), name="salaries_staff_pay_amount"),
+            _first_of_month("effective_from", "salaries_staff_pay_first_of_month"),
+        ]
+
+    def __str__(self):
+        return f"{self.user_id}: {self.amount} from {self.effective_from}"
+
+
 class Month(models.Model):
     """A closed salary month. Its lines are frozen. Append-only."""
 
@@ -114,6 +148,32 @@ class Line(models.Model):
 
     def __str__(self):
         return f"{self.teacher_id}/{self.student_id}: {self.amount}"
+
+
+class FixedLine(models.Model):
+    """An employee's fixed salary for a closed month (frozen at closing). Append-only."""
+
+    month = models.ForeignKey(
+        Month, on_delete=models.PROTECT, related_name="fixed_lines", verbose_name=_("Month")
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name=_("Employee"),
+    )
+    amount = MoneyField(_("Amount"))
+
+    class Meta:
+        db_table = "salaries_fixed_line"
+        verbose_name = _("Fixed salary line")
+        constraints = [
+            models.CheckConstraint(condition=Q(amount__gt=0), name="salaries_fixed_line_positive"),
+            models.UniqueConstraint(fields=["month", "user"], name="salaries_fixed_line_once"),
+        ]
+
+    def __str__(self):
+        return f"{self.user_id}: {self.amount}"
 
 
 class Adjustment(models.Model):

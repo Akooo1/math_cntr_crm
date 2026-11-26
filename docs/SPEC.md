@@ -1390,3 +1390,45 @@ Missed lessons: whoever manages students, and the teacher a task was given to. O
 debt: only people who see debts (never sales managers or teachers). Leads: lead staff; a
 sales manager sees their own leads' warnings and unassigned ones. Branch scope applies;
 another branch's warning is 404.
+
+---
+
+## 20. Expenses, staff salaries and branch profit (owner's request)
+
+Owner's decisions: a cash expense comes out of the day's Kassa; administrators' and sales
+managers' salaries are a fixed monthly amount plus manual bonuses/deductions; center-wide
+costs are split between branches by students' payments. Details: `docs/modules/expenses.md`.
+
+### 20.1 Expenses (`apps/expenses`)
+
+- `expenses_category` (editable in Sozlamalar → Xarajat turlari; starting list Ijara,
+  Kommunal to'lovlar, Reklama, Kanselyariya, Xo'jalik, Boshqa).
+- `expenses_expense` (append-only, trigger): branch (empty = whole center), category, amount
+  (> 0), date, `method` (a Kassa method = paid from that branch's cash desk; empty = bank,
+  the owner's own money), note, created by. A mistake is a `reversal` row (Direktor only,
+  with a reason, dated today; a cash desk expense's money goes back into today's Kassa).
+- From the cash desk: same rules as payments — not in the future, at most
+  `billing.backdate_days` back, never on a closed day (day lock + check). It shows in the
+  Kassa as the subtotal "Xarajatlar" (billing's cash-source hook, SPEC 17.4).
+- Who: the Direktor and branch administrators (own branch); center-wide expenses only the
+  Direktor.
+
+### 20.2 Staff salaries (`apps/salaries`)
+
+- `salaries_staff_pay` (append-only): a fixed monthly salary from a month on (0 stops it),
+  for administrators and sales managers (a teacher may also get one).
+- Closing a month freezes it into `salaries_fixed_line`. The salary sheet shows it next to the
+  teacher share; bonuses, deductions, carry-over and payout work as for teachers.
+- Administrators and sales managers see their own "Maoshim" (no student data on their sheet;
+  owner-approved, like the teachers' own sheet).
+
+### 20.3 Branch profit (report, Direktor only)
+
+Per branch for the period: students' payments (net) + desk sales paid on the spot − purchase
+cost of what was sold − teacher salaries (by the group's branch) − staff salaries (by the
+person's branch) − the branch's expenses − its share of center-wide costs. Center-wide costs =
+center-wide expenses + teachers' bonuses/deductions + pay of staff in several branches, split
+by students' payments (equally when nobody paid); the split adds up exactly
+(`apps/expenses/domain.split`, rounded with `round_amount`). Salaries count for the months
+that start inside the period; an open month counts as calculated so far. Books given "pay
+later" count when the parent pays (they are billing charges).

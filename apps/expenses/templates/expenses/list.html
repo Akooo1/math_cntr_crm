@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}{% translate "Expenses" %}{% endblock %}
+{% block heading %}{% translate "Expenses" %}{% endblock %}
+{% block menu %}{% if user|can:"expenses.profit" %}<a class="menu-item" role="menuitem" href="{% url 'reports:report' 'filial-foydasi' %}">{% icon "chart" "w-4 h-4" %}{% translate "Branch profit" %}</a>{% endif %}{% if user|can:"settings.manage" %}<a class="menu-item" role="menuitem" href="{% url 'settings:section_list' 'xarajat-turlari' %}">{% icon "cog" "w-4 h-4" %}{% translate "Expense categories" %}</a>{% endif %}{% endblock %}
+{% block primary %}{% if can_create %}<a href="{% url 'expenses:create' %}" class="btn-primary">{% icon "plus" %}<span>{% translate "New expense" %}</span></a>{% endif %}{% endblock %}
+{% block content %}
+  <form method="get" class="card mb-4 grid grid-cols-2 items-end gap-3 p-4 sm:flex sm:flex-wrap">
+    <div><label class="label" for="dan">{% translate "From" %}</label><input id="dan" name="dan" value="{{ start|sana }}" data-mask="date" inputmode="numeric" class="input w-full sm:w-40"></div>
+    <div><label class="label" for="gacha">{% translate "To" %}</label><input id="gacha" name="gacha" value="{{ end|sana }}" data-mask="date" inputmode="numeric" class="input w-full sm:w-40"></div>
+    <div class="col-span-2 min-w-0 sm:flex-[1_1_10rem]"><label class="label" for="tur">{% translate "Category" %}</label><select id="tur" name="tur" class="input"><option value="">{% translate "All" %}</option>{% for c in categories %}<option value="{{ c.pk }}" {% if category == c.pk|stringformat:"s" %}selected{% endif %}>{{ c.name }}</option>{% endfor %}</select></div>
+    {% if show_center %}<label class="col-span-2 flex min-h-11 items-center gap-2 text-sm"><input type="checkbox" class="check" name="joy" value="markaz" {% if request.GET.joy == "markaz" %}checked{% endif %}>{% translate "Only center-wide" %}</label>{% endif %}
+    <button class="btn-secondary col-span-2">{% icon "funnel" "w-4 h-4" %}{% translate "Filter" %}</button>
+  </form>
+
+  {% if not page.object_list %}
+    <div class="card">{% url 'expenses:list' as reset %}{% include "components/empty.html" with icon="wallet" title=_("No expenses in this period.") text=_("Record rent, utilities, advertising and other costs here; the branch profit report uses them.") reset=reset %}</div>
+  {% else %}
+  <ul class="space-y-2 md:hidden">
+    {% for e in page %}
+      <li><a href="{% url 'expenses:detail' e.reverses_id|default:e.pk %}" class="card flex items-center justify-between gap-3 p-3">
+        <div class="min-w-0"><p class="truncate font-medium">{{ e.category.name }}{% if e.kind == 'reversal' %} · <span class="text-rose-700">{% translate "Cancelled" %}</span>{% endif %}</p><p class="truncate text-sm text-slate-500">{{ e.spent_on|sana }} · {% if e.branch %}{{ e.branch.name }}{% else %}{% translate "Whole center" %}{% endif %}{% if e.method %} · {% translate "Cash desk" %}{% endif %}</p></div>
+        <span class="shrink-0 font-semibold tabular-nums {% if e.kind == 'reversal' %}text-emerald-700{% elif e.pk in cancelled %}text-muted line-through{% endif %}">{% if e.kind == 'reversal' %}+{% else %}−{% endif %}{{ e.amount|som }}</span>
+      </a></li>
+    {% endfor %}
+  </ul>
+  <div class="card table-scroll hidden md:block">
+    <table class="min-w-full">
+      <thead><tr>
+        <th class="table-head">{% translate "Date" %}</th><th class="table-head">{% translate "Category" %}</th><th class="table-head">{% translate "Branch" %}</th>
+        <th class="table-head">{% translate "Paid from" %}</th><th class="table-head">{% translate "Note" %}</th><th class="table-head">{% translate "Created by" %}</th><th class="table-head text-right">{% translate "Amount" %}</th>
+      </tr></thead>
+      <tbody class="divide-y divide-slate-100">
+        {% for e in page %}
+          <tr class="hover:bg-surface-2">
+            <td class="table-cell tabular-nums"><a class="link" href="{% url 'expenses:detail' e.reverses_id|default:e.pk %}">{{ e.spent_on|sana }}</a></td>
+            <td class="table-cell">{{ e.category.name }}{% if e.kind == 'reversal' %} <span class="badge bg-rose-100 text-rose-800">{% translate "Cancelled" %}</span>{% endif %}</td>
+            <td class="table-cell">{% if e.branch %}{{ e.branch.name }}{% else %}{% translate "Whole center" %}{% endif %}</td>
+            <td class="table-cell">{% if e.method %}{% blocktranslate with m=e.method.name %}Cash desk: {{ m }}{% endblocktranslate %}{% else %}—{% endif %}</td>
+            <td class="table-cell max-w-xs truncate">{{ e.note|default:e.reason|default:"—" }}</td>
+            <td class="table-cell">{{ e.created_by.full_name }}</td>
+            <td class="table-cell text-right font-semibold tabular-nums {% if e.kind == 'reversal' %}text-emerald-700{% elif e.pk in cancelled %}text-muted line-through{% endif %}">{% if e.kind == 'reversal' %}+{% endif %}{{ e.amount|som }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% include "components/pagination.html" %}
+  {% endif %}
+{% endblock %}

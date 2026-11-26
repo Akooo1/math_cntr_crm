@@ -10,7 +10,11 @@ from apps.core.settings_panel import register_section
 from apps.core.system_settings import SettingDef, register_setting
 
 register_permission("salaries.manage", _("Manage teacher salaries"), {Role.DIRECTOR})
-register_permission("salaries.view_own", _("See own salary"), {Role.TEACHER})
+register_permission(
+    "salaries.view_own",
+    _("See own salary"),
+    {Role.TEACHER, Role.BRANCH_ADMIN, Role.SALES_MANAGER},
+)
 
 registry.add_nav(
     NavItem(
@@ -78,9 +82,10 @@ register_audit_labels(
 
 
 def _register():
-    from .sections import RateSection
+    from .sections import RateSection, StaffPaySection
 
     register_section(RateSection())
+    register_section(StaffPaySection())
 
 
 _register()

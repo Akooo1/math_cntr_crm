@@ -21,7 +21,7 @@ from apps.students.models import Group, Student
 
 from .domain import calc
 from .formatting import format_percent
-from .models import Adjustment, Line, Month, Payout, Rate
+from .models import Adjustment, FixedLine, Line, Month, Payout, Rate, StaffPay
 
 CLOSED, OPEN, LATER = "closed", "open", "later"
 
@@ -97,6 +97,53 @@ def rate_lookup():
 
 def teachers():
     return get_user_model().objects.filter(role=Role.TEACHER).order_by("full_name")
+
+
+SALARIED_ROLES = (Role.TEACHER, Role.BRANCH_ADMIN, Role.SALES_MANAGER)
+
+
+def salaried():
+    """Everyone who can have a salary sheet: teachers (share) and staff (fixed pay)."""
+    return get_user_model().objects.filter(role__in=SALARIED_ROLES).order_by("full_name")
+
+
+def staff():
+    """Administrators and sales managers: the people with a fixed monthly salary."""
+    return (
+        get_user_model()
+        .objects.filter(role__in=(Role.BRANCH_ADMIN, Role.SALES_MANAGER))
+        .order_by("full_name")
+    )
+
+
+def fixed_amounts(month: dt.date) -> dict[int, int]:
+    """{user_id: fixed salary in force in `month`} for active people with one (> 0)."""
+    rows = defaultdict(list)
+    for r in StaffPay.objects.filter(user__is_active=True).values(
+        "user_id", "effective_from", "created_at", "id", "amount"
+    ):
+        rows[r["user_id"]].append(
+            calc.PayRow(r["effective_from"], (r["created_at"], r["id"]), r["amount"])
+        )
+    out = {uid: calc.fixed_on(rs, month) for uid, rs in rows.items()}
+    return {uid: a for uid, a in out.items() if a > 0}
+
+
+def current_staff_pay() -> list[dict]:
+    """Sozlamalar -> Xodimlar maoshi: each administrator / manager, today's fixed salary and
+    history."""
+    month = month_start(dates.today())
+    history = defaultdict(list)
+    for r in StaffPay.objects.select_related("created_by").order_by(
+        "-effective_from", "-created_at"
+    ):
+        history[r.user_id].append(r)
+    now = fixed_amounts(month)
+    people = staff().filter(is_active=True) | get_user_model().objects.filter(pk__in=history)
+    return [
+        {"user": u, "amount": now.get(u.pk, 0), "history": history.get(u.pk, [])}
+        for u in people.distinct().order_by("full_name")
+    ]
 
 
 def current_rates() -> list[dict]:
@@ -204,10 +251,12 @@ def sheets_for(month: dt.date, teacher_ids: set[int] | None = None) -> list[Shee
     state = month_state(month)
     if state == CLOSED:
         lines = list(Line.objects.filter(month__month=month))
+        fixed = dict(FixedLine.objects.filter(month__month=month).values_list("user_id", "amount"))
     elif state == OPEN:
         lines = draft(month)
+        fixed = fixed_amounts(month)
     else:
-        lines = []
+        lines, fixed = [], {}
     adjustments = list(Adjustment.objects.filter(month=month).select_related("created_by"))
     payouts = _active_payouts(month) if state == CLOSED else {}
     by_teacher = defaultdict(list)
@@ -216,7 +265,7 @@ def sheets_for(month: dt.date, teacher_ids: set[int] | None = None) -> list[Shee
     adj_by_teacher = defaultdict(list)
     for a in adjustments:
         adj_by_teacher[a.teacher_id].append(a)
-    ids = set(by_teacher) | set(adj_by_teacher)
+    ids = set(by_teacher) | set(adj_by_teacher) | set(fixed)
     if teacher_ids is not None:
         ids = (ids | teacher_ids) & teacher_ids
     else:
@@ -232,7 +281,7 @@ def sheets_for(month: dt.date, teacher_ids: set[int] | None = None) -> list[Shee
                 state=state,
                 lines=mine,
                 adjustments=adj,
-                totals=calc.totals(mine, [(a.kind, a.amount) for a in adj]),
+                totals=calc.totals(mine, [(a.kind, a.amount) for a in adj], fixed.get(tid, 0)),
                 payout=payouts.get(tid),
             )
         )
@@ -245,7 +294,7 @@ def month_overview(user, month: dt.date) -> dict:
     sheets = sheets_for(month)
     grand = calc.Totals()
     for s in sheets:
-        for f in ("paid", "share", "corrections", "bonuses", "deductions"):
+        for f in ("paid", "share", "corrections", "fixed", "bonuses", "deductions"):
             setattr(grand, f, getattr(grand, f) + getattr(s.totals, f))
     return {
         "month": month,
@@ -265,11 +314,13 @@ def sheet(user, teacher_id: int, month: dt.date) -> Sheet:
             raise PermissionDenied
         if teacher_id != user.pk:
             raise Http404
-    if not teachers().filter(pk=teacher_id).exists():
+    person = salaried().filter(pk=teacher_id).first()
+    if person is None:
         raise Http404
     result = sheets_for(month, {teacher_id})[0]
     result.lines = _line_dicts(result.lines)
-    result.rate = format_percent(rate_lookup()(teacher_id, month))
+    if person.role == Role.TEACHER:
+        result.rate = format_percent(rate_lookup()(teacher_id, month))
     return result
 
 

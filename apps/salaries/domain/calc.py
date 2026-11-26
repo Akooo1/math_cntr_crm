@@ -84,17 +84,36 @@ class Totals:
     paid: int = 0  # money students paid this month (share lines' basis)
     share: int = 0
     corrections: int = 0
+    fixed: int = 0  # fixed monthly salary (administrators, managers)
     bonuses: int = 0
     deductions: int = 0  # negative or zero (includes carry-over)
 
     @property
     def total(self) -> int:
-        return self.share + self.corrections + self.bonuses + self.deductions
+        return self.share + self.corrections + self.fixed + self.bonuses + self.deductions
 
 
-def totals(lines: list, adjustments: list[tuple[str, int]]) -> Totals:
+@dataclass(frozen=True)
+class PayRow:
+    effective_from: dt.date
+    order: tuple  # tie-break for rows with the same month: later created wins
+    amount: int
+
+
+def fixed_on(rows: list[PayRow], month: dt.date) -> int:
+    """The fixed monthly salary in force in `month` (0 = none)."""
+    best = None
+    for row in rows:
+        if row.effective_from <= month and (
+            best is None or (row.effective_from, row.order) > (best.effective_from, best.order)
+        ):
+            best = row
+    return 0 if best is None else best.amount
+
+
+def totals(lines: list, adjustments: list[tuple[str, int]], fixed: int = 0) -> Totals:
     """`lines` need .kind/.base/.amount; adjustments are (kind, signed amount)."""
-    t = Totals()
+    t = Totals(fixed=fixed)
     for line in lines:
         if line.kind == SHARE:
             t.paid += line.base

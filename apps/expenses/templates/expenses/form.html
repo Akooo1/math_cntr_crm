@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{% translate "New expense" %}{% endblock %}
+{% block heading %}{% translate "New expense" %}{% endblock %}
+{% block breadcrumbs %}<a href="{% url 'expenses:list' %}">{% translate "Expenses" %}</a>{% endblock %}
+{% block content %}
+  <form method="post" class="card max-w-2xl space-y-4 p-5" novalidate>{% csrf_token %}
+    {% include "components/form_errors.html" %}
+    {% for f in form %}{% field f %}{% endfor %}
+    <div class="form-actions justify-end pt-2">
+      <a href="{% url 'expenses:list' %}" class="btn-secondary">{% translate "Cancel" %}</a>
+      <button class="btn-primary">{% icon "check" %}<span>{% translate "Save" %}</span></button>
+    </div>
+  </form>
+{% endblock %}

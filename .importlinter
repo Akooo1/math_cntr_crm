@@ -11,6 +11,7 @@ name = Module layers
 type = layers
 layers =
     apps.demo
+    apps.expenses
     apps.reports | apps.salaries | apps.telegram | apps.store
     apps.alerts
     apps.billing | apps.crm
@@ -29,6 +30,7 @@ type = forbidden
 source_modules =
     apps.alerts.domain
     apps.billing.domain
+    apps.expenses.domain
     apps.salaries.domain
     apps.staff.domain
     apps.store.domain

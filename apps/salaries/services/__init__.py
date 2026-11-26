@@ -14,7 +14,7 @@ from apps.core.roles import Role
 
 from .. import selectors
 from ..domain import calc
-from ..models import Adjustment, Line, Month, Payout, Rate
+from ..models import Adjustment, FixedLine, Line, Month, Payout, Rate, StaffPay
 
 LOCK_KEY = 7_410_001  # pg advisory lock: one salary write at a time
 
@@ -27,6 +27,38 @@ def _lock():
 def _teacher(user):
     if user.role != Role.TEACHER:
         raise ValidationError(_("Only teachers have a salary rate."))
+
+
+def _salaried(user):
+    if user.role not in selectors.SALARIED_ROLES:
+        raise ValidationError(_("Only teachers and staff have a salary."))
+
+
+def set_staff_pay(
+    *, actor, user, amount: int, effective_from: dt.date, reason: str = ""
+) -> StaffPay:
+    """A fixed monthly salary from a month on (0 stops it). Closed months never change."""
+    require_perm(actor, "salaries.manage")
+    _salaried(user)
+    if amount < 0:
+        raise ValidationError(_("The amount can't be negative."))
+    effective_from = month_start(effective_from)
+    closed = selectors.closed_months()
+    if effective_from in closed or any(m > effective_from for m in closed):
+        raise ValidationError(_("That month is already closed. Choose a later month."))
+    with transaction.atomic():
+        _lock()
+        row = StaffPay.objects.create(
+            user=user,
+            amount=amount,
+            effective_from=effective_from,
+            reason=reason,
+            created_by=actor,
+        )
+        audit.record(
+            actor, "salaries.staff_pay.create", row, after=audit.snapshot(row), reason=reason
+        )
+    return row
 
 
 def add_rate(*, actor, teacher, rate_bp: int, effective_from: dt.date, reason: str = "") -> Rate:
@@ -68,11 +100,17 @@ def close_month(*, actor, month: dt.date) -> Month:
         adjustments = defaultdict(list)
         for a in Adjustment.objects.filter(month=month):
             adjustments[a.teacher_id].append((a.kind, a.amount))
+        fixed = selectors.fixed_amounts(month)
         totals = {
-            str(tid): calc.totals(by_teacher.get(tid, []), adjustments.get(tid, [])).total
-            for tid in set(by_teacher) | set(adjustments)
+            str(tid): calc.totals(
+                by_teacher.get(tid, []), adjustments.get(tid, []), fixed.get(tid, 0)
+            ).total
+            for tid in set(by_teacher) | set(adjustments) | set(fixed)
         }
         closed = Month.objects.create(month=month, closed_by=actor, totals=totals)
+        FixedLine.objects.bulk_create(
+            FixedLine(month=closed, user_id=uid, amount=amount) for uid, amount in fixed.items()
+        )
         Line.objects.bulk_create(
             Line(
                 month=closed,
@@ -111,7 +149,7 @@ def add_adjustment(
 ) -> Adjustment:
     """Bonus (+) or deduction (-) for a month that is not closed yet."""
     require_perm(actor, "salaries.manage")
-    _teacher(teacher)
+    _salaried(teacher)
     if kind not in (Adjustment.Kind.BONUS, Adjustment.Kind.DEDUCTION):
         raise ValidationError(_("Choose a bonus or a deduction."))
     if amount <= 0:

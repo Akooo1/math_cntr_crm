@@ -50,6 +50,22 @@ class RateForm(StyledForm):
         return selectors.parse_month(self.cleaned_data["effective_from"])
 
 
+class StaffPayForm(StyledForm):
+    user = forms.ModelChoiceField(queryset=None, label=_("Employee"))
+    amount = MoneyField(label=_("Monthly salary"), help_text=_("0 stops the fixed salary."))
+    effective_from = forms.ChoiceField(label=_("From month"))
+    reason = forms.CharField(label=_("Reason"), required=False, widget=forms.Textarea)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["user"].queryset = selectors.salaried().filter(is_active=True)
+        self.fields["user"].empty_label = _("Choose")
+        self.fields["effective_from"].choices = month_choices()
+
+    def clean_effective_from(self):
+        return selectors.parse_month(self.cleaned_data["effective_from"])
+
+
 class AdjustmentForm(StyledForm):
     kind = forms.ChoiceField(
         label=_("Type"),

@@ -155,6 +155,12 @@ class Command(BaseCommand):
             with transaction.atomic():
                 self._seed_store(User)
             created = True
+        from apps.expenses.models import Expense
+
+        if not Expense.objects.exists():
+            with transaction.atomic():
+                self._seed_expenses(User)
+            created = True
         # Early warnings from the demo attendance, debts and leads (the cron job does this
         # every 15 minutes in production). Idempotent.
         from apps.alerts.services import run_checks
@@ -166,6 +172,49 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("Demo data created."))
         for phone, name, role, _b in USERS:
             self.stdout.write(f"  {phone}  {DEMO_PASSWORD}  {role}  {name}")
+
+    def _seed_expenses(self, User):
+        """This month's expenses per branch (not from the cash desk, so the demo Kassa stays
+        as it is), one center-wide ad budget, and fixed salaries for staff from the open
+        salary month."""
+        from apps.expenses import services as expenses
+        from apps.expenses.models import Category
+        from apps.salaries import services as salaries
+        from apps.salaries.selectors import open_month
+
+        director = User.objects.get(phone=USERS[0][0])
+        today = dates.today()
+        cat = {c.name: c for c in Category.objects.all()}
+        for i, branch in enumerate(Branch.objects.order_by("pk")):
+            for name, amount in (
+                ("Ijara", 6_000_000 + i * 1_000_000),
+                ("Kommunal to'lovlar", 850_000),
+            ):
+                expenses.record(
+                    actor=director,
+                    branch=branch,
+                    category=cat[name],
+                    amount=amount,
+                    spent_on=today.replace(day=1),
+                    note="Demo",
+                )
+        expenses.record(
+            actor=director,
+            branch=None,
+            category=cat["Reklama"],
+            amount=2_400_000,
+            spent_on=today.replace(day=1),
+            note="Instagram",
+        )
+        month = open_month()
+        for phone, _n, role, _b in USERS:
+            if role in (Role.BRANCH_ADMIN, Role.SALES_MANAGER):
+                salaries.set_staff_pay(
+                    actor=director,
+                    user=User.objects.get(phone=phone),
+                    amount=4_000_000 if role == Role.BRANCH_ADMIN else 3_000_000,
+                    effective_from=month,
+                )
 
     def _seed_store(self, User):
         """Books and counter items in both branches: deliveries over the last weeks (one

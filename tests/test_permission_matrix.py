@@ -371,9 +371,11 @@ def objects(director, branch_a, branch_b, admin_a, teacher_a):
         or LeadStage.objects.create(name="Qo'shimcha", kind="custom"),
         "rad-sabablari": RefusalReason.objects.first(),
         "ketish-sabablari": LeaveReason.objects.first(),
+        "xarajat-turlari": _first_expense_category(),
         "chek": branch_a,
         "umumiy": branch_a,
         "stavkalar": leads["rate"],
+        "xodimlar-maoshi": leads["staff_pay"],
         "filial-joylashuvi": branch_a,
         "ish-vaqti": teacher_a,
         "bildirishnomalar": branch_a,
@@ -508,8 +510,12 @@ def _salary_objects(director, teacher_a, teacher_b):
     bonus = salaries.add_adjustment(
         actor=director, teacher=teacher_a, month=nxt, kind="bonus", amount=1000, reason="x"
     )
+    staff_pay = salaries.set_staff_pay(
+        actor=director, user=teacher_b, amount=1_000_000, effective_from=nxt
+    )
     return {
         "rate": rate,
+        "staff_pay": staff_pay,
         "salary_month": month,
         "salary_next": nxt,
         "salary_payout": payout,
@@ -555,10 +561,11 @@ def telegram_cases(o) -> dict[str, list[Case]]:
 
 
 def salaries_cases(o) -> dict[str, list[Case]]:
-    """Salaries: Direktor only; a teacher sees only "Maoshim" (own sheet, no teacher id in
-    the URL). Salaries are not branch-scoped: the Direktor reaches every teacher."""
+    """Salaries: Direktor only; teachers, administrators and managers see only "Maoshim"
+    (own sheet, no id in the URL). Salaries are not branch-scoped: the Direktor reaches
+    every teacher."""
     director, director_post = expect({D: 200}), expect({D: 302})
-    teacher = expect({T: 200})
+    teacher = expect({T: 200, A: 200, M: 200})  # own sheet: teachers and salaried staff
     month, nxt = f"{o['salary_month']:%m.%Y}", f"{o['salary_next']:%m.%Y}"
     ta, tb = o["teacher_a"].pk, o["teacher_b"].pk
     return {
@@ -598,6 +605,57 @@ def salaries_cases(o) -> dict[str, list[Case]]:
                 director_post,
                 {"reason": "x"},
             )
+        ],
+    }
+
+
+def _first_expense_category():
+    from apps.expenses.models import Category
+
+    return Category.objects.order_by("pk").first()
+
+
+def expenses_cases(o) -> dict[str, list[Case]]:
+    """Expenses: Direktor and branch administrators (own branch; center-wide ones only the
+    Direktor); cancelling is Direktor only."""
+    from apps.accounts.models import User
+    from apps.expenses import services as expenses
+    from apps.expenses.models import Category
+
+    d = User.objects.filter(role=D).first()
+    # Not the section's object: the settings toggle case deactivates that one.
+    cat = Category.objects.order_by("-pk").first()
+    ea = expenses.record(
+        actor=d, branch=o["group_a"].branch, category=cat, amount=1000, spent_on=today()
+    )
+    eb = expenses.record(
+        actor=d, branch=o["group_b"].branch, category=cat, amount=1000, spent_on=today()
+    )
+    shared = expenses.record(actor=d, branch=None, category=cat, amount=1000, spent_on=today())
+    staff = expect({D: 200, A: 200})
+    data = {
+        "branch": o["group_a"].branch.pk,
+        "category": cat.pk,
+        "amount": "1000",
+        "spent_on": today().strftime("%d.%m.%Y"),
+        "method": "",
+    }
+    return {
+        "expenses:list": [
+            Case("/xarajatlar/", expect=staff),
+            Case("/xarajatlar/?dan=01.01.2026&gacha=31.12.2026&joy=markaz", expect=staff),
+        ],
+        "expenses:create": [
+            Case("/xarajatlar/yangi/", expect=staff),
+            Case("/xarajatlar/yangi/", "post", expect({D: 302, A: 302}), data),
+        ],
+        "expenses:detail": [
+            Case(f"/xarajatlar/{ea.pk}/", expect=staff),
+            Case(f"/xarajatlar/{eb.pk}/", expect=expect({D: 200, A: 404})),
+            Case(f"/xarajatlar/{shared.pk}/", expect=expect({D: 200, A: 404})),
+        ],
+        "expenses:reverse": [
+            Case(f"/xarajatlar/{eb.pk}/bekor-qilish/", "post", expect({D: 302}), {"reason": "x"})
         ],
     }
 
@@ -665,6 +723,7 @@ def cases(objects) -> dict[str, list[Case]]:
     c.update(telegram_cases(objects))
     c.update(store_cases(objects))
     c.update(alerts_cases(objects))
+    c.update(expenses_cases(objects))
     for s in sections():
         base = f"/sozlamalar/{s.slug}/"
         obj = objects[s.slug]

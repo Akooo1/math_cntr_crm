@@ -7,7 +7,7 @@
   {% with manage=user|can:"salaries.manage" %}
   <div class="mb-4 flex flex-wrap items-center gap-3">
     {% include "salaries/_month_picker.html" %}
-    <p class="text-sm text-slate-500">{% blocktranslate with r=sheet.rate %}Rate: {{ r }}%{% endblocktranslate %}</p>
+    {% if sheet.rate %}<p class="text-sm text-slate-500">{% blocktranslate with r=sheet.rate %}Rate: {{ r }}%{% endblocktranslate %}</p>{% endif %}
   </div>
 
   <div class="card mb-4 p-4">
@@ -15,6 +15,7 @@
       <div class="min-w-0"><dt class="text-sm text-slate-500">{% translate "Money paid" %}</dt><dd class="font-semibold tabular-nums">{{ sheet.totals.paid|som }}</dd></div>
       <div class="min-w-0"><dt class="text-sm text-slate-500">{% translate "Share" %}</dt><dd class="font-semibold tabular-nums">{{ sheet.totals.share|som }}</dd></div>
       <div class="min-w-0"><dt class="text-sm text-slate-500">{% translate "Corrections" %}</dt><dd class="font-semibold tabular-nums">{{ sheet.totals.corrections|som }}</dd></div>
+      {% if sheet.totals.fixed %}<div class="min-w-0"><dt class="text-sm text-slate-500">{% translate "Fixed salary" %}</dt><dd class="font-semibold tabular-nums">{{ sheet.totals.fixed|som }}</dd></div>{% endif %}
       <div class="min-w-0"><dt class="text-sm text-slate-500">{% translate "Bonuses" %}</dt><dd class="font-semibold tabular-nums">{{ sheet.totals.bonuses|som }}</dd></div>
       <div class="min-w-0"><dt class="text-sm text-slate-500">{% translate "Deductions" %}</dt><dd class="font-semibold tabular-nums">{{ sheet.totals.deductions|som }}</dd></div>
       <div class="min-w-0"><dt class="text-sm text-slate-500">{% translate "Total" %}</dt><dd class="text-lg font-semibold tabular-nums">{{ sheet.totals.total|som }}</dd></div>

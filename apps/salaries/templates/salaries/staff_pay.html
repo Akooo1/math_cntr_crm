@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ section.title }}{% endblock %}
+{% block heading %}{{ section.title }}{% endblock %}
+{% block breadcrumbs %}<a href="{% url 'settings:index' %}">{% translate "Settings" %}</a>{% endblock %}
+{% block count %}<span class="count-pill">{{ rows|length }}</span>{% endblock %}
+{% block primary %}<a href="{% url 'settings:section_create' section.slug %}" class="btn-primary">{% icon "plus" %}<span>{% translate "Set a salary" %}</span></a>{% endblock %}
+{% block content %}
+  {% include "settings/_header.html" %}
+  <div class="mb-4 rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+    {% translate "Administrators and sales managers get this fixed amount every month, on their salary sheet next to the teachers. Bonuses and deductions are added on the sheet. A new amount applies from the month you choose; closed months never change." %}
+  </div>
+  <div class="space-y-3">
+    {% for r in rows %}
+      <div class="card p-4" x-data="{ open: false }">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div><p class="font-semibold">{{ r.user.full_name }}</p><p class="text-sm text-slate-500">{{ r.user.get_role_display }}</p></div>
+          <p class="text-lg font-semibold tabular-nums">{% if r.amount %}{{ r.amount|som }}{% else %}—{% endif %}</p>
+        </div>
+        <div class="mt-3 flex flex-wrap gap-2">
+          <a class="btn-secondary" href="{% url 'settings:section_create' section.slug %}?xodim={{ r.user.pk }}">{% icon "plus" "w-4 h-4" %}{% translate "Change salary" %}</a>
+          {% if r.history %}<button type="button" class="btn-ghost" @click="open = !open" :aria-expanded="open">{% icon "list" "w-4 h-4" %}{% translate "History" %} ({{ r.history|length }})</button>{% endif %}
+        </div>
+        <div x-show="open" x-cloak class="mt-3 overflow-x-auto">
+          <table class="min-w-full text-sm">
+            <thead><tr class="text-left text-xs uppercase text-slate-500"><th class="py-2 pr-4">{% translate "From month" %}</th><th class="py-2 pr-4">{% translate "Monthly salary" %}</th><th class="py-2 pr-4">{% translate "Reason" %}</th><th class="py-2">{% translate "Created by" %}</th></tr></thead>
+            <tbody class="divide-y divide-slate-100">
+              {% for h in r.history %}<tr><td class="py-2 pr-4">{{ h.effective_from|date:"F Y" }}</td><td class="py-2 pr-4 font-medium tabular-nums">{{ h.amount|som }}</td><td class="py-2 pr-4">{{ h.reason|default:"—" }}</td><td class="py-2">{{ h.created_by.full_name }}<br><span class="text-xs text-slate-500">{% relative_time h.created_at %}</span></td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    {% empty %}<div class="card">{% include "components/empty.html" with icon="user" title=_("Add administrators or sales managers first.") %}</div>{% endfor %}
+  </div>
+{% endblock %}

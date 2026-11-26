@@ -36,7 +36,7 @@ npm run build:css                              # Tailwind -> static/dist/app.css
 ## Layout and module boundaries
 
 ```
-config/   apps/{core,accounts,settings,crm,students,staff,billing,alerts,reports,salaries,telegram,store,demo}/   templates/   static/   locale/   scripts/   docs/   tests/
+config/   apps/{core,accounts,settings,crm,students,staff,billing,alerts,reports,salaries,telegram,store,expenses,demo}/   templates/   static/   locale/   scripts/   docs/   tests/
 ```
 
 `apps/demo` holds the demo seed command only; it sits above every module and nothing imports it.
@@ -44,7 +44,7 @@ config/   apps/{core,accounts,settings,crm,students,staff,billing,alerts,reports
 Dependency direction (enforced by `.importlinter`; CI fails on violations):
 
 ```
-core ← accounts ← settings ← crm, students, staff ;  students ← billing ← alerts ← reports, salaries, telegram, store ;  crm ← alerts ;  staff ← telegram ;  crm → students
+core ← accounts ← settings ← crm, students, staff ;  students ← billing ← alerts ← reports, salaries, telegram, store ← expenses ;  crm ← alerts ;  staff ← telegram ;  crm → students
 ```
 
 - Import another module only through `services`, `selectors`, `events`, or `models` (models only for FK targets and types).
@@ -189,6 +189,10 @@ Inside a module:
 | Payment received (success screen) / take another payment | To'lov qabul qilindi / Yana to'lov qabul qilish |
 | Warnings (early-warning tasks) / missed lessons | Ogohlantirishlar / Darsga kelmaganlar |
 | Leave reason(s) / why students leave (report) | Ketish sababi (sabablari) / O'quvchilar nega ketadi |
+| Expenses / expense categories / new expense | Xarajatlar / Xarajat turlari / Yangi xarajat |
+| Whole center (center-wide) / share of center-wide costs | Butun markaz / Umumiy xarajatlardan ulushi |
+| Branch profit / profit | Filial foydasi / Foyda |
+| Fixed salary (staff) / staff salaries | Belgilangan maosh / Xodimlar maoshi |
 | Database backup (nightly / before an update) | Zaxira nusxa (kechki / yangilanishdan oldin) |
 
 Add new terms here before using them in the UI.
@@ -308,7 +312,7 @@ Add new terms here before using them in the UI.
 
 - Enforce role and branch scope on the server, in services and selectors. Hiding a button is never the protection.
 - An object outside the user's scope returns 404.
-- Financial fields never reach Sotuv menejeri (only the derived `payment_status`) or O'qituvchi (nothing), with one owner-approved exception: a teacher sees their own salary sheet (students' payments to their groups and their share). See SPEC §13.
+- Financial fields never reach Sotuv menejeri (only the derived `payment_status`) or O'qituvchi (nothing), with owner-approved exceptions: a teacher sees their own salary sheet (students' payments to their groups and their share), and administrators and sales managers see their own salary sheet (fixed pay, bonuses; no student data). See SPEC §13, §20.
 - Every new URL must be added to `tests/test_permission_matrix.py` with the expected result for all four roles, in and out of branch. CI fails on unlisted URLs.
 - Django admin is dev-only. Never expose it in production.
 - Never commit secrets. `.env` is git-ignored, and `.env.example` documents the variables.

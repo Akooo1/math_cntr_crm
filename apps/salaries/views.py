@@ -8,7 +8,6 @@ from django.views.decorators.http import require_POST
 
 from apps.core import dates, excel, listing
 from apps.core.permissions import perm_required
-from apps.core.roles import Role
 
 from . import selectors, services
 from .forms import AdjustmentForm, PayoutForm, ReasonForm
@@ -28,7 +27,7 @@ def _month_url(name, month, **kwargs):
 
 
 def _teacher(pk):
-    return get_object_or_404(get_user_model(), pk=pk, role=Role.TEACHER)
+    return get_object_or_404(get_user_model(), pk=pk, role__in=selectors.SALARIED_ROLES)
 
 
 def _messages_from(request, exc):
@@ -56,10 +55,11 @@ def index(request):
 
 def _excel(data):
     headers = [
-        _("Teacher"),
+        _("Employee"),
         _("Money paid"),
         _("Share"),
         _("Corrections"),
+        _("Fixed salary"),
         _("Bonuses"),
         _("Deductions"),
         _("Total"),
@@ -71,6 +71,7 @@ def _excel(data):
             s.totals.paid,
             s.totals.share,
             s.totals.corrections,
+            s.totals.fixed,
             s.totals.bonuses,
             s.totals.deductions,
             s.totals.total,
@@ -79,8 +80,18 @@ def _excel(data):
         for s in data["sheets"]
     ]
     g = data["grand"]
-    totals = [_("Total"), g.paid, g.share, g.corrections, g.bonuses, g.deductions, g.total, ""]
-    kinds = ["text", "money", "money", "money", "money", "money", "money", "date"]
+    totals = [
+        _("Total"),
+        g.paid,
+        g.share,
+        g.corrections,
+        g.fixed,
+        g.bonuses,
+        g.deductions,
+        g.total,
+        "",
+    ]
+    kinds = ["text", "money", "money", "money", "money", "money", "money", "money", "date"]
     content = excel.workbook(_("Salaries"), headers, rows, kinds, totals)
     return excel.response(f"maosh-{data['month']:%Y-%m}", content)
 

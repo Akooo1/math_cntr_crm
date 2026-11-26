@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-26 13:54+0500\n"
+"POT-Creation-Date: 2026-11-26 14:11+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -2003,6 +2003,171 @@ msgid ""
 "administrator."
 msgstr "O'quvchi yaratildi. Guruhga qo'shishni filial administratori bajaradi."
 
+msgid "Expenses"
+msgstr "Xarajatlar"
+
+msgid "Category"
+msgstr "Turi"
+
+msgid "Paid from"
+msgstr "Qayerdan to'landi"
+
+msgid "From the cash desk: the Kassa expects this much less cash that day."
+msgstr "Kassadan: o'sha kuni kassada shuncha kam naqd pul bo'lishi kutiladi."
+
+msgid "Whole center (split between branches)"
+msgstr "Butun markaz (filiallar o'rtasida taqsimlanadi)"
+
+#, python-format
+msgid "Cash desk: %(m)s"
+msgstr "Kassadan: %(m)s"
+
+msgid "Not from the cash desk (bank, owner)"
+msgstr "Kassadan emas (bank, egasi)"
+
+msgid "Expense category"
+msgstr "Xarajat turi"
+
+msgid "Expense categories"
+msgstr "Xarajat turlari"
+
+msgid "Expense"
+msgstr "Xarajat"
+
+msgid "Paid from the cash desk"
+msgstr "Kassadan to'langan"
+
+msgid "Cancels"
+msgstr "Bekor qiladi"
+
+msgid "See expenses"
+msgstr "Xarajatlarni ko'rish"
+
+msgid "Record expenses"
+msgstr "Xarajat kiritish"
+
+msgid "Record center-wide expenses"
+msgstr "Butun markaz xarajatlarini kiritish"
+
+msgid "Cancel expenses"
+msgstr "Xarajatlarni bekor qilish"
+
+msgid "See branch profit"
+msgstr "Filial foydasini ko'rish"
+
+msgid "Branch profit"
+msgstr "Filial foydasi"
+
+msgid "Money in minus salaries, purchase cost and expenses, per branch."
+msgstr ""
+"Har bir filial bo'yicha: tushgan pul minus maoshlar, xarid narxi va "
+"xarajatlar."
+
+msgid "Rent, utilities, advertising and other kinds of expenses."
+msgstr "Ijara, kommunal to'lovlar, reklama va boshqa xarajat turlari."
+
+msgid "Desk sales"
+msgstr "Kassadagi savdo"
+
+msgid "Purchase cost"
+msgstr "Xarid narxi"
+
+msgid "Teachers' salaries"
+msgstr "O'qituvchilar maoshi"
+
+msgid "Staff salaries"
+msgstr "Xodimlar maoshi"
+
+msgid "Share of center-wide costs"
+msgstr "Umumiy xarajatlardan ulushi"
+
+msgid "Profit"
+msgstr "Foyda"
+
+msgid ""
+"Money that came in during the period minus what it cost. Books given 'pay "
+"later' count when the parent pays. Salaries count for the months that start "
+"in the period (an open month as calculated so far). Center-wide expenses, "
+"teachers' bonuses and deductions and staff working in several branches are "
+"split between branches by students' payments."
+msgstr ""
+"Davr ichida tushgan pul minus uning xarajati. \"Keyin to'lash\" bilan "
+"berilgan kitoblar ota-ona to'laganda hisoblanadi. Maoshlar davr ichida "
+"boshlanadigan oylar uchun hisoblanadi (ochiq oy — hozirgacha hisoblangani). "
+"Butun markaz xarajatlari, o'qituvchilarning mukofot va ushlab qolishlari "
+"hamda bir nechta filialda ishlaydigan xodimlar maoshi filiallarga "
+"o'quvchilar to'lovlari ulushiga qarab taqsimlanadi."
+
+msgid "This day is closed in the Kassa. Choose another date."
+msgstr "Bu kun kassada yopilgan. Boshqa sanani tanlang."
+
+msgid ""
+"A center-wide expense can't come from a branch cash desk. Choose the branch."
+msgstr "Butun markaz xarajati filial kassasidan to'lanmaydi. Filialni tanlang."
+
+msgid "Enter an amount greater than zero."
+msgstr "Noldan katta summa kiriting."
+
+msgid "Choose a category from the list."
+msgstr "Ro'yxatdan turini tanlang."
+
+msgid "The date can't be in the future."
+msgstr "Sana kelajakda bo'lishi mumkin emas."
+
+msgid "Choose a cash desk method."
+msgstr "Kassa to'lov usulini tanlang."
+
+#, python-format
+msgid "A cash desk expense can be dated at most %(n)s days back."
+msgstr ""
+"Kassadan to'langan xarajat ko'pi bilan %(n)s kun oldingi sana bilan "
+"kiritiladi."
+
+msgid "Only an expense can be cancelled."
+msgstr "Faqat xarajatni bekor qilish mumkin."
+
+msgid "This expense is already cancelled."
+msgstr "Bu xarajat allaqachon bekor qilingan."
+
+msgid "Whole center"
+msgstr "Butun markaz"
+
+#, python-format
+msgid "Cancelled on %(d)s by %(n)s."
+msgstr "%(d)s kuni %(n)s tomonidan bekor qilingan."
+
+msgid ""
+"Cancel this expense? A cash desk expense's money goes back into today's "
+"Kassa."
+msgstr ""
+"Bu xarajat bekor qilinsinmi? Kassadan to'langan xarajat puli bugungi kassaga "
+"qaytadi."
+
+msgid "Cancel the expense"
+msgstr "Xarajatni bekor qilish"
+
+msgid "New expense"
+msgstr "Yangi xarajat"
+
+msgid "Only center-wide"
+msgstr "Faqat butun markaz"
+
+msgid "No expenses in this period."
+msgstr "Bu davrda xarajatlar yo'q."
+
+msgid ""
+"Record rent, utilities, advertising and other costs here; the branch profit "
+"report uses them."
+msgstr ""
+"Ijara, kommunal, reklama va boshqa xarajatlarni shu yerga kiriting; filial "
+"foydasi hisoboti ulardan foydalanadi."
+
+msgid "Expense saved."
+msgstr "Xarajat saqlandi."
+
+msgid "Expense cancelled."
+msgstr "Xarajat bekor qilindi."
+
 msgid "Reports"
 msgstr "Hisobotlar"
 
@@ -2179,6 +2344,15 @@ msgstr "Foizni kiriting, masalan 50 yoki 62,5."
 msgid "A percent must be between 0 and 100."
 msgstr "Foiz 0 dan 100 gacha bo'lishi kerak."
 
+msgid "Employee"
+msgstr "Xodim"
+
+msgid "Monthly salary"
+msgstr "Oylik maosh"
+
+msgid "0 stops the fixed salary."
+msgstr "0 — belgilangan maoshni to'xtatadi."
+
 msgid "Bonus"
 msgstr "Mukofot"
 
@@ -2190,6 +2364,9 @@ msgstr "Stavka"
 
 msgid "Teacher rate"
 msgstr "O'qituvchi stavkasi"
+
+msgid "Fixed salary"
+msgstr "Belgilangan maosh"
 
 msgid "Salary month"
 msgstr "Maosh oyi"
@@ -2206,6 +2383,9 @@ msgstr "To'langan pul"
 msgid "Salary line"
 msgstr "Maosh qatori"
 
+msgid "Fixed salary line"
+msgstr "Belgilangan maosh qatori"
+
 msgid "Carried over from last month"
 msgstr "O'tgan oydan qoldiq"
 
@@ -2214,9 +2394,6 @@ msgstr "Mukofot yoki ushlab qolish"
 
 msgid "Salary given"
 msgstr "Berildi"
-
-msgid "Cancels"
-msgstr "Bekor qiladi"
 
 msgid "Salary payout"
 msgstr "Maosh berish"
@@ -2256,8 +2433,17 @@ msgstr "O'qituvchi stavkalari"
 msgid "Each teacher's share of the money students paid, with history."
 msgstr "Har bir o'qituvchining o'quvchilar to'lagan puldan ulushi va tarixi."
 
+msgid ""
+"Fixed monthly salaries of administrators and sales managers, with history."
+msgstr ""
+"Administratorlar va sotuv menejerlarining belgilangan oylik maoshi, tarixi "
+"bilan."
+
 msgid "Only teachers have a salary rate."
 msgstr "Stavka faqat o'qituvchilar uchun."
+
+msgid "Only teachers and staff have a salary."
+msgstr "Maosh faqat o'qituvchilar va xodimlar uchun."
 
 msgid "That month is already closed. Choose a later month."
 msgstr "Bu oy allaqachon yopilgan. Keyingi oyni tanlang."
@@ -2281,9 +2467,6 @@ msgstr "Bu oy yopilgan."
 msgid "A carry-over can't be deleted."
 msgstr "O'tgan oydan qoldiqni o'chirib bo'lmaydi."
 
-msgid "The date can't be in the future."
-msgstr "Sana kelajakda bo'lishi mumkin emas."
-
 msgid "Close the month first."
 msgstr "Avval oyni yoping."
 
@@ -2305,8 +2488,8 @@ msgstr "Avval oldingi oylarni yoping"
 msgid "Teachers' share"
 msgstr "O'qituvchilar ulushi"
 
-msgid "Corrections, bonuses, deductions"
-msgstr "Tuzatishlar, mukofotlar, ushlab qolishlar"
+msgid "Fixed salaries, corrections, bonuses, deductions"
+msgstr "Belgilangan maoshlar, tuzatishlar, mukofotlar, ushlab qolishlar"
 
 msgid "To pay"
 msgstr "Beriladigan summa"
@@ -2334,6 +2517,10 @@ msgstr "%(m)s oyini yopish"
 #, python-format
 msgid "%(m)s is not closed yet. This month is calculated after it."
 msgstr "%(m)s hali yopilmagan. Bu oy undan keyin hisoblanadi."
+
+#, python-format
+msgid "Fixed salary: %(f)s"
+msgstr "Belgilangan maosh: %(f)s"
 
 #, python-format
 msgid "Paid by students: %(p)s"
@@ -2430,6 +2617,26 @@ msgstr "O'chirish"
 
 msgid "None."
 msgstr "Yo'q."
+
+msgid "Set a salary"
+msgstr "Maosh belgilash"
+
+msgid ""
+"Administrators and sales managers get this fixed amount every month, on "
+"their salary sheet next to the teachers. Bonuses and deductions are added on "
+"the sheet. A new amount applies from the month you choose; closed months "
+"never change."
+msgstr ""
+"Administratorlar va sotuv menejerlari har oy shu belgilangan summani oladi; "
+"u o'qituvchilar yonida ularning maosh varaqasida ko'rinadi. Mukofot va "
+"ushlab qolishlar varaqada qo'shiladi. Yangi summa siz tanlagan oydan boshlab "
+"amal qiladi; yopilgan oylar o'zgarmaydi."
+
+msgid "Change salary"
+msgstr "Maoshni o'zgartirish"
+
+msgid "Add administrators or sales managers first."
+msgstr "Avval administrator yoki sotuv menejerlarini qo'shing."
 
 #, python-format
 msgid "My salary, %(m)s"
@@ -2623,9 +2830,6 @@ msgstr ""
 
 msgid "Workdays"
 msgstr "Ish kunlari"
-
-msgid "Employee"
-msgstr "Xodim"
 
 msgid "Arrived at"
 msgstr "Kelgan vaqti"
@@ -2923,9 +3127,6 @@ msgstr "Savdo bekor qilindi"
 
 msgid "Stock correction"
 msgstr "Tuzatish"
-
-msgid "Purchase cost"
-msgstr "Xarid narxi"
 
 msgid "Stock movement"
 msgstr "Ombor harakati"

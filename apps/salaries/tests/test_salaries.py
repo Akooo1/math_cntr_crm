@@ -221,8 +221,8 @@ class TestAccess:
         assert mine.totals.total == 150_000
         with pytest.raises(Http404):
             selectors.sheet(teacher_a, setup["teacher"].pk, NOV)
-        for user in (admin_a, manager_a):
-            with pytest.raises(PermissionDenied):
+        for user in (admin_a, manager_a):  # staff see only their own sheet
+            with pytest.raises(Http404):
                 selectors.sheet(user, setup["teacher"].pk, NOV)
         with pytest.raises(PermissionDenied):
             services.close_month(actor=admin_a, month=OCT)
@@ -234,7 +234,7 @@ class TestAccess:
         assert "Ustoz Aliyev" in text and "150 000" in text.replace(" ", " ")
         resp = client.get("/maosh/?oy=11.2026&excel=1")
         ws = load_workbook(io.BytesIO(resp.content)).active
-        assert [c.value for c in ws[1]][:3] == ["O'qituvchi", "To'langan pul", "Ulush"]
+        assert [c.value for c in ws[1]][:3] == ["Xodim", "To'langan pul", "Ulush"]
         assert ws.cell(row=2, column=3).value == 150_000
         sheet_text = page_text(client.get(f"/maosh/oqituvchi/{setup['teacher'].pk}/?oy=11.2026"))
         assert "Karimov Aziz" in sheet_text

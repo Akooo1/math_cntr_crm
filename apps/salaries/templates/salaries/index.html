@@ -3,7 +3,8 @@
 {% block heading %}{% translate "Salaries" %}{% endblock %}
 {% block menu %}
   <a class="menu-item" role="menuitem" href="?oy={{ month|date:'m.Y' }}&excel=1">{% icon "download" "w-4 h-4" %}{% translate "Export to Excel" %}</a>
-  {% if user|can:"settings.manage" %}<a class="menu-item" role="menuitem" href="{% url 'settings:section_list' 'stavkalar' %}">{% icon "cog" "w-4 h-4" %}{% translate "Teacher rates" %}</a>{% endif %}
+  {% if user|can:"settings.manage" %}<a class="menu-item" role="menuitem" href="{% url 'settings:section_list' 'stavkalar' %}">{% icon "cog" "w-4 h-4" %}{% translate "Teacher rates" %}</a>
+  <a class="menu-item" role="menuitem" href="{% url 'settings:section_list' 'xodimlar-maoshi' %}">{% icon "cog" "w-4 h-4" %}{% translate "Staff salaries" %}</a>{% endif %}
 {% endblock %}
 {% block content %}
   <div class="mb-4 flex flex-wrap items-center gap-3">{% include "salaries/_month_picker.html" %}{% include "salaries/_state.html" %}</div>
@@ -11,7 +12,7 @@
   <div class="card mb-4 grid grid-cols-2 gap-x-3 gap-y-4 p-4 md:grid-cols-4">
     <div class="min-w-0"><p class="text-sm text-slate-500">{% translate "Money paid" %}</p><p class="text-lg font-semibold tabular-nums sm:text-xl">{{ grand.paid|som }}</p></div>
     <div class="min-w-0"><p class="text-sm text-slate-500">{% translate "Teachers' share" %}</p><p class="text-lg font-semibold tabular-nums sm:text-xl">{{ grand.share|som }}</p></div>
-    <div class="min-w-0"><p class="text-sm text-slate-500">{% translate "Corrections, bonuses, deductions" %}</p><p class="text-lg font-semibold tabular-nums sm:text-xl">{{ grand.corrections|add:grand.bonuses|add:grand.deductions|som }}</p></div>
+    <div class="min-w-0"><p class="text-sm text-slate-500">{% translate "Fixed salaries, corrections, bonuses, deductions" %}</p><p class="text-lg font-semibold tabular-nums sm:text-xl">{{ grand.fixed|add:grand.corrections|add:grand.bonuses|add:grand.deductions|som }}</p></div>
     <div class="min-w-0"><p class="text-sm text-slate-500">{% translate "To pay" %}</p><p class="text-lg font-semibold tabular-nums sm:text-xl">{{ grand.total|som }}</p>{% if state == "closed" %}<p class="text-xs text-slate-500">{% blocktranslate with p=paid_out|som %}paid out {{ p }}{% endblocktranslate %}</p>{% endif %}</div>
   </div>
 
@@ -34,7 +35,7 @@
     {% for s in sheets %}
       <a href="{% url 'salaries:sheet' s.teacher.pk %}?oy={{ month|date:'m.Y' }}" class="card block p-4">
         <div class="flex justify-between gap-2"><p class="font-medium">{{ s.teacher.full_name }}</p><p class="font-semibold tabular-nums">{{ s.totals.total|som }}</p></div>
-        <p class="text-sm text-slate-500">{% blocktranslate with p=s.totals.paid|som %}Paid by students: {{ p }}{% endblocktranslate %}</p>
+        {% if s.totals.fixed %}<p class="text-sm text-slate-500">{% blocktranslate with f=s.totals.fixed|som %}Fixed salary: {{ f }}{% endblocktranslate %}</p>{% else %}<p class="text-sm text-slate-500">{% blocktranslate with p=s.totals.paid|som %}Paid by students: {{ p }}{% endblocktranslate %}</p>{% endif %}
         {% if s.payout %}<p class="text-sm text-emerald-700">{% blocktranslate with d=s.payout.paid_on|sana %}Paid out {{ d }}{% endblocktranslate %}</p>{% endif %}
       </a>
     {% empty %}<div class="card">{% include "components/empty.html" with icon="wallet" title=_("No teachers yet.") %}</div>{% endfor %}
@@ -43,8 +44,8 @@
   <div class="card table-scroll hidden md:block">
     <table class="min-w-full">
       <thead><tr>
-        <th class="table-head">{% translate "Teacher" %}</th><th class="table-head text-right">{% translate "Money paid" %}</th><th class="table-head text-right">{% translate "Share" %}</th>
-        <th class="table-head text-right">{% translate "Corrections" %}</th><th class="table-head text-right">{% translate "Bonuses" %}</th><th class="table-head text-right">{% translate "Deductions" %}</th>
+        <th class="table-head">{% translate "Employee" %}</th><th class="table-head text-right">{% translate "Money paid" %}</th><th class="table-head text-right">{% translate "Share" %}</th>
+        <th class="table-head text-right">{% translate "Corrections" %}</th><th class="table-head text-right">{% translate "Fixed salary" %}</th><th class="table-head text-right">{% translate "Bonuses" %}</th><th class="table-head text-right">{% translate "Deductions" %}</th>
         <th class="table-head text-right">{% translate "Total" %}</th><th class="table-head">{% translate "Salary given" %}</th>
       </tr></thead>
       <tbody class="divide-y divide-slate-100">
@@ -54,6 +55,7 @@
             <td class="table-cell text-right tabular-nums">{{ s.totals.paid|som }}</td>
             <td class="table-cell text-right tabular-nums">{{ s.totals.share|som }}</td>
             <td class="table-cell text-right tabular-nums">{{ s.totals.corrections|som }}</td>
+            <td class="table-cell text-right tabular-nums">{{ s.totals.fixed|som }}</td>
             <td class="table-cell text-right tabular-nums">{{ s.totals.bonuses|som }}</td>
             <td class="table-cell text-right tabular-nums">{{ s.totals.deductions|som }}</td>
             <td class="table-cell text-right font-semibold tabular-nums">{{ s.totals.total|som }}</td>
@@ -61,7 +63,7 @@
           </tr>
         {% endfor %}
       </tbody>
-      <tfoot><tr class="table-foot"><td class="table-cell">{% translate "Total" %}</td><td class="table-cell text-right tabular-nums">{{ grand.paid|som }}</td><td class="table-cell text-right tabular-nums">{{ grand.share|som }}</td><td class="table-cell text-right tabular-nums">{{ grand.corrections|som }}</td><td class="table-cell text-right tabular-nums">{{ grand.bonuses|som }}</td><td class="table-cell text-right tabular-nums">{{ grand.deductions|som }}</td><td class="table-cell text-right tabular-nums">{{ grand.total|som }}</td><td class="table-cell"></td></tr></tfoot>
+      <tfoot><tr class="table-foot"><td class="table-cell">{% translate "Total" %}</td><td class="table-cell text-right tabular-nums">{{ grand.paid|som }}</td><td class="table-cell text-right tabular-nums">{{ grand.share|som }}</td><td class="table-cell text-right tabular-nums">{{ grand.corrections|som }}</td><td class="table-cell text-right tabular-nums">{{ grand.fixed|som }}</td><td class="table-cell text-right tabular-nums">{{ grand.bonuses|som }}</td><td class="table-cell text-right tabular-nums">{{ grand.deductions|som }}</td><td class="table-cell text-right tabular-nums">{{ grand.total|som }}</td><td class="table-cell"></td></tr></tfoot>
     </table>
   </div>
   {% endif %}

@@ -226,3 +226,29 @@ class TestWarnings:
         t = resp.context["totals"]
         assert (t.total, t.shown, t.filtered) == (3, 2, True)
         assert count_pill(resp) == "2/3"
+
+
+class TestExpenses:
+    def test_count_and_sum(self, client, admin_a, branch_a, director):
+        from apps.expenses import services
+        from apps.expenses.models import Category
+
+        rent = Category.objects.get(name="Ijara")
+        today = dt.date.today()
+        for amount in (100_000, 250_000):
+            services.record(
+                actor=admin_a, branch=branch_a, category=rent, amount=amount, spent_on=today
+            )
+        old = services.record(
+            actor=admin_a,
+            branch=branch_a,
+            category=rent,
+            amount=1_000,
+            spent_on=today - dt.timedelta(days=40),
+        )
+        assert old.pk
+        login(client, admin_a)
+        resp = client.get("/xarajatlar/")
+        t = resp.context["totals"]
+        assert (t.total, t.shown, t.amount) == (3, 2, 350_000)
+        assert count_pill(resp) == "2/3"
