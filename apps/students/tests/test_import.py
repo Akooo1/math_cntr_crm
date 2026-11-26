@@ -185,6 +185,74 @@ class TestStudents:
         rows_with_errors = sorted({e["row"] for e in batch.report["errors"]})
         assert rows_with_errors == [3, 4]
 
+    def test_one_student_in_three_groups_by_one_row_per_group(self, admin_a, branch_a, refs):
+        teacher, course = refs
+        groups = [
+            make_group(
+                admin_a, branch_a, teacher=teacher, course=course, name=n, start=dt.date(2026, 9, 1)
+            )
+            for n in ("7-A", "7-B", "Olimpiada")
+        ]
+        base = {"Familiya": "Karimov", "Ism": "Aziz", "Telefon": "901112233"}
+        rows = [
+            {**base, "Guruh nomi": g.name, "Guruhga qo'shilgan sana": "01.09.2026"} for g in groups
+        ]
+        rows[2]["Familiya"] = "KARIMOV"  # same person, typed differently
+        batch = importing.commit(
+            actor=admin_a, batch=run(admin_a, branch_a, "students", rows), branch=branch_a
+        )
+        assert batch.report["summary"] == {
+            "students_created": 1,
+            "students_updated": 0,
+            "enrollments_created": 3,
+        }
+        aziz = Student.objects.get()
+        assert {e.group for e in Enrollment.objects.filter(student=aziz)} == set(groups)
+
+    def test_repeated_rows_that_make_no_sense_are_refused(self, admin_a, branch_a, refs):
+        teacher, course = refs
+        make_group(
+            admin_a, branch_a, teacher=teacher, course=course, name="7-A", start=dt.date(2026, 9, 1)
+        )
+        joined = {"Guruh nomi": "7-A", "Guruhga qo'shilgan sana": "01.09.2026"}
+        rows = [
+            {"Familiya": "A", "Ism": "B", "Telefon": "901112233", **joined},
+            {"Familiya": "A", "Ism": "B", "Telefon": "901112233", **joined},  # same group again
+            {"Familiya": "C", "Ism": "D", "Telefon": "901112233", **joined},  # another name
+            {"Familiya": "A", "Ism": "B", "Telefon": "901112233"},  # repeat without a group
+        ]
+        batch = run(admin_a, branch_a, "students", rows)
+        assert sorted({e["row"] for e in batch.report["errors"]}) == [3, 4, 5]
+        assert batch.status == ImportBatch.Status.FAILED and not Student.objects.exists()
+
+    def test_siblings_share_the_parent_phone(self, admin_a, branch_a, refs):
+        sister = make_student(
+            admin_a,
+            branch_a,
+            last_name="Aliyeva",
+            first_name="Madina",
+            parent_phone="+998937778899",
+        )
+        rows = [
+            {"Familiya": "Aliyev", "Ism": "Jasur", "Ota-onasining telefoni": "93 777 88 99"},
+            {
+                "Familiya": sister.last_name,
+                "Ism": sister.first_name,
+                "Ota-onasining telefoni": "93 777 88 99",
+                "Izohlar": "yangilandi",
+            },
+        ]
+        batch = importing.commit(
+            actor=admin_a,
+            batch=run(admin_a, branch_a, "students", rows, update_existing=True),
+            branch=branch_a,
+        )
+        assert batch.report["summary"]["students_created"] == 1  # the brother
+        assert batch.report["summary"]["students_updated"] == 1  # the sister, found by name
+        sister.refresh_from_db()
+        assert sister.notes == "yangilandi"
+        assert Student.objects.filter(parent_phone="+998937778899").count() == 2
+
     def test_commit_revalidates(self, admin_a, branch_a, refs):
         row = {"Familiya": "A", "Ism": "B", "Telefon": "901112233"}
         batch = run(admin_a, branch_a, "students", [row])

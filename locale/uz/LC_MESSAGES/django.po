@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-26 17:43+0500\n"
+"POT-Creation-Date: 2026-11-26 22:13+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -3548,6 +3548,10 @@ msgid "enter the student's or the parent's phone"
 msgstr "o'quvchi yoki ota-onasining telefonini kiriting"
 
 #, python-format
+msgid "the phone repeats row %(n)d of the file with another name"
+msgstr "telefon faylning %(n)d-qatorida boshqa ism bilan takrorlangan"
+
+#, python-format
 msgid "the phone repeats row %(n)d of the file"
 msgstr "telefon faylning %(n)d-qatorida takrorlangan"
 
@@ -3570,11 +3574,22 @@ msgstr "o'quvchi guruhga qo'shilgan sanani kiriting"
 msgid "the join date is before the group starts"
 msgstr "qo'shilgan sana guruh boshlanishidan oldin"
 
+#, python-format
+msgid "the student is already in this group on row %(n)d"
+msgstr "o'quvchi %(n)d-qatorda shu guruhga allaqachon qo'shilgan"
+
 msgid "Courses, teachers and rooms must exist in Settings first."
 msgstr "Avval Sozlamalarda kurslar, o'qituvchilar va xonalar bo'lishi kerak."
 
-msgid "Import groups first. A student is matched by phone."
-msgstr "Avval guruhlarni import qiling. O'quvchi telefon bo'yicha topiladi."
+msgid ""
+"Import groups first. A student is matched by phone (with only the parent's "
+"phone: by phone and name). A student in several groups: one row per group "
+"with the same phone and name."
+msgstr ""
+"Avval guruhlarni import qiling. O'quvchi telefon raqami bo'yicha topiladi "
+"(faqat ota-onasining telefoni bo'lsa: telefon va ism bo'yicha). Bir nechta "
+"guruhda o'qiydigan o'quvchi: har bir guruh uchun bitta qator, telefon va ism "
+"bir xil."
 
 msgid "Checked, ready to import"
 msgstr "Tekshirildi, import qilishga tayyor"

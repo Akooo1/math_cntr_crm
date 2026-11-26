@@ -3,12 +3,14 @@
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 from apps.core import system_settings
 from apps.core.forms import StyledForm
+from apps.core.roles import Role
 from apps.core.settings_panel import Column, SettingsSection, register_section
 
 from . import services
@@ -59,6 +61,7 @@ class RoomSection(SettingsSection):
     model = Room
     form_class = RoomForm
     audit_prefix = "settings.room"
+    branch_field = "branch"
     columns = [
         Column(_("Name"), lambda r: r.name, primary=True),
         Column(_("Branch"), lambda r: r.branch.name),
@@ -67,6 +70,10 @@ class RoomSection(SettingsSection):
 
     def get_queryset(self, request):
         return Room.objects.select_related("branch")
+
+    def get_form(self, request, instance=None, data=None):
+        initial = {"branch": request.branch_filter} if instance is None else None
+        return RoomForm(data=data, instance=instance, initial=initial)
 
 
 class CourseSection(SettingsSection):
@@ -134,6 +141,15 @@ class UserSection(SettingsSection):
     def get_queryset(self, request):
         return get_user_model().objects.prefetch_related("branch_links__branch")
 
+    def list_queryset(self, request):
+        """With a branch picked: its people, plus the Direktor (who works in every branch)."""
+        qs = self.get_queryset(request)
+        if request.branch_filter is None:
+            return qs
+        return qs.filter(
+            Q(branch_links__branch_id=request.branch_filter) | Q(role=Role.DIRECTOR)
+        ).distinct()
+
     def get_form(self, request, instance=None, data=None):
         return StaffUserForm(data=data, instance=instance)
 
@@ -159,6 +175,8 @@ def _receipt_view(request, section):
         messages.success(request, gettext("Saved."))
         return redirect("settings:section_list", slug=section.slug)
     branches = Branch.objects.select_related("receipt_info").order_by("name")
+    if request.branch_filter:  # the center's details stay; branch details follow the top bar
+        branches = branches.filter(pk=request.branch_filter)
     return render(
         request,
         "settings/receipt.html",

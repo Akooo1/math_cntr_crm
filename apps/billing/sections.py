@@ -30,14 +30,25 @@ def _prices_view(request, section):
     courses = Course.objects.filter(is_active=True).prefetch_related(
         Prefetch("prices", queryset=Price.objects.select_related("branch", "group", "created_by"))
     )
+    # With a branch picked in the top bar: the price in force there (its own price, or the
+    # all-branches one), and only all-branches rows and that branch's rows in the history.
+    branch = request.branch_filter
     rows = []
     for course in courses:
         kind = services.price_kind_for(course)
-        history = [p for p in course.prices.all() if p.kind == kind]
+        history = [
+            p
+            for p in course.prices.all()
+            if p.kind == kind and (branch is None or p.branch_id in (None, branch))
+        ]
         current = selectors.effective_price(
-            course_id=course.id, kind=kind, on_date=today, branch_id=None
+            course_id=course.id, kind=kind, on_date=today, branch_id=branch
         )
-        upcoming = [p for p in history if p.effective_from > today]
+        upcoming = [
+            p
+            for p in history
+            if p.effective_from > today and p.group_id is None and (branch or not p.branch_id)
+        ]
         rows.append(
             {
                 "course": course,

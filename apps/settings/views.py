@@ -43,7 +43,7 @@ def section_list(request, slug):
     if section.custom_view is not None:
         return section.custom_view(request, section)
     show_inactive = request.GET.get("nofaol") == "1"
-    everything = section.get_queryset(request)
+    everything = section.list_queryset(request)
     qs = everything
     has_flag = hasattr(section.model, "is_active")
     if has_flag and not show_inactive:

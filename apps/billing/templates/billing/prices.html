@@ -20,15 +20,15 @@
           <div class="text-right">
             {% if r.current %}
               <p class="text-lg font-semibold">{{ r.current.amount|som }}</p>
-              <p class="text-xs text-slate-500">{% blocktranslate with d=r.current.effective_from|sana %}since {{ d }}{% endblocktranslate %}</p>
+              <p class="text-xs text-slate-500">{% blocktranslate with d=r.current.effective_from|sana %}since {{ d }}{% endblocktranslate %}{% if r.current.branch %} · {{ r.current.branch.name }}{% endif %}</p>
             {% else %}
               <p class="badge bg-amber-100 text-amber-900">{% translate "No price yet" %}</p>
             {% endif %}
           </div>
         </div>
-        {% for u in r.upcoming %}{% if not u.branch and not u.group %}
-          <p class="mt-2 text-sm text-sky-800">{% blocktranslate with a=u.amount|som d=u.effective_from|sana %}From {{ d }}: {{ a }}{% endblocktranslate %}</p>
-        {% endif %}{% endfor %}
+        {% for u in r.upcoming %}
+          <p class="mt-2 text-sm text-sky-800">{% blocktranslate with a=u.amount|som d=u.effective_from|sana %}From {{ d }}: {{ a }}{% endblocktranslate %}{% if u.branch %} ({{ u.branch.name }}){% endif %}</p>
+        {% endfor %}
         <div class="mt-3 flex flex-wrap gap-2">
           <a class="btn-secondary" href="{% url 'settings:section_create' section.slug %}?kurs={{ r.course.pk }}">{% icon "plus" "w-4 h-4" %}{% translate "Change price" %}</a>
           {% if r.history %}<button type="button" class="btn-ghost" @click="open = !open" :aria-expanded="open">{% icon "list" "w-4 h-4" %}{% translate "History" %} ({{ r.history|length }})</button>{% endif %}

@@ -16,7 +16,9 @@ GROUP = _("Staff")
 
 def _locations_view(request, section):
     return render(
-        request, "staff/locations.html", {"section": section, "rows": selectors.locations()}
+        request,
+        "staff/locations.html",
+        {"section": section, "rows": selectors.locations(request.branch_filter)},
     )
 
 
@@ -61,7 +63,7 @@ def _schedules_view(request, section):
 
     from apps.core.system_settings import get_setting
 
-    rows = selectors.schedules()
+    rows = selectors.schedules(request.branch_filter)
     for r in rows:
         if r["schedule"]:
             r["days"] = ", ".join(str(WEEKDAYS_ABBR[d - 1]) for d in r["schedule"].workdays)

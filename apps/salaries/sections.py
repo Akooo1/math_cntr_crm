@@ -15,7 +15,11 @@ def _rates_view(request, section):
     return render(
         request,
         "salaries/rates.html",
-        {"section": section, "rows": selectors.current_rates(), "today": dates.today()},
+        {
+            "section": section,
+            "rows": selectors.current_rates(request.branch_filter),
+            "today": dates.today(),
+        },
     )
 
 
@@ -52,7 +56,11 @@ def _staff_pay_view(request, section):
     return render(
         request,
         "salaries/staff_pay.html",
-        {"section": section, "rows": selectors.current_staff_pay(), "today": dates.today()},
+        {
+            "section": section,
+            "rows": selectors.current_staff_pay(request.branch_filter),
+            "today": dates.today(),
+        },
     )
 
 

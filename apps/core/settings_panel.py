@@ -38,6 +38,9 @@ class SettingsSection:
     allow_create = True
     allow_edit = True
     allow_toggle_active = True
+    # The field that ties a row to a branch (e.g. "branch", "branch_links__branch"): the
+    # list then follows the top-bar branch switcher. None = the same for every branch.
+    branch_field: str | None = None
     list_template = "settings/section_list.html"
     form_template = "settings/section_form.html"
     # A custom section replaces the list page: custom_view(request, section) -> response.
@@ -47,6 +50,15 @@ class SettingsSection:
 
     def get_queryset(self, request) -> QuerySet:
         return self.model._default_manager.all()
+
+    def list_queryset(self, request) -> QuerySet:
+        """What the list page shows: get_queryset() narrowed to the switcher's branch."""
+        qs = self.get_queryset(request)
+        branch = getattr(request, "branch_filter", None)
+        if self.branch_field is None or branch is None:
+            return qs
+        qs = qs.filter(**{self.branch_field: branch})
+        return qs.distinct() if "__" in self.branch_field else qs
 
     def can_create(self, request) -> bool:
         return self.allow_create

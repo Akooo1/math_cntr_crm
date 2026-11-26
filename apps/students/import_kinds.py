@@ -212,7 +212,9 @@ def parse_students(raw, ctx) -> ParseResult:
         search_key(g.name): g
         for g in Group.objects.filter(branch=ctx.branch).exclude(status="finished")
     }
-    seen_phones: dict[str, int] = {}
+    # A student in several groups comes as one row per group with the same phone: the first
+    # row creates (or updates) the student, the next rows only add a group.
+    seen_phones: dict[str, dict] = {}
     for number, row in raw:
         errs = []
 
@@ -236,14 +238,38 @@ def parse_students(raw, ctx) -> ParseResult:
         except ValueError:
             birth = joined = None
             err(_("a date is wrong (use DD.MM.YYYY)"))
-        key_phone = ph or parent_ph
+        # The student's own phone is one person. A parent's phone may be shared by siblings,
+        # so without the student's phone a row is that phone plus the name.
+        name_key = (search_key(last), search_key(first))
+        key_phone = ph or ((parent_ph, *name_key) if parent_ph else "")
         existing = None
-        if key_phone:
-            if key_phone in seen_phones:
-                err(_("the phone repeats row %(n)d of the file") % {"n": seen_phones[key_phone]})
-            seen_phones[key_phone] = number
+        first_row = seen_phones.get(key_phone) if key_phone else None
+        if first_row is not None:
+            if name_key != first_row["name"]:
+                err(
+                    _("the phone repeats row %(n)d of the file with another name")
+                    % {"n": first_row["number"]}
+                )
+            elif not text(row.get(str(S_GROUP))):
+                err(_("the phone repeats row %(n)d of the file") % {"n": first_row["number"]})
+            existing = first_row["existing"]
+        elif key_phone:
+            seen_phones[key_phone] = first_row = {
+                "number": number,
+                "name": name_key,
+                "existing": None,
+                "groups": {},
+            }
             match = Student.objects.filter(phone=ph).first() if ph else None
-            match = match or Student.objects.filter(phone="", parent_phone=parent_ph).first()
+            if match is None and not ph:
+                match = next(
+                    (
+                        s
+                        for s in Student.objects.filter(phone="", parent_phone=parent_ph)
+                        if (search_key(s.last_name), search_key(s.first_name)) == name_key
+                    ),
+                    None,
+                )
             if match is not None:
                 if match.branch_id != ctx.branch.pk:
                     err(_("this phone belongs to a student of another branch"))
@@ -253,7 +279,8 @@ def parse_students(raw, ctx) -> ParseResult:
                         % {"name": match.full_name}
                     )
                 else:
-                    existing = match
+                    existing = first_row["existing"] = match
+            first_row = None  # this is the first row, not a repeat
         group = None
         group_name = text(row.get(str(S_GROUP)))
         if group_name:
@@ -264,6 +291,11 @@ def parse_students(raw, ctx) -> ParseResult:
                 err(_("enter the date the student joined the group"))
             elif joined < group.start_date:
                 err(_("the join date is before the group starts"))
+            elif first_row is not None and group.pk in first_row["groups"]:
+                err(
+                    _("the student is already in this group on row %(n)d")
+                    % {"n": first_row["groups"][group.pk]}
+                )
             elif (
                 existing
                 and Enrollment.objects.filter(
@@ -271,11 +303,15 @@ def parse_students(raw, ctx) -> ParseResult:
                 ).exists()
             ):
                 group = None  # already enrolled: only contacts get updated
+        if key_phone and group is not None:
+            seen_phones[key_phone]["groups"].setdefault(group.pk, number)
         if errs:
             result.errors.extend(errs)
             continue
         result.rows.append(
             {
+                "key": key_phone,
+                "repeat": first_row is not None,
                 "existing": existing,
                 "data": {
                     "last_name": last,
@@ -297,8 +333,11 @@ def parse_students(raw, ctx) -> ParseResult:
 def commit_students(rows, ctx) -> dict:
     created = updated = enrolled = 0
     reason = _("Imported from Excel")
+    by_phone = {}
     for r in rows:
-        if r["existing"] is not None:
+        if r["repeat"]:
+            student = by_phone[r["key"]]  # another group for the student of an earlier row
+        elif r["existing"] is not None:
             data = {k: v for k, v in r["data"].items() if v not in ("", None)}
             merged = {f: getattr(r["existing"], f) for f in student_services.FIELDS} | data
             student = student_services.update_student(
@@ -310,6 +349,7 @@ def commit_students(rows, ctx) -> dict:
                 actor=ctx.actor, branch=ctx.branch, data=r["data"], import_batch=ctx.batch
             )
             created += 1
+        by_phone.setdefault(r["key"], student)
         if r["group"] is not None:
             # Imported enrollments skip extensions: past money comes from opening balances.
             enrollment_services.enroll(
@@ -349,6 +389,10 @@ def register():
             parse=parse_students,
             commit=commit_students,
             supports_update=True,
-            help_text=gettext_lazy("Import groups first. A student is matched by phone."),
+            help_text=gettext_lazy(
+                "Import groups first. A student is matched by phone (with only the parent's "
+                "phone: by phone and name). A student in several groups: one row per group "
+                "with the same phone and name."
+            ),
         )
     )

@@ -99,18 +99,21 @@ def my_today(user) -> dict:
     }
 
 
-def locations() -> list[dict]:
+def locations(branch_id: int | None = None) -> list[dict]:
     locs = {loc.branch_id: loc for loc in BranchLocation.objects.all()}
     rows = []
-    for b in Branch.objects.filter(is_active=True).order_by("name"):
+    branches = Branch.objects.filter(is_active=True).order_by("name")
+    if branch_id:
+        branches = branches.filter(pk=branch_id)
+    for b in branches:
         loc = locs.get(b.pk)
         coords = f"{loc.latitude:.6f}, {loc.longitude:.6f}" if loc else ""
         rows.append({"branch": b, "location": loc, "coords": coords})
     return rows
 
 
-def schedules() -> list[dict]:
-    people = list(staff())
+def schedules(branch_id: int | None = None) -> list[dict]:
+    people = list(staff(branch_id=branch_id))
     by_user = {s.user_id: s for s in Schedule.objects.filter(user__in=people)}
     return [
         {"user": p, "schedule": by_user.get(p.pk), "from_lessons": p.role == Role.TEACHER}

@@ -28,6 +28,8 @@ CENTER_WIDE = {
     "reports:index",
     "salaries:index",  # one sheet per person for all branches (see the note on the page)
 }
+# Sozlamalar pages that list every branch by design.
+SETTINGS_CENTER_WIDE = {"filiallar"}
 
 
 def pick(client, branch_id):
@@ -124,3 +126,72 @@ class TestFollowTheSwitcher:
         pick(c, branch_a.pk)
         groups = set(c.get("/ota-onalarga-xabar/").context["form"].fields["group"].queryset)
         assert ga in groups and gb not in groups
+
+
+def test_settings_pages_follow_the_switcher(client):
+    """Every Sozlamalar list with branch A picked: no room, person or branch-only price of
+    branch B. The branch list itself is the same for every branch."""
+    from apps.core.settings_panel import sections
+    from apps.settings.models import Room
+
+    call_command("seed_demo")
+    director = get_user_model().objects.filter(role="director").first()
+    client.force_login(director)
+    a, b = list(Branch.objects.order_by("pk"))[:2]
+    User = get_user_model()
+    only_b = (
+        set(Room.objects.filter(branch=b).values_list("name", flat=True))
+        - set(Room.objects.filter(branch=a).values_list("name", flat=True))
+    ) | set(
+        User.objects.filter(branch_links__branch=b)
+        .exclude(branch_links__branch=a)
+        .values_list("full_name", flat=True)
+    )
+    only_b |= {b.name}
+    assert len(only_b) > 3
+    pick(client, a.pk)
+    leaks = {}
+    for section in sections():
+        if section.slug in SETTINGS_CENTER_WIDE:
+            continue
+        resp = client.get(f"/sozlamalar/{section.slug}/")
+        assert resp.status_code == 200, section.slug
+        found = sorted(n for n in only_b if n in main_of(resp))
+        if found:
+            leaks[section.slug] = found[:3]
+    assert leaks == {}
+
+
+class TestSettingsDetails:
+    def test_new_room_starts_with_the_picked_branch(self, login, director, branch_a, branch_b):
+        c = login(director)
+        pick(c, branch_b.pk)
+        form = c.get("/sozlamalar/xonalar/yangi/").context["form"]
+        assert form["branch"].value() == branch_b.pk
+
+    def test_prices_show_the_branch_price(self, login, director, branch_a, branch_b):
+        import datetime as dt
+
+        from apps.billing import services as billing
+        from tests.factories import CourseFactory
+
+        course = CourseFactory(name="Matematika 5")
+        day = dt.date(2026, 1, 1)
+        billing.pricing.add_price(
+            actor=director, course=course, branch=None, amount=500_000, effective_from=day
+        )
+        billing.pricing.add_price(
+            actor=director, course=course, branch=branch_b, amount=450_000, effective_from=day
+        )
+        c = login(director)
+
+        def current():
+            rows = c.get("/sozlamalar/narxlar/").context["rows"]
+            row = next(r for r in rows if r["course"] == course)
+            return row["current"].amount, {p.amount for p in row["history"]}
+
+        assert current() == (500_000, {500_000, 450_000})  # all branches
+        pick(c, branch_a.pk)
+        assert current() == (500_000, {500_000})  # A has no price of its own
+        pick(c, branch_b.pk)
+        assert current() == (450_000, {500_000, 450_000})

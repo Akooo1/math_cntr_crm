@@ -129,7 +129,14 @@ def fixed_amounts(month: dt.date) -> dict[int, int]:
     return {uid: a for uid, a in out.items() if a > 0}
 
 
-def current_staff_pay() -> list[dict]:
+def _in_branch(people, branch_id: int | None):
+    """People linked to the branch picked in the top bar (None = everyone)."""
+    if not branch_id:
+        return people
+    return people.filter(branch_links__branch_id=branch_id).distinct()
+
+
+def current_staff_pay(branch_id: int | None = None) -> list[dict]:
     """Sozlamalar -> Xodimlar maoshi: each administrator / manager, today's fixed salary and
     history."""
     month = month_start(dates.today())
@@ -142,11 +149,11 @@ def current_staff_pay() -> list[dict]:
     people = staff().filter(is_active=True) | get_user_model().objects.filter(pk__in=history)
     return [
         {"user": u, "amount": now.get(u.pk, 0), "history": history.get(u.pk, [])}
-        for u in people.distinct().order_by("full_name")
+        for u in _in_branch(people.distinct(), branch_id).order_by("full_name")
     ]
 
 
-def current_rates() -> list[dict]:
+def current_rates(branch_id: int | None = None) -> list[dict]:
     rate_for = rate_lookup()
     month = month_start(dates.today())
     history = defaultdict(list)
@@ -161,7 +168,7 @@ def current_rates() -> list[dict]:
             "own": bool(history.get(t.pk)),
             "history": history.get(t.pk, []),
         }
-        for t in teachers()
+        for t in _in_branch(teachers(), branch_id).order_by("full_name")
         if t.is_active or history.get(t.pk)
     ]
 

@@ -444,7 +444,7 @@ Rules marked **[Q-n]** depend on an answer in section 9. The text states my reco
   - **O'quvchilar:** name, phones, parent, birth date, group name, enrollment start date, discount.
   - **Boshlang'ich qoldiqlar:** student phone, amount (debt positive, credit negative), date, comment.
 - **Flow:** upload → validate everything (dry run) → show a per-row error list in Uzbek, e.g. "3-qator: telefon raqami noto'g'ri" → commit everything in **one transaction**, or nothing.
-- Duplicate phones within the file or against the database are reported as errors, unless the user ticks "mavjudini yangilash" (update existing) for students.
+- Duplicate phones within the file or against the database are reported as errors, unless the user ticks "mavjudini yangilash" (update existing) for students. A student in several groups is one row per group with the same phone and name (§23.2).
 - Courses, teachers and rooms must exist in Sozlamalar first. The import never creates settings objects silently.
 - **Who:** the Direktor (any branch) or an admin (their branch).
 
@@ -1503,4 +1503,31 @@ the students module registers teachers' first lesson per day.
   says so when a branch is picked. Each branch's salary cost is in the Filial foydasi report.
   `tests/test_branch_switcher.py` loads every page with branch A picked and fails if a
   student, group or lead of branch B shows up.
+
+### 23.1 Sozlamalar and the switcher
+
+Sozlamalar lists follow the top-bar branch too: Xonalar, Foydalanuvchilar (that branch's
+people plus the Direktor), Filial joylashuvi, Ish vaqti, Stavkalar and Xodimlar maoshi (people
+linked to the branch), Chek (that branch's receipt details; the center's stay) and Narxlar.
+With a branch picked, Narxlar shows the price in force there (its own price, or the
+all-branches one) and only all-branches rows and that branch's rows in the history. "Yangi
+xona" starts with the picked branch. "Yangi narx" doesn't, so an all-branches price is never
+made branch-only by accident. Filiallar and the reference lists (courses, discount types,
+methods, lead lists, categories, reasons, products, templates) are the same for every branch.
+Section code: `SettingsSection.branch_field` / `list_queryset(request)`.
+
+### 23.2 One student in several groups
+
+A student can be in several groups of their branch (not of another branch; a student belongs
+to one branch). Each group charges its own full monthly fee; there is no automatic discount
+for a 2nd or 3rd group (owner's decision; a Chegirma can be added by hand). Every screen
+(profile, list and its group filter, Qarzdorlar, Davomat for each teacher, the parent bot)
+shows every group; `tests/test_several_groups.py`.
+
+Excel import of students: one row per group with the same phone and name. The first row
+creates (or, with "update existing", updates) the student; the next rows only add a group.
+Refused: the same phone with another name, the same group twice, a repeat row without a
+group. A row with only the parent's phone is matched by that phone **and** the name, so
+siblings who share a parent's phone are two students (before, a second sibling was refused,
+and "update existing" could update the wrong sibling).
 
