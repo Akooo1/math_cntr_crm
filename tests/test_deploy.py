@@ -132,3 +132,28 @@ def test_health_server_answers_ok(tmp_path):
             pytest.fail("health server did not answer")
     finally:
         subprocess.run(["pkill", "-f", "ThreadingHTTPServer"], check=False)
+
+
+def test_production_has_no_demo_data_command():
+    """The live site must never be able to load demo data (owner's request)."""
+    import subprocess
+    import sys
+
+    code = (
+        "import django, os;"
+        "os.environ['DJANGO_SETTINGS_MODULE']='config.settings.prod';"
+        "os.environ.setdefault('DJANGO_SECRET_KEY','x'*50);"
+        "django.setup();"
+        "from django.conf import settings;"
+        "from django.core.management import get_commands;"
+        "print('apps.demo' in settings.INSTALLED_APPS, 'seed_demo' in get_commands())"
+    )
+    out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True)
+    assert out.stdout.strip() == "False False", out.stderr
+
+
+def test_entrypoint_seeds_only_with_dev_settings():
+    from pathlib import Path
+
+    script = (Path(__file__).resolve().parents[1] / "scripts/entrypoint.sh").read_text()
+    assert "*dev*) python manage.py seed_demo" in script

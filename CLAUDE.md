@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **§19–§23 on the work branch** (warnings, expenses and profit, parent bot menu, Ombor and Import rights per person, Kunni yopish Direktor-only, branch switcher fixes, teachers' arrival from lessons) with the lime/black design; waiting for the owner's review before `main`. Update this line at the end of each phase.
+- Current phase: **§19–§23 released to `main`** (warnings, expenses and profit, parent bot menu, Ombor and Import rights per person, Kunni yopish Direktor-only, branch switcher fixes, teachers' arrival from lessons, students in several groups) with the lime/black design. Production never has the demo app (`config/settings/prod.py`). Waiting for the owner's next request. Update this line at the end of each phase.
 
 ## Ask the owner before
 

@@ -51,8 +51,13 @@ case "$DJANGO_SETTINGS_MODULE" in
          fi ;;
 esac
 
+# Demo data only with the dev settings (docker compose locally); production settings don't
+# even have the command, so DEMO_SEED=1 set there by mistake does nothing.
 if [ "${DEMO_SEED:-0}" = "1" ]; then
-  python manage.py seed_demo
+  case "$DJANGO_SETTINGS_MODULE" in
+    *dev*) python manage.py seed_demo ;;
+    *) echo "DEMO_SEED ignored: demo data is only for local development." ;;
+  esac
 fi
 
 exec "$@"
