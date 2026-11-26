@@ -118,7 +118,22 @@ TASK_TITLES = ["Qayta qo'ng'iroq qilish", "Narxlarni yuborish", "Sinov darsini e
 class Command(BaseCommand):
     help = "Create demo data (idempotent)."
 
+    LOCAL_HOSTS = {"db", "localhost", "127.0.0.1", "::1", ""}
+
     def handle(self, *args, **options):
+        # Safety: demo data must never reach a real (e.g. Railway) database, even if a local
+        # .env points DATABASE_URL at it by mistake.
+        from django.conf import settings
+        from django.core.management.base import CommandError
+
+        db = settings.DATABASES["default"]
+        host = db.get("HOST") or ""
+        testing = str(db.get("NAME", "")).startswith("test_")
+        if host not in self.LOCAL_HOSTS or not (settings.DEBUG or testing):
+            raise CommandError(
+                f"Refusing to load demo data: database host {host!r} is not a local one "
+                "(or DEBUG is off). Demo data is only for a database on this computer."
+            )
         User = get_user_model()
         created = False
         if not User.objects.filter(phone=USERS[0][0]).exists():

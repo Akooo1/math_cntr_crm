@@ -137,3 +137,15 @@ def check_reports():
     # Overdue debt in the reports is the debtors list total.
     debt = get_report("qarzdorlik").build(director, params)
     assert debt.totals[2] == sum(raw_overdue_by_student().values()) == branches.totals[4]
+
+
+def test_demo_data_refuses_a_remote_database(settings):
+    """A local .env with Railway's DATABASE_URL must never get demo data."""
+    from django.core.management.base import CommandError
+
+    settings.DATABASES["default"]["HOST"] = "trolley.proxy.rlwy.net"
+    try:
+        with pytest.raises(CommandError):
+            call_command("seed_demo")
+    finally:
+        settings.DATABASES["default"]["HOST"] = "localhost"
