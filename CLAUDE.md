@@ -1,11 +1,11 @@
 # CLAUDE.md — Matematika Markazi operations platform
 
-Read `docs/SPEC.md` before any work. It is the source of truth for scope, data model and business rules. This file holds the conventions every session and every future module must follow.
+Read `docs/HANDOFF.md` first (current state, what waits for the owner, how we work), then `docs/SPEC.md` before any work. It is the source of truth for scope, data model and business rules. This file holds the conventions every session and every future module must follow.
 
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **§24 on the work branch** (registered-student check, To'lagan fix, reopening a cash day, the owner (Ega), several groups in one window, refund on leave, Maosh avansi and salaries from the Kassa); §19–§23 are on `main`. Waiting for the owner's review before `main`. Production never has the demo app (`config/settings/prod.py`). Update this line at the end of each phase.
+- Current phase: **§24 on the work branch** (registered-student check, To'lagan fix, reopening a cash day, the owner (Ega), several groups in one window, refund on leave, Maosh avansi and salaries from the Kassa); §19–§23 are on `main`. Waiting for the owner's review before `main`. Production never has the demo app (`config/settings/prod.py`). Update this line and `docs/HANDOFF.md` at the end of each phase.
 
 ## Ask the owner before
 
