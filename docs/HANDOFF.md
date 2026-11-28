@@ -20,10 +20,7 @@ Rules and conventions live in `CLAUDE.md`; every business decision lives in `doc
    `main` to the work branch.
 2. After the release: the owner makes themselves Ega (Sozlamalar → Foydalanuvchilar → own
    row → Ega). Until then every Direktor manages users.
-3. Online demo (fake data for showing the system): designed, NOT built. Plan: a demo
-   setting (`config.settings.demo`), fake-data banner, Telegram and backups off, a lock that
-   refuses to seed a database with non-demo users, a SEPARATE Railway project with its own
-   database. Owner chose: no nightly reset. Owner said "stop for now".
+3. Online demo with fake data: the owner decided it isn't needed. Don't build it.
 
 ## How we work (the owner's standing rules)
 
