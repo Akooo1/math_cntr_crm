@@ -114,17 +114,36 @@ def student_create(request):
         branch_ids=accessible_branch_ids(request.user),
         initial={"branch": request.branch_filter} if request.branch_filter else None,
     )
+    found = None
     if request.method == "POST" and form.is_valid():
         data = dict(form.cleaned_data)
         branch = data.pop("branch")
-        try:
-            student = services.create_student(actor=request.user, branch=branch, data=data)
-        except ValidationError as exc:
-            form.add_error(None, exc)
+        found = selectors.matches(request.user, data)
+        if found.warnings and not found.blocking and not request.POST.get("baribir"):
+            pass  # show who is already registered; saving needs the "add anyway" tick
         else:
-            messages.success(request, _("Student created."))
-            return redirect("students:detail", pk=student.pk)
-    return render(request, "students/student_form.html", {"form": form, "student": None})
+            try:
+                student = services.create_student(actor=request.user, branch=branch, data=data)
+            except ValidationError as exc:
+                form.add_error(None, exc)
+            else:
+                messages.success(request, _("Student created."))
+                return redirect("students:detail", pk=student.pk)
+    return render(
+        request,
+        "students/student_form.html",
+        {"form": form, "student": None, "matches": found, "ask_confirm": bool(found)},
+    )
+
+
+@perm_required("students.manage")
+def duplicate_check(request):
+    """HTMX: who is already registered, while the new-student form is filled in."""
+    form = StudentForm(request.GET, branch_ids=accessible_branch_ids(request.user))
+    form.is_valid()  # partial input is fine: use whatever parsed
+    data = {k: form.cleaned_data.get(k) for k in services.students.FIELDS}
+    found = selectors.matches(request.user, data)
+    return render(request, "students/_matches.html", {"matches": found if found else None})
 
 
 @perm_required("students.manage")

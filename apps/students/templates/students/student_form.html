@@ -10,6 +10,12 @@
         {% for f in form %}{% if f.name != "notes" %}{% field f %}{% endif %}{% endfor %}
       </div>
       {% field form.notes %}
+      {% if not student %}
+        <div id="student-matches" hx-get="{% url 'students:duplicate_check' %}" hx-trigger="change from:closest form delay:300ms" hx-include="closest form" hx-swap="innerHTML">{% include "students/_matches.html" %}</div>
+        {% if ask_confirm and not matches.blocking %}
+          <label class="flex items-center gap-2 text-sm font-medium"><input type="checkbox" name="baribir" value="1" class="check">{% translate "This is a different student (e.g. a brother or sister): add anyway" %}</label>
+        {% endif %}
+      {% endif %}
       <div class="form-actions justify-end pt-2">
         <a href="{% if student %}{% url 'students:detail' student.pk %}{% else %}{% url 'students:list' %}{% endif %}" class="btn-secondary">{% translate "Cancel" %}</a>
         <button class="btn-primary">{% icon "check" %}{% translate "Save" %}</button>

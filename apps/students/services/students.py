@@ -5,7 +5,7 @@ from django.db import transaction
 from django.utils.translation import gettext as _
 
 from apps.core import audit, events
-from apps.core.permissions import ensure_branch_access, require_perm
+from apps.core.permissions import accessible_branch_ids, ensure_branch_access, require_perm
 
 from ..events import StudentCreated
 from ..models import Student
@@ -33,12 +33,32 @@ def _clean(data: dict) -> dict:
     return out
 
 
+def _refuse_taken_phone(actor, phone: str, exclude_id=None) -> None:
+    """A student's own phone belongs to one student (owner's request, SPEC §24)."""
+    from .. import selectors
+
+    owner = selectors.own_phone_owner(phone, exclude_id)
+    if owner is None:
+        return
+    allowed = accessible_branch_ids(actor)
+    if allowed is None or owner.branch_id in allowed:
+        raise ValidationError(
+            _("This student is already registered: %(name)s (%(branch)s).")
+            % {"name": owner.full_name, "branch": owner.branch.name}
+        )
+    raise ValidationError(
+        _("A student with this phone is already registered in another branch: %(branch)s.")
+        % {"branch": owner.branch.name}
+    )
+
+
 def create_student(*, actor, branch, data: dict, lead=None, import_batch=None) -> Student:
     """Create a student in `branch`. `data` holds already-validated, normalized values."""
     require_perm(actor, "students.create")
     ensure_branch_access(actor, branch.pk)
     values = _clean(data)
     with transaction.atomic():
+        _refuse_taken_phone(actor, values["phone"])
         student = Student.objects.create(
             branch=branch, lead=lead, import_batch=import_batch, **values
         )
@@ -53,6 +73,8 @@ def update_student(*, actor, student: Student, data: dict) -> Student:
     values = _clean(data)
     with transaction.atomic():
         student = Student.objects.select_for_update().get(pk=student.pk)
+        if values["phone"] != student.phone:  # old duplicates stay editable
+            _refuse_taken_phone(actor, values["phone"], exclude_id=student.pk)
         before = audit.snapshot(student)
         for k, v in values.items():
             setattr(student, k, v)

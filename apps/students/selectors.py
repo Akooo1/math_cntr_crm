@@ -4,12 +4,18 @@ O'qituvchi sees only groups they teach and the students currently in those group
 """
 
 import datetime as dt
+from dataclasses import dataclass, field
 
 from django.db.models import Count, Exists, OuterRef, Prefetch, Q
 from django.http import Http404
 
 from apps.core import dates
-from apps.core.permissions import apply_branch_filter, require_perm, scope_by_branch
+from apps.core.permissions import (
+    accessible_branch_ids,
+    apply_branch_filter,
+    require_perm,
+    scope_by_branch,
+)
 from apps.core.roles import Role
 from apps.core.search import text_search
 
@@ -219,3 +225,65 @@ def leave_reasons_report(user, p):
             "Students who left a group in the period (a student who left two groups counts twice)."
         ),
     )
+
+
+# --- Already registered? (docs/SPEC.md §24) -------------------------------------------------
+
+
+@dataclass
+class Match:
+    reason: str  # "phone" (the same student phone: refused), "parent_phone", "name"
+    student: Student | None  # None when the student is in a branch the user can't see
+    branch_name: str
+
+
+@dataclass
+class Matches:
+    blocking: list = field(default_factory=list)
+    warnings: list = field(default_factory=list)
+
+    def __bool__(self):
+        return bool(self.blocking or self.warnings)
+
+
+def own_phone_owner(phone: str, exclude_id=None) -> Student | None:
+    """The student whose own phone this already is (a phone belongs to one student)."""
+    if not phone:
+        return None
+    qs = Student.objects.filter(phone=phone).select_related("branch")
+    if exclude_id:
+        qs = qs.exclude(pk=exclude_id)
+    return qs.first()
+
+
+def matches(user, data: dict, exclude_id=None) -> Matches:
+    """Students already registered who look like `data`, in ALL branches. The same own
+    phone is refused; the same parent's phone (often a brother or sister) or the same name
+    and date of birth only warn. Outside the user's branches only the branch is shown."""
+    from apps.core.text import search_key
+
+    allowed = accessible_branch_ids(user)
+    out, seen = Matches(), set()
+
+    def add(kind, s, bucket):
+        if s.pk in seen or s.pk == exclude_id:
+            return
+        seen.add(s.pk)
+        visible = allowed is None or s.branch_id in allowed
+        bucket.append(Match(kind, s if visible else None, s.branch.name))
+
+    phone, parent = data.get("phone") or "", data.get("parent_phone") or ""
+    owner = own_phone_owner(phone, exclude_id)
+    if owner:
+        add("phone", owner, out.blocking)
+    phones = [p for p in (phone, parent, data.get("extra_phone") or "") if p]
+    if phones:
+        for s in find_by_phones(phones).exclude(pk=exclude_id or 0):
+            add("parent_phone", s, out.warnings)
+    last, first, birth = data.get("last_name"), data.get("first_name"), data.get("birth_date")
+    if last and first and birth:
+        key = (search_key(last), search_key(first))
+        for s in Student.objects.filter(birth_date=birth).select_related("branch"):
+            if (search_key(s.last_name), search_key(s.first_name)) == key:
+                add("name", s, out.warnings)
+    return out

@@ -7,6 +7,7 @@ app_name = "students"
 urlpatterns = [
     path("oquvchilar/", views.student_list, name="list"),
     path("oquvchilar/yangi/", views.student_create, name="create"),
+    path("oquvchilar/dublikat/", views.duplicate_check, name="duplicate_check"),
     path("oquvchilar/<int:pk>/", views.student_detail, name="detail"),
     path("oquvchilar/<int:pk>/tahrirlash/", views.student_edit, name="edit"),
     path("oquvchilar/<int:pk>/guruhga-qoshish/", views.enroll, name="enroll"),

@@ -114,6 +114,10 @@ def students_cases(o) -> dict[str, list[Case]]:
         [
             ("students:list", [Case("/oquvchilar/", expect=view_all)]),
             ("students:create", [Case("/oquvchilar/yangi/", expect=manage)]),
+            (
+                "students:duplicate_check",
+                [Case("/oquvchilar/dublikat/?phone=901112233", expect=manage)],
+            ),
             two(
                 "students:detail",
                 "/oquvchilar/{}/",

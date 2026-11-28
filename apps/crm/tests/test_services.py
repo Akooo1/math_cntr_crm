@@ -269,9 +269,24 @@ class TestConversion:
         with pytest.raises(ValidationError):
             services.convert(actor=manager_a, lead=lead, student_data={**self.DATA, "phone": ""})
 
-    def test_existing_student_phone_needs_confirmation(self, manager_a, branch_a):
+    def test_existing_student_phone_is_refused_even_when_confirmed(self, manager_a, branch_a):
+        """A student's own phone belongs to one student (owner's rule, SPEC §24)."""
+        from django.core.exceptions import ValidationError
+
         Student.objects.create(
             branch=branch_a, first_name="X", last_name="Y", phone="+998901234567"
+        )
+        lead = make_lead(manager_a, branch_a)
+        with pytest.raises(services.DuplicateWarning):
+            services.convert(actor=manager_a, lead=lead, student_data=self.DATA)
+        with pytest.raises(ValidationError):
+            services.convert(
+                actor=manager_a, lead=lead, student_data=self.DATA, confirm_duplicate=True
+            )
+
+    def test_shared_parent_phone_needs_confirmation(self, manager_a, branch_a):
+        Student.objects.create(
+            branch=branch_a, first_name="X", last_name="Y", parent_phone="+998901234567"
         )
         lead = make_lead(manager_a, branch_a)
         with pytest.raises(services.DuplicateWarning):

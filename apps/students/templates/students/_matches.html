@@ -1,0 +1,10 @@
+{% if matches %}
+  <div class="rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900" role="status">
+    <p class="font-semibold">{% translate "Already registered:" %}</p>
+    <ul class="mt-1 list-disc space-y-0.5 pl-5">
+      {% for m in matches.blocking %}{% include "students/_match.html" %}{% endfor %}
+      {% for m in matches.warnings %}{% include "students/_match.html" %}{% endfor %}
+    </ul>
+    {% if matches.blocking %}<p class="mt-2 font-medium">{% translate "The student's own phone already belongs to this student. Open their page instead of adding them again." %}</p>{% endif %}
+  </div>
+{% endif %}
