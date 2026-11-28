@@ -8,6 +8,7 @@
       <form method="post" class="space-y-4" novalidate>{% csrf_token %}
         {% include "components/form_errors.html" %}
         {% for k, v in hidden %}<input type="hidden" name="{{ k }}" value="{{ v }}">{% endfor %}
+        {% if step_group and step_total > 1 %}<p class="badge bg-sky-100 text-sky-800">{% blocktranslate with n=step_no total=step_total name=step_group.name %}Group {{ n }} of {{ total }}: {{ name }}{% endblocktranslate %}</p>{% endif %}
         {% for ext, ctx in confirm %}{% include ext.template %}{% endfor %}
         <div class="form-actions justify-end pt-2">
           <a href="{{ back }}" class="btn-secondary">{% translate "Cancel" %}</a>

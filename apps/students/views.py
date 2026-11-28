@@ -245,32 +245,69 @@ def _enrollment_for(request, pk) -> Enrollment:
 
 @perm_required("students.manage")
 def enroll(request, pk):
+    """Enroll into one or several groups. Each group's money step (charge, discount,
+    installment plan) is confirmed on its own, one after another; `tayyor` carries the
+    groups already done between the steps."""
     student = selectors.get_student(request.user, pk)
+    back = reverse("students:detail", args=[student.pk])
     form = EnrollForm(
         request.POST or None, groups=selectors.enrollable_groups(request.user, student)
     )
+    title = _("Enroll into a group")
+    if request.method != "POST" or not form.is_valid():
+        return _enroll_page(request, student, form, title, back)
+    d = form.cleaned_data
+    chosen = sorted(d["group"], key=lambda g: g.name)
+    done = {int(x) for x in request.POST.get("tayyor", "").split(",") if x.isdigit()}
+    data = request.POST  # extension fields belong to the group being confirmed now
+    for group in chosen:
+        if group.pk in done:
+            continue
+        action = services.EnrollmentAction("enroll", student, d["date"], group=group)
+        pending = extensions.previews(action, data)
+        if pending and not (data is request.POST and request.POST.get("tasdiq")):
+            return _enroll_page(request, student, form, title, back, pending, chosen, done, group)
+        try:
+            services.enroll(
+                actor=request.user,
+                student=student,
+                group=group,
+                start_date=d["date"],
+                reason=d["reason"],
+                capacity_override=d["capacity_override"],
+                extension_data=data if pending else None,
+            )
+        except ValidationError as exc:
+            form.add_error(None, exc)
+            return _enroll_page(request, student, form, title, back, pending, chosen, done, group)
+        done.add(group.pk)
+        data = None  # the next group starts from its own suggestions
+    messages.success(request, _("Saved."))
+    return redirect(back)
 
-    def execute(d, ext):
-        services.enroll(
-            actor=request.user,
-            student=student,
-            group=d["group"],
-            start_date=d["date"],
-            reason=d["reason"],
-            capacity_override=d["capacity_override"],
-            extension_data=ext,
-        )
 
-    return _action_view(
+def _enroll_page(
+    request, student, form, title, back, confirm=None, chosen=(), done=(), current=None
+):
+    hidden = []
+    if confirm is not None:
+        hidden = [(k, request.POST.get(k, "")) for k in ("date", "reason", "capacity_override")]
+        hidden += [("group", g.pk) for g in chosen]
+        hidden.append(("tayyor", ",".join(str(x) for x in sorted(done))))
+    return render(
         request,
-        student=student,
-        form=form,
-        title=_("Enroll into a group"),
-        build_action=lambda d: services.EnrollmentAction(
-            "enroll", student, d["date"], group=d["group"]
-        ),
-        execute=execute,
-        back=reverse("students:detail", args=[student.pk]),
+        "students/enrollment_action.html",
+        {
+            "student": student,
+            "form": form,
+            "title": title,
+            "confirm": confirm,
+            "hidden": hidden,
+            "back": back,
+            "step_group": current,
+            "step_no": len(done) + 1,
+            "step_total": len(chosen),
+        },
     )
 
 

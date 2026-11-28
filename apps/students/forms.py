@@ -168,7 +168,15 @@ class LeaveReasonForm(StyledModelForm):
 
 
 class EnrollForm(ActionForm):
-    group = forms.ModelChoiceField(label=_("Group"), queryset=Group.objects.none())
+    """One or several groups at once (owner's request, SPEC §24): the same start date; the
+    billing confirmation then comes once per group, in turn."""
+
+    group = forms.ModelMultipleChoiceField(
+        label=_("Groups"),
+        queryset=Group.objects.none(),
+        widget=forms.CheckboxSelectMultiple,
+        help_text=_("Tick one or more groups."),
+    )
     capacity_override = forms.BooleanField(label=_("Over capacity"), required=False)
 
     field_order = ["group", "date", "reason", "capacity_override"]

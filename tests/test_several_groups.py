@@ -78,3 +78,27 @@ def test_parent_bot_lists_every_group(three):
     )
     text = parent_menu.answer(chat, parent_menu.SCHEDULE)
     assert all(g.name in text for g in groups)
+
+
+def test_enroll_into_several_groups_in_one_window(clock, login, admin_a, branch_a, monthly):  # noqa: F811
+    """Owner's request: tick several groups; each group's money step is confirmed in turn."""
+    from apps.students.models import Enrollment
+
+    groups = [
+        make_group(admin_a, branch_a, course=monthly, start=D(2026, 9, 1), days=MWF, name=n)
+        for n in ("Algebra", "Geometriya")
+    ]
+    s = make_student(admin_a, branch_a)
+    c = login(admin_a)
+    url = f"/oquvchilar/{s.pk}/guruhga-qoshish/"
+    data = {"group": [g.pk for g in groups], "date": "16.11.2026", "reason": ""}
+    step = c.post(url, data)
+    assert step.context["step_group"] == groups[0] and step.context["step_total"] == 2
+    first = {**data, "tasdiq": "1", "x_seen": "1", "tayyor": ""}
+    step = c.post(url, first)
+    assert step.status_code == 200 and step.context["step_group"] == groups[1]
+    assert Enrollment.objects.filter(student=s).count() == 1
+    second = {**data, "tasdiq": "1", "x_seen": "1", "tayyor": str(groups[0].pk)}
+    assert c.post(url, second).status_code == 302
+    assert {e.group for e in Enrollment.objects.filter(student=s)} == set(groups)
+    assert Charge.objects.filter(student=s).count() == 2

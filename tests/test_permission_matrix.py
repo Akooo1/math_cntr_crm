@@ -764,9 +764,16 @@ def cases(objects) -> dict[str, list[Case]]:
                 Case(f"{base}{obj.pk}/holat/", "post", {**only({D: 302}, 403), "anon": 302})
             )
         for action in s.actions:
-            c["settings:section_action"].append(
-                Case(f"{base}{obj.pk}/{action}/", expect={**DIRECTOR_ONLY, "anon": 302})
+            # "ega" (make the owner) is offered only on a Direktor's row: 404 on others.
+            ok = (
+                {**DIRECTOR_ONLY, "anon": 302}
+                if action != "ega"
+                else {
+                    **only({D: 404}, 403),
+                    "anon": 302,
+                }
             )
+            c["settings:section_action"].append(Case(f"{base}{obj.pk}/{action}/", expect=ok))
     return c
 
 
