@@ -1531,3 +1531,68 @@ group. A row with only the parent's phone is matched by that phone **and** the n
 siblings who share a parent's phone are two students (before, a second sibling was refused,
 and "update existing" could update the wrong sibling).
 
+---
+
+## 24. Owner's round: registered students, the Kassa, the owner, several groups (owner's request)
+
+Decisions by the owner in this round; each is enforced in the service, with tests.
+
+### 24.1 A new student who is already registered
+- The student's **own phone** belongs to one student: creating (the form, lead conversion,
+  Excel import) or editing to a phone another student already has is refused, naming the
+  student (another branch: only the branch's name). Old duplicates stay editable as long as
+  the phone isn't changed.
+- The **same parent's phone** (often a brother or sister) or the **same name and date of
+  birth** only warns: the form lists who it is and needs the tick "Bu boshqa o'quvchi:
+  baribir qo'shish". The new-student form shows matches live (`/oquvchilar/dublikat/`).
+
+### 24.2 "To'lagan" after a cancelled payment
+`billing.selectors.payment_statuses`: only money that stayed counts (6.4.10).
+
+### 24.3 Reopening a closed cash day
+Direktor, with a reason (`billing.cash.reopen`). Table `billing_cash_day_reopen` (close
+one-to-one, reopened_by, reopened_at, reason; append-only, reason required). The close row
+stays; `CashDayClose.objects.in_force()` = closes without a reopen; the unique (branch, date)
+constraint became an index, so a day can be closed again with a new snapshot. The payment
+trigger `billing_payment_closed_day()` counts only closes in force. Every reopen is listed on
+that day's Kassa and audited (`billing.cash_day.reopen`).
+
+### 24.4 The owner (Ega)
+`accounts_user.is_owner` (bool). The owner is a Direktor who alone manages users, roles,
+branches, extra permissions and passwords (`accounts.users.manage`, `owner_only=True` in
+`core.permissions`). Until anyone is the owner, every Direktor has it; a Direktor makes
+themselves the owner once (Sozlamalar → Foydalanuvchilar → Ega), and from then on only the
+owner can do that for others. The last owner can't step down. Other Direktors keep every
+other right. Nothing is set automatically on existing data.
+
+### 24.5 Several groups in one window
+Guruhga qo'shish takes several groups with one start date; billing's confirmation (charge,
+discount, installment plan) comes for each group in turn on the same page (`tayyor` carries
+the groups already enrolled).
+
+### 24.6 Returning the lessons not taken on leave
+When a student leaves a group, billing already lowers that group's charge for the lessons
+after the leave date; money that no longer fits becomes credit, and the teacher's share
+(money applied to the group's charges) already drops with it (a correction line in the next
+open month). New: a refund of exactly that, from the student's page
+(`/chiqish/<enrollment>/pul-qaytarish/`), by the Direktor **or an administrator**
+(`billing.refund.leave`; every other refund stays the Direktor's). Limit: what the leave took
+off the group's charges (`proration_leave` + `cancellation` adjustments) minus refunds
+already made for it, never more than the credit; only cash desk methods. `billing_payment.
+for_enrollment` (nullable) ties the refund to the leave. Absences are never returned: a
+missed lesson is still paid.
+
+### 24.7 Maosh avansi and salaries from the Kassa
+- `salaries_advance` (append-only): person, month, kind advance/cancel, amount, given_on,
+  branch, method (a cash desk method), note, cancels, created_by. Direktor only.
+- An advance is taken from the **earliest salary month not closed yet** and may not be more
+  than that month has earned so far (the open sheet: teachers' share of money paid so far,
+  staff's fixed salary, plus bonuses, minus deductions) minus advances already given.
+- The month-end payout (Maoshni berish) pays `total - advances` from a chosen branch's Kassa
+  (`salaries_payout.branch`, `.method`, nullable: payouts made before this stay outside the
+  Kassa). Cancelling an advance or a payout puts the money back into today's Kassa of that
+  branch. Both respect `lock_day` / closed days and the backdating window.
+- If a month's total later drops below the advances (e.g. a deduction), closing the month
+  carries the minus into the next month (`carry`), as with any negative total.
+- Kassa: cash source `salaries` (advances and payouts out, their cancels in).
+

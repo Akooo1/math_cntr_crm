@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-26 22:13+0500\n"
+"POT-Creation-Date: 2026-11-28 11:56+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -50,6 +50,9 @@ msgstr "F.I.Sh."
 msgid "Role"
 msgstr "Rol"
 
+msgid "Owner"
+msgstr "Ega"
+
 msgid "Active"
 msgstr "Faol"
 
@@ -58,6 +61,15 @@ msgstr "Parolni almashtirishi shart"
 
 msgid "User"
 msgstr "Foydalanuvchi"
+
+msgid "Director (owner)"
+msgstr "Direktor (Ega)"
+
+msgid "Only an active Direktor can be the owner."
+msgstr "Faqat faol Direktor ega bo'la oladi."
+
+msgid "Make someone else the owner first."
+msgstr "Avval boshqa kishini ega qiling."
 
 #, python-format
 msgid "The password must be at least %(n)d characters long."
@@ -656,6 +668,21 @@ msgstr "Yopilgan kassa kuni"
 msgid "Closed cash days"
 msgstr "Yopilgan kassa kunlari"
 
+msgid "Close"
+msgstr "Yopish"
+
+msgid "Reopened by"
+msgstr "Qayta ochgan"
+
+msgid "Reopened at"
+msgstr "Qayta ochilgan vaqt"
+
+msgid "Reopened cash day"
+msgstr "Qayta ochilgan kassa kuni"
+
+msgid "Reopened cash days"
+msgstr "Qayta ochilgan kassa kunlari"
+
 msgid "See finances"
 msgstr "Moliyani ko'rish"
 
@@ -679,6 +706,12 @@ msgstr "Kassa hisobotini ko'rish"
 
 msgid "Close the cash day"
 msgstr "Kassa kunini yopish"
+
+msgid "Reopen a closed cash day"
+msgstr "Yopilgan kunni qayta ochish"
+
+msgid "Refund the lessons not taken when a student leaves"
+msgstr "Guruhdan chiqqanda o'tilmagan darslar pulini qaytarish"
 
 msgid "See debtors"
 msgstr "Qarzdorlarni ko'rish"
@@ -806,6 +839,12 @@ msgstr "Kelajakdagi kunni yopib bo'lmaydi."
 msgid "This day is already closed."
 msgstr "Bu kun allaqachon yopilgan."
 
+msgid "Write why the day is reopened."
+msgstr "Kun nima uchun qayta ochilayotganini yozing."
+
+msgid "This day is not closed."
+msgstr "Bu kun yopilmagan."
+
 msgid "Write the reason."
 msgstr "Sababini yozing."
 
@@ -862,6 +901,17 @@ msgstr "Faqat tasdiqlangan to'lovni bekor qilish mumkin."
 
 msgid "This payment is already reversed."
 msgstr "Bu to'lov allaqachon bekor qilingan."
+
+msgid "Choose a cash desk method."
+msgstr "Kassa to'lov usulini tanlang."
+
+#, python-format
+msgid "At most %(amount)s can be returned for this group."
+msgstr "Bu guruh uchun ko'pi bilan %(amount)s qaytarish mumkin."
+
+#, python-format
+msgid "Left the group %(group)s: lessons not taken"
+msgstr "%(group)s guruhidan chiqdi: o'tilmagan darslar"
 
 #, python-format
 msgid "Only the credit can be refunded: %(credit)s."
@@ -973,6 +1023,23 @@ msgstr "Jami"
 msgid "By source"
 msgstr "Manbalar bo'yicha"
 
+#, python-format
+msgid "Closed by %(by)s (%(at)s), reopened by %(who)s (%(when)s): %(reason)s"
+msgstr "%(by)s yopgan (%(at)s), %(who)s qayta ochgan (%(when)s): %(reason)s"
+
+msgid ""
+"Reopen the day? Payments dated that day can be changed until you close it "
+"again."
+msgstr ""
+"Kun qayta ochilsinmi? Qayta yopmaguningizcha shu kungi to'lovlarni "
+"o'zgartirish mumkin bo'ladi."
+
+msgid "Why reopen?"
+msgstr "Nima uchun qayta ochilmoqda?"
+
+msgid "Reopen the day"
+msgstr "Kunni qayta ochish"
+
 msgid "Close the day? Its payments will be locked."
 msgstr "Kun yopilsinmi? Uning to'lovlari qulflanadi."
 
@@ -1046,6 +1113,10 @@ msgstr "hisob-kitob yopiq"
 #, python-format
 msgid "overdue %(o)s"
 msgstr "muddati o'tgan %(o)s"
+
+#, python-format
+msgid "Return %(a)s (%(g)s)"
+msgstr "%(a)s qaytarish (%(g)s)"
 
 msgid "due"
 msgstr "muddat"
@@ -1248,6 +1319,14 @@ msgstr "%(name)s ga pul qaytarish"
 msgid "Credit available for refund: %(credit)s"
 msgstr "Qaytarish mumkin bo'lgan avans: %(credit)s"
 
+#, python-format
+msgid ""
+"Left %(group)s: the lessons not taken, up to %(amount)s. Missed lessons "
+"(absences) are not returned."
+msgstr ""
+"%(group)s guruhidan chiqdi: o'tilmagan darslar puli, ko'pi bilan %(amount)s. "
+"Qoldirilgan (kelmagan) darslar puli qaytarilmaydi."
+
 msgid "No access"
 msgstr "Ruxsat yo'q"
 
@@ -1297,6 +1376,9 @@ msgstr "Eng eski to'lov muddati"
 
 msgid "Time"
 msgstr "Vaqt"
+
+msgid "The day is open again. Close it when the corrections are done."
+msgstr "Kun qayta ochildi. Tuzatishlar tugagach, uni yana yoping."
 
 msgid "The day is closed. Its payments are locked."
 msgstr "Kun yopildi. Uning to'lovlari qulflandi."
@@ -1432,9 +1514,6 @@ msgstr "Ya"
 
 msgid "Today"
 msgstr "Bugun"
-
-msgid "Close"
-msgstr "Yopish"
 
 msgid "Calendar"
 msgstr "Taqvim"
@@ -2117,9 +2196,6 @@ msgstr "Ro'yxatdan turini tanlang."
 msgid "The date can't be in the future."
 msgstr "Sana kelajakda bo'lishi mumkin emas."
 
-msgid "Choose a cash desk method."
-msgstr "Kassa to'lov usulini tanlang."
-
 #, python-format
 msgid "A cash desk expense can be dated at most %(n)s days back."
 msgstr ""
@@ -2362,6 +2438,9 @@ msgstr "Mukofot"
 msgid "Deduction"
 msgstr "Ushlab qolish"
 
+msgid "From the Kassa of"
+msgstr "Qaysi filial kassasidan"
+
 msgid "Rate"
 msgstr "Stavka"
 
@@ -2400,6 +2479,12 @@ msgstr "Berildi"
 
 msgid "Salary payout"
 msgstr "Maosh berish"
+
+msgid "Salary advance"
+msgstr "Maosh avansi"
+
+msgid "Salary advances"
+msgstr "Maosh avanslari"
 
 msgid "Manage teacher salaries"
 msgstr "O'qituvchilar maoshini boshqarish"
@@ -2442,6 +2527,14 @@ msgstr ""
 "Administratorlar va sotuv menejerlarining belgilangan oylik maoshi, tarixi "
 "bilan."
 
+#, python-format
+msgid "Salary advance: %(name)s"
+msgstr "Maosh avansi: %(name)s"
+
+#, python-format
+msgid "Salary: %(name)s, %(month)s"
+msgstr "Maosh: %(name)s, %(month)s"
+
 msgid "Only teachers have a salary rate."
 msgstr "Stavka faqat o'qituvchilar uchun."
 
@@ -2469,6 +2562,26 @@ msgstr "Bu oy yopilgan."
 
 msgid "A carry-over can't be deleted."
 msgstr "O'tgan oydan qoldiqni o'chirib bo'lmaydi."
+
+msgid "Choose the branch and the Kassa method."
+msgstr "Filial va kassa usulini tanlang."
+
+#, python-format
+msgid "A cash desk payment can be dated at most %(n)s days back."
+msgstr ""
+"Kassadan to'lov ko'pi bilan %(n)s kun oldingi sana bilan yozilishi mumkin."
+
+#, python-format
+msgid "At most %(amount)s can be given now: what %(month)s has earned so far."
+msgstr ""
+"Hozir ko'pi bilan %(amount)s berish mumkin: %(month)s oyida shu paytgacha "
+"ishlab topilgani."
+
+msgid "This advance is already cancelled."
+msgstr "Bu avans allaqachon bekor qilingan."
+
+msgid "The month is closed: this advance is part of it."
+msgstr "Oy yopilgan: bu avans o'sha oyga kiritilgan."
 
 msgid "Close the month first."
 msgstr "Avval oyni yoping."
@@ -2592,12 +2705,32 @@ msgstr "Maosh varaqasi"
 msgid "Rate: %(r)s%%"
 msgstr "Stavka: %(r)s%%"
 
+msgid "Still to pay"
+msgstr "Berilishi kerak"
+
 #, python-format
 msgid "Paid out %(a)s on %(d)s"
 msgstr "%(d)s kuni %(a)s berildi"
 
 msgid "Preliminary: the month is not closed yet."
 msgstr "Taxminiy: oy hali yopilmagan."
+
+msgid "Cancel this advance? The money goes back into today's Kassa."
+msgstr "Avans bekor qilinsinmi? Pul bugungi kassaga qaytadi."
+
+msgid "Give a salary advance"
+msgstr "Maosh avansi berish"
+
+#, python-format
+msgid ""
+"Up to %(a)s: what this month has earned so far. It comes out of the Kassa "
+"now and off this month's salary."
+msgstr ""
+"Ko'pi bilan %(a)s: shu oyda hozirgacha ishlab topilgani. Pul hozir kassadan "
+"chiqadi va shu oyning maoshidan ayiriladi."
+
+msgid "Give the advance"
+msgstr "Avans berish"
 
 #, python-format
 msgid "Pay out %(a)s"
@@ -2665,6 +2798,12 @@ msgstr "O'chirildi."
 
 msgid "The salary is marked as paid out."
 msgstr "Maosh berilgan deb belgilandi."
+
+msgid "The advance is saved. It comes off this month's salary."
+msgstr "Avans saqlandi. U shu oyning maoshidan ayiriladi."
+
+msgid "The advance is cancelled; the money is back in the Kassa."
+msgstr "Avans bekor qilindi, pul kassaga qaytdi."
 
 msgid "The payout is cancelled."
 msgstr "Berilgan maosh bekor qilindi."
@@ -2764,6 +2903,9 @@ msgstr "Filial chek ma'lumotlari"
 
 msgid "Manage settings"
 msgstr "Sozlamalarni boshqarish"
+
+msgid "Manage users, roles and rights"
+msgstr "Foydalanuvchilar, rollar va ruxsatlarni boshqarish"
 
 msgid "Organization"
 msgstr "Tashkilot"
@@ -3455,6 +3597,9 @@ msgstr "Haftalik jadvalga kamida bitta dars qo'shing."
 msgid "Why is the student leaving?"
 msgstr "O'quvchi nega ketmoqda?"
 
+msgid "Tick one or more groups."
+msgstr "Bir yoki bir nechta guruhni belgilang."
+
 msgid "Over capacity"
 msgstr "Sig'imdan oshirish"
 
@@ -3839,6 +3984,39 @@ msgstr "Faylda ma'lumot qatorlari yo'q."
 msgid "This file can't be imported. Upload it again."
 msgstr "Bu faylni import qilib bo'lmaydi. Qayta yuklang."
 
+#, python-format
+msgid "This student is already registered: %(name)s (%(branch)s)."
+msgstr "Bu o'quvchi allaqachon ro'yxatdan o'tgan: %(name)s (%(branch)s)."
+
+#, python-format
+msgid ""
+"A student with this phone is already registered in another branch: "
+"%(branch)s."
+msgstr ""
+"Bu telefon raqamli o'quvchi boshqa filialda ro'yxatdan o'tgan: %(branch)s."
+
+msgid "a student in another branch"
+msgstr "boshqa filialdagi o'quvchi"
+
+msgid "the same student's phone"
+msgstr "o'quvchining telefoni bir xil"
+
+msgid "the same name and date of birth"
+msgstr "ism va tug'ilgan sana bir xil"
+
+msgid "the same phone number"
+msgstr "telefon raqami bir xil"
+
+msgid "Already registered:"
+msgstr "Allaqachon ro'yxatdan o'tgan:"
+
+msgid ""
+"The student's own phone already belongs to this student. Open their page "
+"instead of adding them again."
+msgstr ""
+"Bu telefon raqami o'sha o'quvchiniki. Qayta qo'shish o'rniga uning "
+"sahifasini oching."
+
 msgid "Awaiting enrollment"
 msgstr "Guruhga qo'shilishi kutilmoqda"
 
@@ -3869,6 +4047,10 @@ msgstr "Bu sanada guruhda o'quvchi yo'q."
 
 msgid "Each tap is saved immediately."
 msgstr "Har bir bosish darhol saqlanadi."
+
+#, python-format
+msgid "Group %(n)s of %(total)s: %(name)s"
+msgstr "%(total)s ta guruhdan %(n)s-si: %(name)s"
 
 msgid "Recalculate"
 msgstr "Qayta hisoblash"
@@ -4021,6 +4203,10 @@ msgstr "Yangi o'quvchi"
 
 msgid "Edit student"
 msgstr "O'quvchini tahrirlash"
+
+msgid "This is a different student (e.g. a brother or sister): add anyway"
+msgstr ""
+"Bu boshqa o'quvchi (masalan, aka-uka yoki opa-singil): baribir qo'shish"
 
 msgid "No student matches these filters."
 msgstr "Bu filtrlarga mos o'quvchi yo'q."
@@ -4681,6 +4867,28 @@ msgid "%(n)s day"
 msgid_plural "%(n)s days"
 msgstr[0] "%(n)s kun"
 msgstr[1] "%(n)s kun"
+
+msgid ""
+"The owner (Ega) is a Direktor who alone can add and change users, their "
+"roles, branches, extra permissions and passwords. Other Direktors keep "
+"everything else."
+msgstr ""
+"Ega — foydalanuvchilar, ularning rollari, filiallari, qo'shimcha ruxsatlari "
+"va parollarini faqat o'zi qo'sha va o'zgartira oladigan Direktor. Boshqa "
+"Direktorlarning qolgan barcha huquqlari saqlanadi."
+
+msgid ""
+"This person stays a Direktor but can no longer manage users, roles and "
+"rights."
+msgstr ""
+"Bu kishi Direktor bo'lib qoladi, lekin foydalanuvchilar, rollar va "
+"ruxsatlarni boshqara olmaydi."
+
+msgid "Make the owner"
+msgstr "Ega qilish"
+
+msgid "Stop being the owner"
+msgstr "Egalikdan voz kechish"
 
 msgid "Branch overrides"
 msgstr "Filiallar uchun alohida ma'lumotlar"

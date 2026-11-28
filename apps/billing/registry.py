@@ -145,12 +145,10 @@ register_audit_labels(
 
 def _account_panel(request, student):
     from apps.core import dates
-
-    from . import selectors
-
     from apps.core.permissions import has_perm
     from apps.students.models import Enrollment
 
+    from . import selectors
     from .services.payments import leave_refundable
 
     leave_refunds = []

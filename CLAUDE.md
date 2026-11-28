@@ -5,7 +5,7 @@ Read `docs/SPEC.md` before any work. It is the source of truth for scope, data m
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **§19–§23 released to `main`** (warnings, expenses and profit, parent bot menu, Ombor and Import rights per person, Kunni yopish Direktor-only, branch switcher fixes, teachers' arrival from lessons, students in several groups) with the lime/black design. Production never has the demo app (`config/settings/prod.py`). Waiting for the owner's next request. Update this line at the end of each phase.
+- Current phase: **§24 on the work branch** (registered-student check, To'lagan fix, reopening a cash day, the owner (Ega), several groups in one window, refund on leave, Maosh avansi and salaries from the Kassa); §19–§23 are on `main`. Waiting for the owner's review before `main`. Production never has the demo app (`config/settings/prod.py`). Update this line at the end of each phase.
 
 ## Ask the owner before
 
@@ -196,12 +196,17 @@ Inside a module:
 | Parent menu (bot) / next payment / next lesson | Menyu / Keyingi to'lov / Keyingi dars |
 | Extra permissions (per person) / from the lesson schedule | Qo'shimcha ruxsatlar / Dars jadvalidan |
 | Database backup (nightly / before an update) | Zaxira nusxa (kechki / yangilanishdan oldin) |
+| Owner (above Direktor) | Ega |
+| Reopen the day (Kassa) | Kunni qayta ochish |
+| Salary advance (not a student's Avans) / still to pay | Maosh avansi / Berilishi kerak |
+| Already registered / add anyway | Allaqachon ro'yxatdan o'tgan / Baribir qo'shish |
 
 Add new terms here before using them in the UI.
 
 ## Building blocks that already exist (use them, don't re-invent)
 
-- `core.permissions`: `register_permission` (`grantable=True`: the Direktor may give it to
+- `core.permissions`: `register_permission` (`owner_only=True`: only the owner (Ega) has it, every
+  Direktor while nobody is the owner; `grantable=True`: the Direktor may give it to
   individual people in Sozlamalar → Foydalanuvchilar; `has_perm` = role or grant),
   `has_perm`, `require_perm`, `perm_required` (view decorator), `scope_by_branch`,
   `ensure_branch_access` (404), `accessible_branch_ids`. `SettingsSection.permission` guards
