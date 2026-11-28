@@ -535,7 +535,16 @@ def _salary_objects(director, teacher_a, teacher_b):
     set_settings({"salaries.start_month": month.year * 100 + month.month}, actor=director)
     rate = salaries.add_rate(actor=director, teacher=teacher_b, rate_bp=6500, effective_from=month)
     salaries.close_month(actor=director, month=month)
-    payout = salaries.pay_out(actor=director, teacher=teacher_a, month=month, paid_on=today())
+    from apps.billing.models import PaymentMethod
+    from apps.settings.models import Branch
+
+    kassa = {
+        "branch": Branch.objects.order_by("pk").first(),
+        "method": PaymentMethod.objects.get(name="Naqd"),
+    }
+    payout = salaries.pay_out(
+        actor=director, teacher=teacher_a, month=month, paid_on=today(), **kassa
+    )
     nxt = add_months(month, 1)
     bonus = salaries.add_adjustment(
         actor=director, teacher=teacher_a, month=nxt, kind="bonus", amount=1000, reason="x"
@@ -624,6 +633,18 @@ def salaries_cases(o) -> dict[str, list[Case]]:
         ],
         "salaries:payout": [
             Case(f"/maosh/oqituvchi/{ta}/berish/", "post", director_post, {"oy": month})
+        ],
+        "salaries:advance": [
+            Case(f"/maosh/oqituvchi/{ta}/avans/", "post", director_post, {"oy": month})
+        ],
+        # tests/test_salary_advances.py cancels real advances; here: none with this id.
+        "salaries:advance_cancel": [
+            Case(
+                "/maosh/avans/999999/bekor-qilish/",
+                "post",
+                {**only({D: 404}, 403), "anon": 302},
+                {"reason": "x"},
+            )
         ],
         "salaries:adjustment_delete": [
             Case(f"/maosh/qoshimcha/{o['salary_bonus'].pk}/ochirish/", "post", director_post)

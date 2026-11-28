@@ -102,3 +102,35 @@ registry.add_widget(
         "my_salary", "salaries/widgets/my_salary.html", "salaries.view_own", 5, _my_salary
     )
 )
+
+
+# --- the Kassa: advances and payouts are money out of a branch's cash desk (SPEC §24) --------
+
+
+def _cash_lines(branch_id, day):
+    from . import selectors
+
+    return selectors.cash_lines(branch_id, day)
+
+
+def _cash_days(since, until):
+    from . import selectors
+
+    return selectors.cash_active_days(since, until)
+
+
+def _register_cash_source():
+    from apps.billing.services.cash import CashSource, register_cash_source
+
+    register_cash_source(
+        CashSource(
+            code="salaries",
+            label=_("Salaries"),
+            lines=_cash_lines,
+            active_days=_cash_days,
+            order=25,
+        )
+    )
+
+
+_register_cash_source()

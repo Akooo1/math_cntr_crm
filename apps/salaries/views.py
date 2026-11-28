@@ -10,8 +10,8 @@ from apps.core import dates, excel, listing
 from apps.core.permissions import perm_required
 
 from . import selectors, services
-from .forms import AdjustmentForm, PayoutForm, ReasonForm
-from .models import Adjustment, Payout
+from .forms import AdjustmentForm, AdvanceForm, PayoutForm, ReasonForm
+from .models import Adjustment, Advance, Payout
 
 
 def _month(request):
@@ -120,7 +120,12 @@ def _sheet_page(request, teacher_id, template):
             "month": month,
             "months": selectors.months_for_picker(),
             "adjustment_form": AdjustmentForm(),
-            "payout_form": PayoutForm(initial={"paid_on": dates.today()}),
+            "payout_form": PayoutForm(
+                initial={"paid_on": dates.today(), "branch": request.branch_filter}
+            ),
+            "advance_form": AdvanceForm(
+                initial={"given_on": dates.today(), "branch": request.branch_filter}
+            ),
             "reason_form": ReasonForm(),
         },
     )
@@ -192,6 +197,8 @@ def payout(request, pk):
                 teacher=teacher,
                 month=month,
                 paid_on=form.cleaned_data["paid_on"],
+                branch=form.cleaned_data["branch"],
+                method=form.cleaned_data["method"],
                 note=form.cleaned_data["note"],
             )
         except ValidationError as exc:
@@ -201,6 +208,55 @@ def payout(request, pk):
     else:
         messages.error(request, " ".join(e for errs in form.errors.values() for e in errs))
     return redirect(_month_url("salaries:sheet", month, pk=teacher.pk))
+
+
+@perm_required("salaries.manage")
+@require_POST
+def advance(request, pk):
+    """Maosh avansi from a branch's Kassa (SPEC §24)."""
+    person = _teacher(pk)
+    form = AdvanceForm(request.POST)
+    if form.is_valid():
+        d = form.cleaned_data
+        try:
+            given = services.give_advance(
+                actor=request.user,
+                person=person,
+                amount=d["amount"],
+                given_on=d["given_on"],
+                branch=d["branch"],
+                method=d["method"],
+                note=d["note"],
+            )
+        except ValidationError as exc:
+            _messages_from(request, exc)
+        else:
+            messages.success(request, _("The advance is saved. It comes off this month's salary."))
+            return redirect(_month_url("salaries:sheet", given.month, pk=person.pk))
+    else:
+        messages.error(request, " ".join(e for errs in form.errors.values() for e in errs))
+    return redirect(_month_url("salaries:sheet", _month(request), pk=person.pk))
+
+
+@perm_required("salaries.manage")
+@require_POST
+def advance_cancel(request, pk):
+    row = get_object_or_404(Advance, pk=pk, kind=Advance.Kind.ADVANCE)
+    form = ReasonForm(request.POST)
+    if form.is_valid():
+        try:
+            services.cancel_advance(
+                actor=request.user, advance=row, reason=form.cleaned_data["reason"]
+            )
+        except ValidationError as exc:
+            _messages_from(request, exc)
+        else:
+            messages.success(
+                request, _("The advance is cancelled; the money is back in the Kassa.")
+            )
+    else:
+        messages.error(request, _("Write the reason."))
+    return redirect(_month_url("salaries:sheet", row.month, pk=row.person_id))
 
 
 @perm_required("salaries.manage")

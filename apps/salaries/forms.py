@@ -80,9 +80,36 @@ class AdjustmentForm(StyledForm):
     reason = forms.CharField(label=_("Reason"), max_length=500)
 
 
+def _kassa_fields(form):
+    """Branch + cash desk method: salary money comes out of a branch's Kassa (SPEC §24)."""
+    from apps.billing import selectors as billing_selectors
+    from apps.settings.models import Branch
+
+    form.fields["branch"].queryset = Branch.objects.filter(is_active=True).order_by("name")
+    form.fields["method"].queryset = billing_selectors.cash_methods_for_entry()
+
+
 class PayoutForm(StyledForm):
     paid_on = UzDateField(label=_("Date"))
+    branch = forms.ModelChoiceField(label=_("From the Kassa of"), queryset=None)
+    method = forms.ModelChoiceField(label=_("Payment method"), queryset=None, empty_label=None)
     note = forms.CharField(label=_("Note"), required=False, max_length=500)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _kassa_fields(self)
+
+
+class AdvanceForm(StyledForm):
+    amount = MoneyField(label=_("Amount"), min_value=1)
+    given_on = UzDateField(label=_("Date"))
+    branch = forms.ModelChoiceField(label=_("From the Kassa of"), queryset=None)
+    method = forms.ModelChoiceField(label=_("Payment method"), queryset=None, empty_label=None)
+    note = forms.CharField(label=_("Note"), required=False, max_length=500)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        _kassa_fields(self)
 
 
 class ReasonForm(StyledForm):

@@ -435,6 +435,7 @@ class Command(BaseCommand):
         """Salaries from the first month with payments: one owner-teacher at 65%, past
         months closed, all but the last one paid out, a bonus in the current month."""
         from apps.core.datemath import add_months, month_start
+        from apps.salaries import selectors as salary_selectors
         from apps.salaries import services as salaries
         from apps.salaries.selectors import open_month
 
@@ -459,13 +460,40 @@ class Command(BaseCommand):
             m = open_month()
             salaries.close_month(actor=director, month=m)
             closed.append(m)
+        # Old months were paid before salaries came out of the Kassa (SPEC §24): like real
+        # payouts made before that update, they have no branch and stay outside the Kassa.
+        from apps.salaries.models import Month as SalaryMonth
+        from apps.salaries.models import Payout
+
         for m in closed[:-1]:
             pay_day = min(add_months(m, 1) - dt.timedelta(days=1), today)
             for t in teachers:
-                try:
-                    salaries.pay_out(actor=director, teacher=t, month=m, paid_on=pay_day)
-                except ValidationError:
-                    pass  # nothing to pay that month
+                sheet = salary_selectors.sheets_for(m, {t.pk})[0]
+                if sheet.totals.to_pay > 0 and sheet.payout is None:
+                    Payout.objects.create(
+                        month=SalaryMonth.objects.get(month=m),
+                        teacher=t,
+                        amount=sheet.totals.to_pay,
+                        paid_on=pay_day,
+                        created_by=director,
+                    )
+        # A salary advance this month, from the first branch's Kassa (the real service).
+        from apps.billing.models import PaymentMethod
+
+        for t in teachers:
+            try:
+                salaries.give_advance(
+                    actor=director,
+                    person=t,
+                    amount=100_000,
+                    given_on=today,
+                    branch=Branch.objects.order_by("pk").first(),
+                    method=PaymentMethod.objects.get(name="Naqd"),
+                    note="Oy o'rtasida",
+                )
+                break
+            except ValidationError:
+                continue  # earned less than that so far this month
         salaries.add_adjustment(
             actor=director,
             teacher=teachers[-1],

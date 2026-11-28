@@ -21,7 +21,7 @@ from apps.students.models import Group, Student
 
 from .domain import calc
 from .formatting import format_percent
-from .models import Adjustment, FixedLine, Line, Month, Payout, Rate, StaffPay
+from .models import Adjustment, Advance, FixedLine, Line, Month, Payout, Rate, StaffPay
 
 CLOSED, OPEN, LATER = "closed", "open", "later"
 
@@ -221,10 +221,11 @@ class Sheet:
     totals: calc.Totals = field(default_factory=calc.Totals)
     payout: Payout | None = None
     rate: str = ""
+    advances: list = field(default_factory=list)  # Advance rows still in force
 
     @property
     def payable(self) -> bool:
-        return self.state == CLOSED and self.payout is None and self.totals.total > 0
+        return self.state == CLOSED and self.payout is None and self.totals.to_pay > 0
 
 
 def _line_dicts(lines) -> list[dict]:
@@ -247,6 +248,19 @@ def _line_dicts(lines) -> list[dict]:
     return out
 
 
+def active_advances(month: dt.date, ids=None) -> dict[int, list]:
+    """{person: [advances given for `month` and not cancelled]}."""
+    qs = Advance.objects.filter(
+        month=month, kind=Advance.Kind.ADVANCE, cancelled_by__isnull=True
+    ).select_related("branch", "method", "created_by")
+    if ids is not None:
+        qs = qs.filter(person_id__in=ids)
+    out = defaultdict(list)
+    for a in qs:
+        out[a.person_id].append(a)
+    return out
+
+
 def _active_payouts(month: dt.date) -> dict[int, Payout]:
     payouts = Payout.objects.filter(
         month__month=month, kind=Payout.Kind.PAYOUT, cancelled_by__isnull=True
@@ -266,13 +280,14 @@ def sheets_for(month: dt.date, teacher_ids: set[int] | None = None) -> list[Shee
         lines, fixed = [], {}
     adjustments = list(Adjustment.objects.filter(month=month).select_related("created_by"))
     payouts = _active_payouts(month) if state == CLOSED else {}
+    advances = active_advances(month)
     by_teacher = defaultdict(list)
     for line in lines:
         by_teacher[line.teacher_id].append(line)
     adj_by_teacher = defaultdict(list)
     for a in adjustments:
         adj_by_teacher[a.teacher_id].append(a)
-    ids = set(by_teacher) | set(adj_by_teacher) | set(fixed)
+    ids = set(by_teacher) | set(adj_by_teacher) | set(fixed) | set(advances)
     if teacher_ids is not None:
         ids = (ids | teacher_ids) & teacher_ids
     else:
@@ -281,6 +296,9 @@ def sheets_for(month: dt.date, teacher_ids: set[int] | None = None) -> list[Shee
     sheets = []
     for tid in ids:
         mine, adj = by_teacher.get(tid, []), adj_by_teacher.get(tid, [])
+        totals = calc.totals(mine, [(a.kind, a.amount) for a in adj], fixed.get(tid, 0))
+        given = advances.get(tid, [])
+        totals.advances = sum(a.amount for a in given)
         sheets.append(
             Sheet(
                 teacher=people[tid],
@@ -288,8 +306,9 @@ def sheets_for(month: dt.date, teacher_ids: set[int] | None = None) -> list[Shee
                 state=state,
                 lines=mine,
                 adjustments=adj,
-                totals=calc.totals(mine, [(a.kind, a.amount) for a in adj], fixed.get(tid, 0)),
+                totals=totals,
                 payout=payouts.get(tid),
+                advances=given,
             )
         )
     sheets.sort(key=lambda s: s.teacher.full_name)
@@ -301,7 +320,7 @@ def month_overview(user, month: dt.date) -> dict:
     sheets = sheets_for(month)
     grand = calc.Totals()
     for s in sheets:
-        for f in ("paid", "share", "corrections", "fixed", "bonuses", "deductions"):
+        for f in ("paid", "share", "corrections", "fixed", "bonuses", "deductions", "advances"):
             setattr(grand, f, getattr(grand, f) + getattr(s.totals, f))
     return {
         "month": month,
@@ -346,3 +365,67 @@ def own_summary(user) -> dict:
     m = open_month()
     s = sheets_for(m, {user.pk})[0]
     return {"month": m, "totals": s.totals, "state": s.state}
+
+
+# --- the Kassa (billing's cash-source hook, SPEC §24) ----------------------------------------
+
+
+def cash_lines(branch_id: int, day: dt.date) -> list:
+    """Salary money out of a branch's Kassa on a day: advances and month-end payouts, and
+    their cancellations coming back in."""
+    from django.urls import reverse
+    from django.utils.translation import gettext as _
+
+    from apps.billing.services.cash import CashLine
+
+    out = []
+    for a in Advance.objects.filter(branch_id=branch_id, given_on=day).select_related(
+        "person", "created_by"
+    ):
+        cancel = a.kind == Advance.Kind.CANCEL
+        out.append(
+            CashLine(
+                source="salaries",
+                method_id=a.method_id,
+                direction="in" if cancel else "out",
+                amount=a.amount,
+                at=a.created_at,
+                by_name=a.created_by.full_name,
+                description=_("Salary advance: %(name)s") % {"name": a.person.full_name},
+                kind_label=_("Cancelled") if cancel else "",
+                url=reverse("salaries:sheet", args=[a.person_id]) + f"?oy={a.month:%m.%Y}",
+            )
+        )
+    for p in Payout.objects.filter(branch_id=branch_id, paid_on=day).select_related(
+        "teacher", "created_by", "month"
+    ):
+        cancel = p.kind == Payout.Kind.CANCEL
+        out.append(
+            CashLine(
+                source="salaries",
+                method_id=p.method_id,
+                direction="in" if cancel else "out",
+                amount=p.amount,
+                at=p.created_at,
+                by_name=p.created_by.full_name,
+                description=_("Salary: %(name)s, %(month)s")
+                % {"name": p.teacher.full_name, "month": f"{p.month.month:%m.%Y}"},
+                kind_label=_("Cancelled") if cancel else "",
+                url=reverse("salaries:sheet", args=[p.teacher_id]) + f"?oy={p.month.month:%m.%Y}",
+            )
+        )
+    return out
+
+
+def cash_active_days(since: dt.date, until: dt.date) -> set:
+    days = set(
+        Advance.objects.filter(given_on__gte=since, given_on__lte=until).values_list(
+            "branch_id", "given_on"
+        )
+    )
+    days |= set(
+        Payout.objects.filter(
+            branch__isnull=False, paid_on__gte=since, paid_on__lte=until
+        ).values_list("branch_id", "paid_on")
+    )
+    return days

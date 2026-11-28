@@ -14,7 +14,7 @@ from apps.core.roles import Role
 
 from .. import selectors
 from ..domain import calc
-from ..models import Adjustment, FixedLine, Line, Month, Payout, Rate, StaffPay
+from ..models import Adjustment, Advance, FixedLine, Line, Month, Payout, Rate, StaffPay
 
 LOCK_KEY = 7_410_001  # pg advisory lock: one salary write at a time
 
@@ -101,11 +101,15 @@ def close_month(*, actor, month: dt.date) -> Month:
         for a in Adjustment.objects.filter(month=month):
             adjustments[a.teacher_id].append((a.kind, a.amount))
         fixed = selectors.fixed_amounts(month)
+        given = {
+            tid: sum(a.amount for a in rows)
+            for tid, rows in selectors.active_advances(month).items()
+        }
         totals = {
             str(tid): calc.totals(
                 by_teacher.get(tid, []), adjustments.get(tid, []), fixed.get(tid, 0)
             ).total
-            for tid in set(by_teacher) | set(adjustments) | set(fixed)
+            for tid in set(by_teacher) | set(adjustments) | set(fixed) | set(given)
         }
         closed = Month.objects.create(month=month, closed_by=actor, totals=totals)
         FixedLine.objects.bulk_create(
@@ -127,6 +131,7 @@ def close_month(*, actor, month: dt.date) -> Month:
         )
         nxt = add_months(month, 1)
         for teacher_id, total in totals.items():
+            total -= given.get(int(teacher_id), 0)  # advances already handed over
             if total < 0:
                 Adjustment.objects.create(
                     month=nxt,
@@ -188,8 +193,125 @@ def delete_adjustment(*, actor, adjustment: Adjustment) -> None:
         adjustment.delete()
 
 
-def pay_out(*, actor, teacher, month: dt.date, paid_on: dt.date, note: str = "") -> Payout:
-    """Record that the teacher got the closed month's total in cash."""
+def _kassa(branch, method, day: dt.date) -> None:
+    """Money out of (or back into) a branch's Kassa: a cash desk method, an open day,
+    within the backdating window. Call inside the transaction (SPEC §24)."""
+    from apps.billing import selectors as billing_selectors
+    from apps.billing.services.cash import lock_day
+    from apps.core.system_settings import get_setting
+
+    if branch is None or method is None:
+        raise ValidationError(_("Choose the branch and the Kassa method."))
+    if not method.included_in_cash_close or not method.is_active:
+        raise ValidationError(_("Choose a cash desk method."))
+    today = dates.today()
+    if day > today:
+        raise ValidationError(_("The date can't be in the future."))
+    window = get_setting("billing.backdate_days")
+    if (today - day).days > window:
+        raise ValidationError(
+            _("A cash desk payment can be dated at most %(n)s days back.") % {"n": window}
+        )
+    lock_day(branch.pk, day)
+    if billing_selectors.is_day_closed(branch.pk, day):
+        raise ValidationError(_("This day is closed in the Kassa. Choose another date."))
+
+
+def give_advance(
+    *, actor, person, amount: int, given_on: dt.date, branch, method, note: str = ""
+) -> Advance:
+    """Maosh avansi from a branch's Kassa (Direktor only). It is taken from the earliest
+    salary month not closed yet and may not be more than that month has earned so far
+    minus advances already given (owner's rules, SPEC §24)."""
+    require_perm(actor, "salaries.manage")
+    _salaried(person)
+    if amount <= 0:
+        raise ValidationError(_("Enter an amount greater than zero."))
+    with transaction.atomic():
+        _lock()
+        _kassa(branch, method, given_on)
+        month = selectors.open_month()
+        sheet = selectors.sheets_for(month, {person.pk})[0]
+        room = sheet.totals.to_pay
+        if amount > room:
+            raise ValidationError(
+                _("At most %(amount)s can be given now: what %(month)s has earned so far.")
+                % {"amount": _money(max(room, 0)), "month": f"{month:%m.%Y}"}
+            )
+        advance = Advance.objects.create(
+            person=person,
+            month=month,
+            amount=amount,
+            given_on=given_on,
+            branch=branch,
+            method=method,
+            note=note.strip(),
+            created_by=actor,
+        )
+        audit.record(
+            actor,
+            "salaries.advance.create",
+            advance,
+            after=audit.snapshot(advance),
+            branch_id=branch.pk,
+        )
+    return advance
+
+
+def cancel_advance(*, actor, advance: Advance, reason: str) -> Advance:
+    """Undo an advance: the money goes back into today's Kassa of the same branch."""
+    require_perm(actor, "salaries.manage")
+    if not reason.strip():
+        raise ValidationError(_("Write the reason."))
+    with transaction.atomic():
+        _lock()
+        advance = Advance.objects.get(pk=advance.pk)
+        if advance.kind != Advance.Kind.ADVANCE or Advance.objects.filter(cancels=advance).exists():
+            raise ValidationError(_("This advance is already cancelled."))
+        if Month.objects.filter(month=advance.month).exists():
+            raise ValidationError(_("The month is closed: this advance is part of it."))
+        today = dates.today()
+        _kassa(advance.branch, advance.method, today)
+        cancel = Advance.objects.create(
+            person=advance.person,
+            month=advance.month,
+            kind=Advance.Kind.CANCEL,
+            amount=advance.amount,
+            given_on=today,
+            branch=advance.branch,
+            method=advance.method,
+            note=reason.strip(),
+            cancels=advance,
+            created_by=actor,
+        )
+        audit.record(
+            actor,
+            "salaries.advance.cancel",
+            advance,
+            after=audit.snapshot(cancel),
+            branch_id=advance.branch_id,
+            reason=reason,
+        )
+    return cancel
+
+
+def _money(amount: int) -> str:
+    from apps.core.money import format_som
+
+    return format_som(amount)
+
+
+def pay_out(
+    *,
+    actor,
+    teacher,
+    month: dt.date,
+    paid_on: dt.date,
+    branch=None,
+    method=None,
+    note: str = "",
+) -> Payout:
+    """Give the closed month's salary, minus advances, from a branch's Kassa (SPEC §24)."""
     require_perm(actor, "salaries.manage")
     if paid_on > dates.today():
         raise ValidationError(_("The date can't be in the future."))
@@ -201,13 +323,16 @@ def pay_out(*, actor, teacher, month: dt.date, paid_on: dt.date, note: str = "")
         sheet = selectors.sheets_for(month, {teacher.pk})[0]
         if sheet.payout is not None:
             raise ValidationError(_("This salary is already paid out."))
-        if sheet.totals.total <= 0:
+        if sheet.totals.to_pay <= 0:
             raise ValidationError(_("There is nothing to pay for this month."))
+        _kassa(branch, method, paid_on)
         payout = Payout.objects.create(
             month=closed,
             teacher=teacher,
-            amount=sheet.totals.total,
+            amount=sheet.totals.to_pay,
             paid_on=paid_on,
+            branch=branch,
+            method=method,
             note=note,
             created_by=actor,
         )
@@ -223,12 +348,16 @@ def cancel_payout(*, actor, payout: Payout, reason: str) -> Payout:
         _lock()
         if payout.kind != Payout.Kind.PAYOUT or Payout.objects.filter(cancels=payout).exists():
             raise ValidationError(_("This payout is already cancelled."))
+        if payout.branch_id:  # paid from the Kassa: the money goes back in today
+            _kassa(payout.branch, payout.method, dates.today())
         cancel = Payout.objects.create(
             month=payout.month,
             teacher=payout.teacher,
             kind=Payout.Kind.CANCEL,
             amount=payout.amount,
             paid_on=dates.today(),
+            branch=payout.branch,
+            method=payout.method,
             note=reason.strip(),
             cancels=payout,
             created_by=actor,

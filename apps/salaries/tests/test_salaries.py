@@ -171,23 +171,24 @@ class TestAdjustmentsAndPayouts:
         with pytest.raises(IntegrityError), transaction.atomic():  # the trigger, too
             Adjustment.objects.filter(pk=adj.pk).delete()
 
-    def test_payout_once_cancel_and_not_in_cash_report(
-        self, setup, director, admin_a, branch_a, cash
-    ):
+    def test_payout_once_cancel_and_from_the_kassa(self, setup, director, admin_a, branch_a, cash):
+        """The salary comes out of a branch's Kassa (owner's decision, SPEC §24)."""
         pay(admin_a, setup["student"], 300_000, cash)
         t = setup["teacher"]
+        kassa = {"branch": branch_a, "method": cash}
         with pytest.raises(ValidationError):  # not closed yet
-            services.pay_out(actor=director, teacher=t, month=NOV, paid_on=D(2026, 11, 16))
+            services.pay_out(actor=director, teacher=t, month=NOV, paid_on=D(2026, 11, 16), **kassa)
         services.close_month(actor=director, month=NOV)
         cash_before = billing.cash.day_report(branch_a.pk, D(2026, 11, 16))["total_net"]
-        p = services.pay_out(actor=director, teacher=t, month=NOV, paid_on=D(2026, 11, 16))
+        p = services.pay_out(actor=director, teacher=t, month=NOV, paid_on=D(2026, 11, 16), **kassa)
         assert p.amount == 150_000
-        assert billing.cash.day_report(branch_a.pk, D(2026, 11, 16))["total_net"] == cash_before
+        after = billing.cash.day_report(branch_a.pk, D(2026, 11, 16))["total_net"]
+        assert after == cash_before - 150_000
         with pytest.raises(ValidationError):
-            services.pay_out(actor=director, teacher=t, month=NOV, paid_on=D(2026, 11, 16))
+            services.pay_out(actor=director, teacher=t, month=NOV, paid_on=D(2026, 11, 16), **kassa)
         services.cancel_payout(actor=director, payout=p, reason="noto'g'ri sana")
         assert sheet(director, t, NOV).payout is None
-        services.pay_out(actor=director, teacher=t, month=NOV, paid_on=D(2026, 11, 15))
+        services.pay_out(actor=director, teacher=t, month=NOV, paid_on=D(2026, 11, 15), **kassa)
         assert sheet(director, t, NOV).payout.paid_on == D(2026, 11, 15)
 
     def test_append_only_tables(self, setup, director, admin_a, cash):
@@ -242,13 +243,16 @@ class TestAccess:
         assert "Karimov Aziz" in page_text(teacher_client.get("/maoshim/?oy=11.2026"))
         assert teacher_client.get("/maosh/").status_code == 403
 
-    def test_close_and_payout_through_views(self, setup, login, director, admin_a, cash):
+    def test_close_and_payout_through_views(self, setup, login, director, admin_a, branch_a, cash):
         pay(admin_a, setup["student"], 300_000, cash)
         client = login(director)
         client.post("/maosh/yopish/", {"oy": "11.2026"})
         assert selectors.open_month() == DEC
         t = setup["teacher"].pk
-        client.post(f"/maosh/oqituvchi/{t}/berish/", {"oy": "11.2026", "paid_on": "16.11.2026"})
+        client.post(
+            f"/maosh/oqituvchi/{t}/berish/",
+            {"oy": "11.2026", "paid_on": "16.11.2026", "branch": branch_a.pk, "method": cash.pk},
+        )
         assert Payout.objects.filter(teacher_id=t, amount=150_000).exists()
         client.post(
             f"/maosh/oqituvchi/{t}/qoshish/",

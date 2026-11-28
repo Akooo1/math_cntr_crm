@@ -97,6 +97,17 @@ def check_cash():
         by_day[(sale.branch_id, sale.sold_on)] += sale.total
     for rev in SaleReversal.objects.filter(sale__settlement="paid").select_related("sale"):
         by_day[(rev.sale.branch_id, rev.reversed_on)] -= rev.sale.total
+    # Expenses paid from the drawer and salary money (advances, payouts) come out of it too.
+    from apps.expenses.models import Expense
+    from apps.salaries.models import Advance, Payout
+
+    for e in Expense.objects.filter(method__isnull=False):
+        by_day[(e.branch_id, e.spent_on)] += e.amount if e.kind == "reversal" else -e.amount
+    for a in Advance.objects.all():
+        by_day[(a.branch_id, a.given_on)] += a.amount if a.kind == "cancel" else -a.amount
+    for po in Payout.objects.filter(branch__isnull=False):
+        by_day[(po.branch_id, po.paid_on)] += po.amount if po.kind == "cancel" else -po.amount
+    assert Advance.objects.exists()
     assert Sale.objects.filter(settlement="paid").exists()
     assert by_day
     for (branch_id, day), total in by_day.items():

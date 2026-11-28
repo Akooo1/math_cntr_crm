@@ -87,10 +87,17 @@ class Totals:
     fixed: int = 0  # fixed monthly salary (administrators, managers)
     bonuses: int = 0
     deductions: int = 0  # negative or zero (includes carry-over)
+    advances: int = 0  # Maosh avansi already given from the Kassa for this month
 
     @property
     def total(self) -> int:
+        """What the month earned."""
         return self.share + self.corrections + self.fixed + self.bonuses + self.deductions
+
+    @property
+    def to_pay(self) -> int:
+        """What is still owed at month end: the total minus advances (SPEC §24)."""
+        return self.total - self.advances
 
 
 @dataclass(frozen=True)

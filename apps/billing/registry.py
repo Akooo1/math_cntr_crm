@@ -155,9 +155,7 @@ def _account_panel(request, student):
 
     leave_refunds = []
     if has_perm(request.user, "billing.refund.leave"):
-        for e in Enrollment.objects.filter(student=student, status="left").select_related(
-            "group"
-        ):
+        for e in Enrollment.objects.filter(student=student, status="left").select_related("group"):
             amount = leave_refundable(e)
             if amount > 0:
                 leave_refunds.append({"enrollment": e, "amount": amount})

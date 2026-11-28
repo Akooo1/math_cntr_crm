@@ -240,6 +240,24 @@ class Payout(models.Model):
     kind = models.CharField(_("Type"), max_length=10, choices=Kind.choices, default=Kind.PAYOUT)
     amount = MoneyField(_("Amount"))
     paid_on = models.DateField(_("Date"))
+    # Paid from this branch's Kassa with this method (SPEC §24); empty on payouts made
+    # before that, which stay outside the Kassa.
+    branch = models.ForeignKey(
+        "center_settings.Branch",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Branch"),
+    )
+    method = models.ForeignKey(
+        "billing.PaymentMethod",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Payment method"),
+    )
     note = models.TextField(_("Note"), blank=True)
     cancels = models.OneToOneField(
         "self",
@@ -272,3 +290,69 @@ class Payout(models.Model):
 
     def __str__(self):
         return f"{self.kind} {self.amount} {self.paid_on}"
+
+
+class Advance(models.Model):
+    """Maosh avansi: money given from a branch's Kassa before the month ends, taken off that
+    month's salary (owner's request, SPEC §24). Append-only: a mistake is undone by a
+    `cancel` row, dated the day it is cancelled, which puts the money back in the Kassa."""
+
+    class Kind(models.TextChoices):
+        ADVANCE = "advance", _("Salary advance")
+        CANCEL = "cancel", _("Cancelled")
+
+    person = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="salary_advances",
+        verbose_name=_("Employee"),
+    )
+    month = models.DateField(_("Month"))  # first day of the month it is taken from
+    kind = models.CharField(_("Type"), max_length=10, choices=Kind.choices, default=Kind.ADVANCE)
+    amount = MoneyField(_("Amount"))
+    given_on = models.DateField(_("Date"))
+    branch = models.ForeignKey(
+        "center_settings.Branch",
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name=_("Branch"),
+    )
+    method = models.ForeignKey(
+        "billing.PaymentMethod",
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name=_("Payment method"),
+    )
+    note = models.TextField(_("Note"), blank=True)
+    cancels = models.OneToOneField(
+        "self",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="cancelled_by",
+        verbose_name=_("Cancels"),
+    )
+    created_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name=_("Created by"),
+    )
+    created_at = models.DateTimeField(_("Created at"), auto_now_add=True)
+
+    class Meta:
+        db_table = "salaries_advance"
+        verbose_name = _("Salary advance")
+        verbose_name_plural = _("Salary advances")
+        ordering = ["given_on", "created_at", "id"]
+        constraints = [
+            models.CheckConstraint(condition=Q(amount__gt=0), name="salaries_advance_positive"),
+            models.CheckConstraint(
+                condition=(Q(kind="advance") & Q(cancels__isnull=True))
+                | (Q(kind="cancel") & Q(cancels__isnull=False)),
+                name="salaries_advance_cancel_link",
+            ),
+        ]
+
+    def __str__(self):
+        return f"{self.kind} {self.amount} {self.given_on}"

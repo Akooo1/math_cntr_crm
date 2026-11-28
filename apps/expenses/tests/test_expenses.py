@@ -137,7 +137,7 @@ class TestScreens:
 
 
 class TestStaffPay:
-    def test_fixed_salary_on_the_sheet_and_frozen(self, clock, director, admin_a):
+    def test_fixed_salary_on_the_sheet_and_frozen(self, clock, director, admin_a, branch_a, cash):
         set_settings({"salaries.start_month": 202611}, actor=director)
         salaries.set_staff_pay(
             actor=director, user=admin_a, amount=3_000_000, effective_from=D(2026, 11, 1)
@@ -165,7 +165,12 @@ class TestStaffPay:
                 actor=director, user=admin_a, amount=1, effective_from=D(2026, 11, 1)
             )
         payout = salaries.pay_out(
-            actor=director, teacher=admin_a, month=D(2026, 11, 1), paid_on=TODAY
+            actor=director,
+            teacher=admin_a,
+            month=D(2026, 11, 1),
+            paid_on=TODAY,
+            branch=branch_a,
+            method=cash,
         )
         assert payout.amount == 3_200_000
 
