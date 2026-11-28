@@ -4,7 +4,7 @@
 {% block content %}
   <div class="mb-4"><a href="{% url 'store:stock' %}{% if branch %}?filial={{ branch.pk }}{% endif %}" class="btn-ghost -ml-3 px-3">{% icon "chevron-left" %}{% translate "Stock" %}</a></div>
   <h2 class="text-xl font-semibold">{{ product.name }}</h2>
-  <p class="mb-4 text-sm text-slate-500">{{ product.get_kind_display }}{% if branch %} · {{ branch.name }}{% endif %}</p>
+  <p class="mb-4 text-sm text-slate-500">{{ product.category.name|default:product.get_kind_display }}{% if branch %} · {{ branch.name }}{% endif %}</p>
   <section class="card p-4 md:p-5">
     <h3 class="font-semibold">{% translate "Stock movements" %}</h3>
     <ul class="mt-2 divide-y divide-slate-100 text-sm">

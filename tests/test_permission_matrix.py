@@ -410,6 +410,7 @@ def objects(director, branch_a, branch_b, admin_a, teacher_a):
         "telegram": branch_a,
         "xabar-shablonlari": _first_template(),
         "mahsulotlar": leads["product"],
+        "mahsulot-turlari": leads["product"].category,
     }
 
 
@@ -794,14 +795,12 @@ def cases(objects) -> dict[str, list[Case]]:
                 Case(f"{base}{obj.pk}/holat/", "post", {**only({D: 302}, 403), "anon": 302})
             )
         for action in s.actions:
-            # "ega" (make the owner) is offered only on a Direktor's row: 404 on others.
+            # "ega" (make the owner) is offered only on a Direktor's row; "ochirish" only for
+            # a product never used / a category without products. These objects are neither.
             ok = (
                 {**DIRECTOR_ONLY, "anon": 302}
-                if action != "ega"
-                else {
-                    **only({D: 404}, 403),
-                    "anon": 302,
-                }
+                if action not in ("ega", "ochirish")
+                else {**only({D: 404}, 403), "anon": 302}
             )
             c["settings:section_action"].append(Case(f"{base}{obj.pk}/{action}/", expect=ok))
     return c

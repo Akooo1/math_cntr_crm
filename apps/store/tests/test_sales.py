@@ -117,6 +117,16 @@ class TestKassa:
         assert store["net"] == 6_000
         assert close.totals["total_net"] == 106_000
 
+    def test_reopened_day_takes_sales_and_reversals_again(
+        self, shop, admin_a, director, branch_a, cash
+    ):
+        """A Direktor reopened the Kassa day (SPEC §24): the database rules must agree."""
+        sale = sell(admin_a, branch_a, cash, (shop["small"], 1))
+        billing.cash.close_day(actor=director, branch=branch_a, day=TODAY)
+        billing.cash.reopen_day(actor=director, branch=branch_a, day=TODAY, reason="xato")
+        sell(admin_a, branch_a, cash, (shop["small"], 1))
+        services.reverse_sale(actor=director, sale=sale, reason="xato")
+
     def test_closed_day_blocks_sales_in_service_and_database(
         self, shop, admin_a, director, branch_a, cash
     ):

@@ -1596,3 +1596,25 @@ missed lesson is still paid.
   carries the minus into the next month (`carry`), as with any negative total.
 - Kassa: cash source `salaries` (advances and payouts out, their cancels in).
 
+---
+
+## 25. Ombor: product categories and deleting a wrong product (owner's request)
+
+- **Categories** (`store_category`: name unique, `is_book` "Kitob kabi", is_active,
+  sort_order; `store_product.category`). The Direktor (or whoever has
+  `store.catalog.manage`) creates, renames, deactivates and deletes them in Sozlamalar →
+  Mahsulot turlari (also linked from the Ombor menu). The migration turned the two fixed
+  types into the categories **Kitoblar** (Kitob kabi) and **Mahsulotlar** and put every
+  existing product into the matching one; nothing else about products changed.
+- "Kitob kabi" decides behaviour: given to a whole group and paid later (books) or sold at
+  the counter (items); `store_product.kind` follows it. It can change only while the category
+  has no products, and a product moves only to a category that behaves the same.
+- A category can be deleted only when it has no products.
+- **Deleting a product** (owner's decision): only one never received, sold or given; it goes
+  with its prices. A used product can't be deleted, only deactivated and renamed, so past Kassa
+  and Ombor days stay correct. The database allows deleting prices only of a product with no
+  stock movement and no sale line (`store_price_guard`).
+- Fixed in the same round: the product type "Book" showed as "Yozish"; it is "Kitob". The
+  store's closed-day rules (`store_sale_closed_day`, `store_reversal_closed_day`) now ignore
+  reopened days (§24), like the payment rule.
+

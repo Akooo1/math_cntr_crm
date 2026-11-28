@@ -12,14 +12,47 @@ from apps.core.model_fields import MoneyField
 from apps.settings.models import Branch
 
 
+class Category(models.Model):
+    """Mahsulot turi: a category the Direktor names (Kitoblar, Daftarlar, ...). "Like books"
+    decides how its products behave: given to a group and paid later (books) or sold at
+    the counter (items). SPEC §25."""
+
+    name = models.CharField(_("Name"), max_length=100, unique=True)
+    is_book = models.BooleanField(
+        _("Like books"),
+        default=False,
+        help_text=_("Can be given to a whole group and paid later, like books."),
+    )
+    is_active = models.BooleanField(_("Active"), default=True)
+    sort_order = models.PositiveIntegerField(_("Order"), default=100)
+
+    class Meta:
+        db_table = "store_category"
+        ordering = ["sort_order", "name"]
+        verbose_name = _("Product category")
+        verbose_name_plural = _("Product categories")
+
+    def __str__(self):
+        return self.name
+
+
 class Product(models.Model):
-    """Catalog row (books and items alike). Global; stock is per branch. Never deleted."""
+    """Catalog row (books and items alike). Global; stock is per branch. A product that was
+    never received, sold or given can be deleted (SPEC §25); a used one only hidden."""
 
     class Kind(models.TextChoices):
         BOOK = "book", pgettext_lazy("product", "Book")
         ITEM = "item", _("Item")
 
+    # Follows the category's "like books" (kept for the book / item rules in the services).
     kind = models.CharField(_("Type"), max_length=10, choices=Kind.choices)
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.PROTECT,
+        null=True,
+        related_name="products",
+        verbose_name=_("Category"),
+    )
     name = models.CharField(_("Name"), max_length=150)
     low_stock_threshold = models.PositiveIntegerField(
         _("Low-stock threshold"),

@@ -124,8 +124,9 @@ def _low_stock(request):
 
 def _register():
     from . import selectors
-    from .sections import ProductSection
+    from .sections import CategorySection, ProductSection
 
+    register_section(CategorySection())
     register_section(ProductSection())
     student_services.register_profile_panel(
         student_services.ProfilePanel(

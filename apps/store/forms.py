@@ -4,30 +4,41 @@ from django.utils.translation import gettext_lazy as _
 from apps.core import dates
 from apps.core.forms import MoneyField, StyledForm, StyledModelForm, UzDateField
 
-from .models import Product
+from .models import Category, Product
 
 
 class ProductForm(StyledModelForm):
-    """New product with its first price; on edit the type and price fields are hidden
-    (prices change only through a new price row)."""
+    """New product with its first price; on edit the price fields are hidden (prices change
+    only through a new price row) and the category can only be one that behaves the same."""
 
     price = MoneyField(label=_("Price"), min_value=1, required=False)
     effective_from = UzDateField(label=_("Effective from"), required=False)
 
     class Meta:
         model = Product
-        fields = ["kind", "name", "low_stock_threshold", "sort_order"]
+        fields = ["category", "name", "low_stock_threshold", "sort_order"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        categories = Category.objects.filter(is_active=True)
+        self.fields["category"].required = True
+        self.fields["category"].empty_label = None
         if self.instance.pk:
-            del self.fields["kind"]
+            self.fields["category"].queryset = categories.filter(
+                is_book=self.instance.kind == Product.Kind.BOOK
+            ) | Category.objects.filter(pk=self.instance.category_id)
             del self.fields["price"]
             del self.fields["effective_from"]
         else:
             self.fields["price"].required = True
             self.fields["effective_from"].required = True
             self.fields["effective_from"].initial = dates.today()
+
+
+class CategoryForm(StyledModelForm):
+    class Meta:
+        model = Category
+        fields = ["name", "is_book", "sort_order"]
 
 
 class PriceForm(StyledForm):

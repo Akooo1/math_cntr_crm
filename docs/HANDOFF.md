@@ -10,13 +10,14 @@ Rules and conventions live in `CLAUDE.md`; every business decision lives in `doc
 - **Work branch** `claude/sweet-keller-1by08z` = `main` + SPEC §24 (owner's round):
   To'lagan fix, registered-student check, reopening a cash day, the owner (Ega), several
   groups in one window, refund on leave, Maosh avansi + salaries from the Kassa, local
-  `WEB_PORT`. All tests pass (716). **Waiting for the owner to say "main".**
+  `WEB_PORT`; and §25 (Ombor categories, deleting a never-used product, "Book" = Kitob,
+  store sale rules respect reopened days). **Waiting for the owner to say "main".**
 - New sessions get a new work branch name from the system; merge or rebase from
   `claude/sweet-keller-1by08z` first if it isn't on `main` yet.
 
 ## Waiting for the owner
 
-1. Say "main" to release §24. Before that: rehearse the upgrade (below), then fast-forward
+1. Say "main" to release §24–§25. Before that: rehearse the upgrade (below), then fast-forward
    `main` to the work branch.
 2. After the release: the owner makes themselves Ega (Sozlamalar → Foydalanuvchilar → own
    row → Ega). Until then every Direktor manages users.

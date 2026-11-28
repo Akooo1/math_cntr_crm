@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{% translate "Delete" %}{% endblock %}
+{% block heading %}{% translate "Delete" %}{% endblock %}
+{% block breadcrumbs %}<a href="{% url 'settings:index' %}">{% translate "Settings" %}</a><a href="{% url 'settings:section_list' section.slug %}">{{ section.title }}</a>{% endblock %}
+{% block content %}
+  <form method="post" class="card max-w-xl space-y-4 p-5">{% csrf_token %}
+    <p class="font-semibold">{{ obj }}</p>
+    <p class="text-sm text-muted">{% translate "It will be deleted for good. This can't be undone." %}</p>
+    <div class="form-actions justify-end">
+      <a href="{% url 'settings:section_list' section.slug %}" class="btn-secondary">{% translate "Cancel" %}</a>
+      <button class="btn-danger">{% icon "x" %}<span>{% translate "Delete" %}</span></button>
+    </div>
+  </form>
+{% endblock %}

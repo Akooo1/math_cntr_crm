@@ -4,7 +4,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: matematika-markazi\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-28 11:56+0500\n"
+"POT-Creation-Date: 2026-11-28 13:05+0500\n"
 "PO-Revision-Date: 2026-11-22 14:00+0500\n"
 "Last-Translator: Matematika Markazi\n"
 "Language-Team: Uzbek\n"
@@ -3258,9 +3258,21 @@ msgstr "Sanalgan soni"
 msgid "How many are actually on the shelf now."
 msgstr "Hozir javonda aslida nechta bor."
 
+msgid "Like books"
+msgstr "Kitob kabi"
+
+msgid "Can be given to a whole group and paid later, like books."
+msgstr "Kitob kabi butun guruhga berish va keyin to'lash mumkin."
+
+msgid "Product category"
+msgstr "Mahsulot turi"
+
+msgid "Product categories"
+msgstr "Mahsulot turlari"
+
 msgctxt "product"
 msgid "Book"
-msgstr "Yozish"
+msgstr "Kitob"
 
 msgid "Item"
 msgstr "Mahsulot"
@@ -3362,6 +3374,9 @@ msgstr ""
 "Markazda sotiladigan kitoblar va mahsulotlar: nomlari, narxlari, minimal "
 "qoldiq."
 
+msgid "Kitoblar, daftarlar, ruchkalar...: names and how they are sold."
+msgstr "Kitoblar, daftarlar, ruchkalar...: nomlari va qanday sotilishi."
+
 msgid "Sales amount"
 msgstr "Savdo summasi"
 
@@ -3393,11 +3408,41 @@ msgid "Not enough %(product)s in stock: %(have)d left, %(wanted)d asked."
 msgstr ""
 "Omborda %(product)s yetarli emas: %(have)d ta qolgan, %(wanted)d ta so'raldi."
 
-msgid "Choose the type."
-msgstr "Turini tanlang."
+msgid "Create a product category first."
+msgstr "Avval mahsulot turini yarating."
+
+msgid "Choose the category."
+msgstr "Mahsulot turini tanlang."
 
 msgid "Write the name."
 msgstr "Nomini yozing."
+
+#, python-format
+msgid "Move it to a category that is also %(kind)s."
+msgstr "Uni xuddi shunday %(kind)s turga o'tkazing."
+
+msgid "like books"
+msgstr "kitob kabi"
+
+msgid "not like books"
+msgstr "kitob kabi bo'lmagan"
+
+msgid ""
+"This product was already received, sold or given, so it can't be deleted. "
+"Deactivate it instead."
+msgstr ""
+"Bu mahsulot kirim qilingan, sotilgan yoki berilgan, shuning uchun uni "
+"o'chirib bo'lmaydi. Uning o'rniga nofaol qiling."
+
+msgid ""
+"This category has products, so \"like books\" can't change. Create a new "
+"category instead."
+msgstr ""
+"Bu turda mahsulotlar bor, shuning uchun \"Kitob kabi\" belgisini o'zgartirib "
+"bo'lmaydi. Uning o'rniga yangi tur yarating."
+
+msgid "Move or delete its products first."
+msgstr "Avval undagi mahsulotlarni boshqa turga o'tkazing yoki o'chiring."
 
 msgid "Add at least one item."
 msgstr "Kamida bitta mahsulot qo'shing."
@@ -3435,6 +3480,9 @@ msgstr "Filialni tanlang"
 
 msgid "Nothing here yet."
 msgstr "Hozircha bo'sh."
+
+msgid "It will be deleted for good. This can't be undone."
+msgstr "Butunlay o'chiriladi. Buni ortga qaytarib bo'lmaydi."
 
 msgid "Give a book"
 msgstr "Kitob berish"

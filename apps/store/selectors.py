@@ -80,7 +80,7 @@ class StockRow:
 def stock_rows(user, branch: Branch, *, kind: str | None = None, active_only=False):
     require_perm(user, "store.view")
     ensure_branch_access(user, branch.pk)
-    products = Product.objects.all()
+    products = Product.objects.select_related("category")
     if kind:
         products = products.filter(kind=kind)
     if active_only:
@@ -330,7 +330,7 @@ def stock_report(user, p):
         low = any(stock_math.is_low(q, prod.low_stock_threshold) for q in current.get(prod.pk, [0]))
         row = [
             prod.name,
-            prod.get_kind_display(),
+            prod.category.name if prod.category else prod.get_kind_display(),
             received.get(prod.pk, 0),
             sold.get(prod.pk, 0),
             closing.get(prod.pk, 0),
