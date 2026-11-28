@@ -428,9 +428,9 @@ Rules marked **[Q-n]** depend on an answer in section 9. The text states my reco
 - Unclosed past days are highlighted on the admin's dashboard.
 
 **6.4.10 What the Sotuv menejeri sees.** A derived `payment_status` per student, with no amounts:
-- `To'lagan`: has payments and no overdue debt.
+- `To'lagan`: money that stayed (payments not cancelled, minus refunds not cancelled) is above zero, and nothing already due is unpaid (owner's report, §24: a cancelled payment used to count). A month that is due but still in its grace days is `To'lov kutilmoqda`.
 - `Qarzi bor`: has overdue debt.
-- `To'lov kutilmoqda`: has charges but no payments yet, none overdue.
+- `To'lov kutilmoqda`: has charges, none overdue, and either no money that stayed or something due still unpaid.
 - `Hisob yo'q`: no charges yet.
 
 **6.4.11 Opening balances (import).**

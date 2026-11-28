@@ -8,6 +8,7 @@ from openpyxl import Workbook
 
 from apps.billing import selectors, services
 from apps.billing.models import Charge, Payment
+from apps.core.system_settings import set_settings
 from apps.students import services as st
 from apps.students.services import importing
 from tests.factories import make_group, make_student, page_text
@@ -76,6 +77,37 @@ class TestDebtors:
         st.enroll(actor=admin_a, student=c, group=group, start_date=D(2026, 11, 16))  # due today
         statuses = selectors.payment_statuses([a.pk, b.pk, c.pk, d.pk])
         assert statuses == {a.pk: "debt", b.pk: "paid", c.pk: "waiting", d.pk: "none"}
+
+    def test_cancelled_or_refunded_money_is_not_paid(
+        self, admin_a, director, branch_a, group, cash
+    ):
+        """Owner's report: a payment taken and then cancelled still showed 'To'lagan'."""
+        cancelled, half, refunded, in_grace = (make_student(admin_a, branch_a) for _ in range(4))
+        for s in (cancelled, half, refunded):
+            st.enroll(actor=admin_a, student=s, group=group, start_date=D(2026, 11, 16))
+        st.enroll(actor=admin_a, student=in_grace, group=group, start_date=D(2026, 11, 2))
+        total = -selectors.balance(cancelled.pk)
+
+        p = pay(admin_a, cancelled, total, cash)
+        assert selectors.payment_statuses([cancelled.pk])[cancelled.pk] == "paid"
+        services.payments.reverse_payment(actor=director, payment=p, reason="xato")
+        assert selectors.payment_statuses([cancelled.pk])[cancelled.pk] == "waiting"
+
+        pay(admin_a, half, total, cash)
+        extra = pay(admin_a, half, 1000, cash)  # a second payment; cancel only that one
+        services.payments.reverse_payment(actor=director, payment=extra, reason="xato")
+        assert selectors.payment_statuses([half.pk])[half.pk] == "paid"
+
+        pay(admin_a, refunded, total + 5000, cash)
+        services.payments.refund(
+            actor=director, student=refunded, amount=5000, method=cash, reason="ortiqcha"
+        )
+        assert selectors.payment_statuses([refunded.pk])[refunded.pk] == "paid"
+
+        # paid an earlier month, this month already due but unpaid and still in grace days
+        set_settings({"billing.grace_days": 30}, actor=director)
+        pay(admin_a, in_grace, 1000, cash)
+        assert selectors.payment_statuses([in_grace.pk])[in_grace.pk] == "waiting"
 
 
 def xlsx(kind_key, rows):

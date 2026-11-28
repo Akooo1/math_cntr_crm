@@ -145,28 +145,40 @@ STATUS_LABELS = {
 
 
 def payment_statuses(student_ids: list[int]) -> dict[int, str]:
-    """'debt' (overdue amount), 'paid', 'waiting' (charges but no payment yet), 'none'."""
+    """'debt' (overdue amount), 'paid', 'waiting' (charges but no payment yet), 'none'.
+
+    'paid' needs money that really stayed: payments that were not cancelled, minus refunds
+    that were not cancelled, above zero; and nothing already due may be unpaid (a month in
+    its grace days is 'waiting', not 'paid')."""
     cutoff = overdue_cutoff()
-    overdue = set(
-        ChargeNet.objects.filter(
-            student_id__in=student_ids, due_date__lt=cutoff, net__gt=F("paid")
-        ).values_list("student_id", flat=True)
-    )
+    today = dates.today()
+    unpaid = ChargeNet.objects.filter(student_id__in=student_ids, net__gt=F("paid"))
+    overdue = set(unpaid.filter(due_date__lt=cutoff).values_list("student_id", flat=True))
+    due_unpaid = set(unpaid.filter(due_date__lte=today).values_list("student_id", flat=True))
     charged = set(
         ChargeNet.objects.filter(student_id__in=student_ids, net__gt=0).values_list(
             "student_id", flat=True
         )
     )
-    paid = set(
+    kept = (
         Payment.objects.filter(
-            student_id__in=student_ids, kind="payment", status="confirmed"
-        ).values_list("student_id", flat=True)
+            student_id__in=student_ids,
+            status=Payment.Status.CONFIRMED,
+            kind__in=(Payment.Kind.PAYMENT, Payment.Kind.REFUND),
+            reversed_by__isnull=True,
+        )
+        .values("student_id")
+        .annotate(
+            i=Sum("amount", filter=Q(kind=Payment.Kind.PAYMENT)),
+            o=Sum("amount", filter=Q(kind=Payment.Kind.REFUND)),
+        )
     )
+    paid = {r["student_id"] for r in kept if (r["i"] or 0) - (r["o"] or 0) > 0}
     out = {}
     for sid in student_ids:
         if sid in overdue:
             out[sid] = "debt"
-        elif sid in paid:
+        elif sid in paid and sid not in due_unpaid:
             out[sid] = "paid"
         elif sid in charged:
             out[sid] = "waiting"
