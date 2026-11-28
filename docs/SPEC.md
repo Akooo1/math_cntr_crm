@@ -423,7 +423,7 @@ Rules marked **[Q-n]** depend on an answer in section 9. The text states my reco
 **6.4.9 Daily cash close (Kassa hisoboti).**
 - **The report** is per branch and date. For each method it shows payments in, refunds and reversals out, net and count, plus the list of transactions. Only methods with `included_in_cash_close` are part of the close.
 - **Closing the day:** the Direktor closes the day (owner's request, §23; before: administrators too). The totals snapshot is stored, and from then on **no payment, reversal or refund dated that day can be created in that branch**. This is enforced in the service and by a database trigger that checks `billing_cash_day_close`.
-- **Reopening:** there is no reopening **[Q-16]**. Errors are corrected through reversals dated on an open day.
+- **Reopening:** the Direktor can reopen a closed day with a reason (owner's request, §24; before: never, Q-16). The close row stays; a `billing_cash_day_reopen` row undoes it, and closing again stores a new snapshot. Both the service and the trigger look only at closes that were not reopened.
 - **Late reversals:** a Direktor reversal on a day that is already closed is refused, with the message to make it the next day.
 - Unclosed past days are highlighted on the admin's dashboard.
 
@@ -580,7 +580,7 @@ Each has my recommendation. Reply with "accept all" or list the numbers you want
 | Q-13 | Can the Sotuv menejeri enroll a student into a group (which creates charges)? | **No.** The manager converts (creates the student, picks the desired group). The admin enrolls and confirms the charge. | Keeps money decisions with the people who handle money. If your managers enroll on the spot, tell me, and I'll let them enroll with the suggested amount only (no overrides). |
 | Q-14 | Who may cancel or correct an issued charge outside enroll, leave, freeze, move and plan edits? | **Direktor only.** | Same reasoning as reversals. |
 | Q-15 | Receipt numbering | **Per branch, `CH-000123`, never resets.** Reversals and refunds use the same sequence. | Gapless and simple. Yearly reset is possible if your accountant wants it. |
-| Q-16 | Can a closed cash day be reopened? | **No, never.** Corrections are reversals dated on an open day. | That is what "locked" means. A reopen button would be used. |
+| Q-16 | Can a closed cash day be reopened? | **Yes, by the Direktor with a reason** (owner's decision, §24; first answer was "never"). | Every reopen is kept and audited; closing again makes a new snapshot. |
 | Q-17 | Opening balance debt from Excel: overdue from when? | **From the date in the file's `qarz_sanasi` column. If empty, from the import date.** | Lets you keep real "days overdue" for old debts. |
 | Q-18 | Backdating payments | **Up to 3 days back (setting), never into a closed day, never in the future.** | Covers "I took cash Saturday and entered it Monday" without opening a hole. |
 

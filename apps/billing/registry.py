@@ -22,6 +22,7 @@ for code, label, roles in (
     ("billing.plan.edit", _("Change installment plans"), {D, A}),
     ("billing.cash.view", _("See the cash report"), {D, A}),
     ("billing.cash.close", _("Close the cash day"), {D}),
+    ("billing.cash.reopen", _("Reopen a closed cash day"), {D}),
     ("billing.debtors.view", _("See debtors"), {D, A}),
     ("billing.payment_status.view", _("See whether a student has paid"), {D, A, M}),
 ):

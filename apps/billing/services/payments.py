@@ -29,7 +29,7 @@ def next_receipt(branch: Branch) -> tuple[int, str]:
 
 
 def is_closed(branch_id: int, day: dt.date) -> bool:
-    return CashDayClose.objects.filter(branch_id=branch_id, date=day).exists()
+    return CashDayClose.objects.in_force().filter(branch_id=branch_id, date=day).exists()
 
 
 def _check_day(branch_id: int, day: dt.date, method: PaymentMethod):

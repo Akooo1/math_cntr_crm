@@ -62,7 +62,7 @@ def rule_for(template: InstallmentTemplate):
 
 def is_day_closed(branch_id: int, day: dt.date) -> bool:
     """Public check for other modules (the store refuses sales on a closed cash day)."""
-    return CashDayClose.objects.filter(branch_id=branch_id, date=day).exists()
+    return CashDayClose.objects.in_force().filter(branch_id=branch_id, date=day).exists()
 
 
 def cash_methods_for_entry():
@@ -339,7 +339,9 @@ def unclosed_days(user, branch_filter=None, days=14) -> list[dict]:
                 branch_filter is None or b == int(branch_filter)
             ):
                 pairs.add((b, d))
-    closed = set(CashDayClose.objects.filter(date__gte=since).values_list("branch_id", "date"))
+    closed = set(
+        CashDayClose.objects.in_force().filter(date__gte=since).values_list("branch_id", "date")
+    )
     from apps.settings.models import Branch
 
     names = dict(Branch.objects.values_list("id", "name"))

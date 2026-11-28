@@ -638,7 +638,15 @@ def cash_report(request):
             excel.workbook(_("Cash report"), headers, data, kinds, totals),
         )
     closed = (
-        CashDayClose.objects.filter(branch=branch, date=day).select_related("closed_by").first()
+        CashDayClose.objects.in_force()
+        .filter(branch=branch, date=day)
+        .select_related("closed_by")
+        .first()
+    )
+    reopens = (
+        CashDayClose.objects.filter(branch=branch, date=day, reopen__isnull=False)
+        .select_related("closed_by", "reopen__reopened_by")
+        .order_by("closed_at")
     )
     return render(
         request,
@@ -655,10 +663,33 @@ def cash_report(request):
             "can_close": has_perm(request.user, "billing.cash.close")
             and not closed
             and day <= dates.today(),
+            "can_reopen": closed is not None and has_perm(request.user, "billing.cash.reopen"),
+            "reopens": reopens,
             "form": CashCloseForm(),
             "unclosed": selectors.unclosed_days(request.user, branch.pk),
         },
     )
+
+
+@perm_required("billing.cash.reopen")
+@require_POST
+def cash_reopen(request):
+    branch, _branches = _cash_branch(request)
+    if branch is None:
+        raise Http404
+    ensure_branch_access(request.user, branch.pk)
+    day = _date(request.POST.get("sana")) or dates.today()
+    try:
+        services.cash.reopen_day(
+            actor=request.user, branch=branch, day=day, reason=request.POST.get("reason", "")
+        )
+    except ValidationError as exc:
+        messages.error(request, " ".join(exc.messages))
+    else:
+        messages.success(
+            request, _("The day is open again. Close it when the corrections are done.")
+        )
+    return redirect(f"{reverse('billing:cash')}?filial={branch.pk}&sana={dates.format_date(day)}")
 
 
 @perm_required("billing.cash.close")

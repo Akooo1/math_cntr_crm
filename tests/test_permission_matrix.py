@@ -253,6 +253,17 @@ def billing_cases(o) -> dict[str, list[Case]]:
                 "billing:cash_close",
                 [Case("/kassa/yopish/", "post", expect({D: 302}), {"sana": "01.01.2020"})],
             ),
+            (
+                "billing:cash_reopen",
+                [
+                    Case(
+                        "/kassa/qayta-ochish/",
+                        "post",
+                        expect({D: 302}),
+                        {"sana": "01.01.2020", "reason": "x"},
+                    )
+                ],
+            ),
         ]
     )
 

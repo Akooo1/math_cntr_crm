@@ -59,6 +59,16 @@
         {% endfor %}
       </ul>
     {% endif %}
+    {% for c in reopens %}
+      <p class="mt-3 rounded-lg bg-surface-2 px-3 py-2 text-sm text-muted">{% blocktranslate with by=c.closed_by.full_name at=c.closed_at|sana_vaqt who=c.reopen.reopened_by.full_name when=c.reopen.reopened_at|sana_vaqt reason=c.reopen.reason %}Closed by {{ by }} ({{ at }}), reopened by {{ who }} ({{ when }}): {{ reason }}{% endblocktranslate %}</p>
+    {% endfor %}
+    {% if can_reopen %}
+      <form method="post" action="{% url 'billing:cash_reopen' %}" class="mt-4 flex flex-wrap items-end gap-2" data-confirm="{% translate 'Reopen the day? Payments dated that day can be changed until you close it again.' %}">{% csrf_token %}
+        <input type="hidden" name="filial" value="{{ branch.pk }}"><input type="hidden" name="sana" value="{{ day|sana }}">
+        <div class="min-w-0 flex-[1_1_14rem]"><label class="label" for="reopen-reason">{% translate "Why reopen?" %}</label><input id="reopen-reason" name="reason" required class="input w-full"></div>
+        <button class="btn-secondary">{% icon "refresh" %}{% translate "Reopen the day" %}</button>
+      </form>
+    {% endif %}
     {% if can_close %}
       <form method="post" action="{% url 'billing:cash_close' %}" class="mt-4 flex flex-wrap items-end gap-2" data-confirm="{% translate 'Close the day? Its payments will be locked.' %}">{% csrf_token %}
         <input type="hidden" name="filial" value="{{ branch.pk }}"><input type="hidden" name="sana" value="{{ day|sana }}">

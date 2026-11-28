@@ -581,7 +581,16 @@ class ReceiptCounter(models.Model):
         return f"{self.branch_id}:{self.last_seq}"
 
 
+class CashDayCloseQuerySet(models.QuerySet):
+    def in_force(self):
+        """Closes that still lock their day: not undone by a reopen (SPEC §24)."""
+        return self.filter(reopen__isnull=True)
+
+
 class CashDayClose(models.Model):
+    """A closed branch-day. Rows are never edited or deleted; a reopen (CashDayReopen)
+    undoes one, and closing the day again adds a new row with a new snapshot."""
+
     branch = models.ForeignKey(
         Branch, on_delete=models.PROTECT, related_name="+", verbose_name=_("Branch")
     )
@@ -596,15 +605,47 @@ class CashDayClose(models.Model):
     totals = models.JSONField(default=dict)
     note = models.CharField(_("Note"), max_length=255, blank=True)
 
+    objects = CashDayCloseQuerySet.as_manager()
+
     class Meta:
         db_table = "billing_cash_day_close"
         ordering = ["-date"]
         verbose_name = _("Closed cash day")
         verbose_name_plural = _("Closed cash days")
-        constraints = [models.UniqueConstraint(fields=["branch", "date"], name="uniq_cash_close")]
+        indexes = [models.Index(fields=["branch", "date"], name="cash_close_branch_date")]
 
     def __str__(self):
         return f"{self.branch_id}:{self.date}"
+
+
+class CashDayReopen(models.Model):
+    """The Direktor reopened a closed day, with a reason (owner's request, SPEC §24)."""
+
+    close = models.OneToOneField(
+        CashDayClose, on_delete=models.PROTECT, related_name="reopen", verbose_name=_("Close")
+    )
+    reopened_by = models.ForeignKey(
+        dj_settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name=_("Reopened by"),
+    )
+    reopened_at = models.DateTimeField(_("Reopened at"), auto_now_add=True)
+    reason = models.TextField(_("Reason"))
+
+    class Meta:
+        db_table = "billing_cash_day_reopen"
+        ordering = ["-reopened_at"]
+        verbose_name = _("Reopened cash day")
+        verbose_name_plural = _("Reopened cash days")
+        constraints = [
+            models.CheckConstraint(
+                condition=~models.Q(reason=""), name="cash_reopen_reason_required"
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.close_id}"
 
 
 # =========================================================================================

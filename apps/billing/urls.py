@@ -20,4 +20,5 @@ urlpatterns = [
     path("qarzdorlar/", views.debtors, name="debtors"),
     path("kassa/", views.cash_report, name="cash"),
     path("kassa/yopish/", views.cash_close, name="cash_close"),
+    path("kassa/qayta-ochish/", views.cash_reopen, name="cash_reopen"),
 ]

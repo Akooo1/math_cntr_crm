@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy
 from apps.core import audit, dates
 from apps.core.permissions import ensure_branch_access, require_perm
 
-from ..models import CashDayClose, Payment, PaymentMethod
+from ..models import CashDayClose, CashDayReopen, Payment, PaymentMethod
 
 # --- Extension point: other modules' money in the cash report (SPEC 17.4) ----------------
 
@@ -162,7 +162,7 @@ def close_day(*, actor, branch, day: dt.date, note: str = "") -> CashDayClose:
         raise ValidationError(_("A future day can't be closed."))
     with transaction.atomic():
         lock_day(branch.pk, day)
-        if CashDayClose.objects.select_for_update().filter(branch=branch, date=day).exists():
+        if CashDayClose.objects.in_force().filter(branch=branch, date=day).exists():
             raise ValidationError(_("This day is already closed."))
         totals = snapshot(day_report(branch.pk, day))
         close = CashDayClose.objects.create(
@@ -172,3 +172,28 @@ def close_day(*, actor, branch, day: dt.date, note: str = "") -> CashDayClose:
             actor, "billing.cash_day.close", close, after={"date": day.isoformat(), **totals}
         )
     return close
+
+
+def reopen_day(*, actor, branch, day: dt.date, reason: str) -> CashDayReopen:
+    """Undo a close (Direktor, with a reason; SPEC §24). Payments, reversals and refunds can
+    be dated that day again; closing it again stores a new snapshot. The close row stays."""
+    require_perm(actor, "billing.cash.reopen")
+    ensure_branch_access(actor, branch.pk)
+    reason = (reason or "").strip()
+    if not reason:
+        raise ValidationError(_("Write why the day is reopened."))
+    with transaction.atomic():
+        lock_day(branch.pk, day)
+        close = CashDayClose.objects.in_force().filter(branch=branch, date=day).first()
+        if close is None:
+            raise ValidationError(_("This day is not closed."))
+        reopen = CashDayReopen.objects.create(close=close, reopened_by=actor, reason=reason)
+        audit.record(
+            actor,
+            "billing.cash_day.reopen",
+            close,
+            before={"date": day.isoformat(), **close.totals},
+            branch_id=branch.pk,
+            reason=reason,
+        )
+    return reopen
