@@ -27,6 +27,8 @@ class User(AbstractBaseUser):
     phone = models.CharField(_("Phone"), max_length=13, unique=True)
     full_name = models.CharField(_("Full name"), max_length=150)
     role = models.CharField(_("Role"), max_length=20, choices=Role.choices)
+    # The owner (Ega): a Direktor who alone manages users, roles and rights (SPEC §24).
+    is_owner = models.BooleanField(_("Owner"), default=False)
     is_active = models.BooleanField(_("Active"), default=True)
     must_change_password = models.BooleanField(_("Must change password"), default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -73,3 +75,12 @@ class User(AbstractBaseUser):
     @property
     def is_director(self) -> bool:
         return self.role == Role.DIRECTOR
+
+    @property
+    def role_label(self) -> str:
+        """The role as shown in lists: the owner is "Direktor (Ega)"."""
+        from django.utils.translation import gettext as _
+
+        if self.is_owner and self.is_director:
+            return _("Director (owner)")
+        return self.get_role_display()

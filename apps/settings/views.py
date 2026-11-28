@@ -53,6 +53,11 @@ def section_list(request, slug):
             "obj": obj,
             "can_edit": section.can_edit(request, obj),
             "can_toggle": section.can_toggle(request, obj),
+            "actions": [
+                (key, label)
+                for key, (label, _view) in section.actions.items()
+                if section.action_visible(request, obj, key)
+            ],
         }
         for obj in qs
     ]
@@ -141,5 +146,7 @@ def section_action(request, slug, pk, action):
     if action not in section.actions:
         raise Http404
     obj = _get_obj(section, request, pk)
+    if not section.action_visible(request, obj, action):
+        raise Http404
     _label, view = section.actions[action]
     return view(request, section, obj)

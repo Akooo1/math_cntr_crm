@@ -24,7 +24,7 @@ def _set_branches(user, branches) -> list[int]:
 
 
 def save_staff_user(*, actor, form, instance=None):
-    require_perm(actor, "settings.manage")
+    require_perm(actor, "accounts.users.manage")
     data = form.cleaned_data
     with transaction.atomic():
         if instance is None:
@@ -90,7 +90,7 @@ def _set_grants(actor, user, codes) -> None:
 
 
 def set_user_active(*, actor, user, active: bool):
-    require_perm(actor, "settings.manage")
+    require_perm(actor, "accounts.users.manage")
     if user.pk == actor.pk:
         raise ValidationError(_("You can't deactivate yourself."))
     with transaction.atomic():

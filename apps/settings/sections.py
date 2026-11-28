@@ -114,6 +114,26 @@ def _reset_password_view(request, section, user):
     )
 
 
+def _owner_view(request, section, user):
+    """Make this Direktor the owner (Ega), or take it back (SPEC §24)."""
+    from apps.accounts import services as account_services
+
+    making = not user.is_owner
+    if request.method == "POST":
+        try:
+            account_services.set_owner(actor=request.user, user=user, owner=making)
+        except ValidationError as exc:
+            messages.error(request, " ".join(exc.messages))
+        else:
+            messages.success(request, gettext("Saved."))
+        return redirect("settings:section_list", slug=section.slug)
+    return render(
+        request,
+        "settings/owner_confirm.html",
+        {"section": section, "person": user, "making": making},
+    )
+
+
 class UserSection(SettingsSection):
     slug = "foydalanuvchilar"
     title = _("Users")
@@ -126,13 +146,28 @@ class UserSection(SettingsSection):
     columns = [
         Column(_("Full name"), lambda u: u.full_name, primary=True),
         Column(_("Phone"), lambda u: u.phone, kind="phone"),
-        Column(_("Role"), lambda u: u.get_role_display(), kind="badge"),
+        Column(_("Role"), lambda u: u.role_label, kind="badge"),
         Column(
             _("Branches"),
             lambda u: ", ".join(link.branch.name for link in u.branch_links.all()) or "—",
         ),
     ]
-    actions = {"parol": (_("Reset password"), _reset_password_view)}
+    permission = "accounts.users.manage"
+    actions = {
+        "parol": (_("Reset password"), _reset_password_view),
+        "ega": (_("Owner"), _owner_view),
+    }
+
+    def action_visible(self, request, obj, key):
+        if key != "ega":
+            return True
+        from apps.core.permissions import owner_exists
+
+        if not obj.is_director or not obj.is_active:
+            return False
+        if owner_exists():
+            return request.user.is_owner
+        return obj.pk == request.user.pk  # nobody is the owner yet: "make me the owner"
 
     @property
     def model(self):

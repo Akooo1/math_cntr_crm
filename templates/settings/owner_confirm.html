@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}{% translate "Owner" %}{% endblock %}
+{% block heading %}{% translate "Owner" %}{% endblock %}
+{% block breadcrumbs %}<a href="{% url 'settings:index' %}">{% translate "Settings" %}</a><a href="{% url 'settings:section_list' section.slug %}">{{ section.title }}</a>{% endblock %}
+{% block content %}
+  <form method="post" class="card max-w-xl space-y-4 p-5">{% csrf_token %}
+    <p class="font-semibold">{{ person.full_name }}</p>
+    {% if making %}
+      <p class="text-sm text-muted">{% translate "The owner (Ega) is a Direktor who alone can add and change users, their roles, branches, extra permissions and passwords. Other Direktors keep everything else." %}</p>
+    {% else %}
+      <p class="text-sm text-muted">{% translate "This person stays a Direktor but can no longer manage users, roles and rights." %}</p>
+    {% endif %}
+    <div class="form-actions justify-end">
+      <a href="{% url 'settings:section_list' section.slug %}" class="btn-secondary">{% translate "Cancel" %}</a>
+      <button class="btn-primary">{% icon "check" %}<span>{% if making %}{% translate "Make the owner" %}{% else %}{% translate "Stop being the owner" %}{% endif %}</span></button>
+    </div>
+  </form>
+{% endblock %}

@@ -23,13 +23,24 @@ class Permission:
     roles: frozenset[str]
     # The Direktor may give it to individual people (Sozlamalar -> Foydalanuvchilar).
     grantable: bool = False
+    # Only the owner (Ega, a Direktor marked as owner) has it; while nobody is the owner
+    # yet, every Direktor has it (docs/SPEC.md §24).
+    owner_only: bool = False
 
 
 _registry: dict[str, Permission] = {}
 
 
-def register_permission(code: str, label, roles, *, grantable: bool = False) -> Permission:
-    perm = Permission(code=code, label=label, roles=frozenset(roles), grantable=grantable)
+def register_permission(
+    code: str, label, roles, *, grantable: bool = False, owner_only: bool = False
+) -> Permission:
+    perm = Permission(
+        code=code,
+        label=label,
+        roles=frozenset(roles),
+        grantable=grantable,
+        owner_only=owner_only,
+    )
     _registry[code] = perm
     return perm
 
@@ -53,6 +64,8 @@ def has_perm(user, code: str) -> bool:
     if user is None or not getattr(user, "is_authenticated", False) or not user.is_active:
         return False
     perm = get_permission(code)
+    if perm.owner_only:
+        return is_director(user) and (getattr(user, "is_owner", False) or not owner_exists())
     if user.role in perm.roles:
         return True
     # Given to this person by the Direktor (only grantable permissions count).
@@ -66,6 +79,13 @@ def require_perm(user, code: str) -> None:
 
 def is_director(user) -> bool:
     return getattr(user, "role", None) == Role.DIRECTOR
+
+
+def owner_exists() -> bool:
+    """Is any active account the owner (Ega)? Until one is, Direktors act as owners."""
+    from django.contrib.auth import get_user_model
+
+    return get_user_model().objects.filter(is_owner=True, is_active=True).exists()
 
 
 # --- Branch scoping ---------------------------------------------------------------

@@ -8,6 +8,12 @@ from . import sections  # noqa: F401 - registers the Sozlamalar sections
 from .selectors import branches_for_switcher, center_name
 
 register_permission("settings.manage", _("Manage settings"), {Role.DIRECTOR})
+register_permission(
+    "accounts.users.manage",
+    _("Manage users, roles and rights"),
+    {Role.DIRECTOR},
+    owner_only=True,
+)
 
 registry.add_nav(
     NavItem(

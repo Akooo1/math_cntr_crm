@@ -66,6 +66,10 @@ class SettingsSection:
     def can_edit(self, request, obj) -> bool:
         return self.allow_edit
 
+    def action_visible(self, request, obj, key) -> bool:
+        """Whether the per-object action `key` is offered for this row."""
+        return True
+
     def can_toggle(self, request, obj) -> bool:
         return self.allow_toggle_active and hasattr(obj, "is_active")
 
