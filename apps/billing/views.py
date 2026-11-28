@@ -296,6 +296,53 @@ def refund(request, pk):
     )
 
 
+@perm_required("billing.refund.leave")
+def leave_refund(request, pk):
+    """Return the lessons not taken after a student left a group (SPEC §24)."""
+    from apps.students.models import Enrollment
+
+    from .forms import LeaveRefundForm
+
+    e = Enrollment.objects.select_related("student", "group").filter(pk=pk).first()
+    if e is None:
+        raise Http404
+    student = _student(request, e.student_id)  # branch scope: 404 outside it
+    limit = services.payments.leave_refundable(e)
+    if limit <= 0:
+        raise Http404
+    form = LeaveRefundForm(
+        request.POST or None,
+        methods=selectors.cash_methods_for_entry(),
+        initial={"amount": limit},
+    )
+    if request.method == "POST" and form.is_valid():
+        d = form.cleaned_data
+        try:
+            row = services.payments.refund_on_leave(
+                actor=request.user, enrollment=e, amount=d["amount"], method=d["method"]
+            )
+        except ValidationError as exc:
+            _error(form, exc)
+        else:
+            messages.success(request, _("The refund was saved."))
+            return redirect("billing:receipt", pk=row.pk)
+    return render(
+        request,
+        "billing/simple_form.html",
+        {
+            "form": form,
+            "title": _("Refund to %(name)s") % {"name": student.full_name},
+            "back": reverse("students:detail", args=[student.pk]),
+            "danger": True,
+            "hint": _(
+                "Left %(group)s: the lessons not taken, up to %(amount)s. Missed lessons "
+                "(absences) are not returned."
+            )
+            % {"group": e.group.name, "amount": services.payments.money_text(limit)},
+        },
+    )
+
+
 # --- Discounts, corrections, plans ----------------------------------------------------------
 
 

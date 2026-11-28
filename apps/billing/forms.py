@@ -195,6 +195,17 @@ class RefundForm(StyledForm):
         self.fields["method"].queryset = methods
 
 
+class LeaveRefundForm(StyledForm):
+    amount = MoneyField(label=_("Amount"), min_value=1)
+    method = forms.ModelChoiceField(
+        label=_("Payment method"), queryset=PaymentMethod.objects.none(), empty_label=None
+    )
+
+    def __init__(self, *args, methods, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["method"].queryset = methods
+
+
 class DiscountAssignForm(StyledForm):
     enrollment = forms.ModelChoiceField(label=_("Group"), queryset=None, empty_label=None)
     discount_type = forms.ModelChoiceField(

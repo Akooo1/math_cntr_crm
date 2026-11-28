@@ -154,6 +154,62 @@ def credit_of(student_id: int) -> int:
 def refund(*, actor, student: Student, amount: int, method: PaymentMethod, reason: str) -> Payment:
     """Pay money back. Only the credit (avans) can be refunded (SPEC 6.4.8)."""
     require_perm(actor, "billing.reverse")
+    return _refund(actor=actor, student=student, amount=amount, method=method, reason=reason)
+
+
+def leave_refundable(enrollment) -> int:
+    """What can still be paid back for the lessons not taken after leaving this group: what
+    the leave took off its charges, minus refunds already made for it, never more than the
+    student's credit (SPEC §24). Absences never count: a missed lesson is still paid."""
+    from django.db.models import Sum
+
+    from ..models import ChargeAdjustment
+
+    if enrollment.status != "left":
+        return 0
+    taken_off = -int(
+        ChargeAdjustment.objects.filter(
+            charge__enrollment=enrollment,
+            kind__in=(ChargeAdjustment.Kind.PRORATION_LEAVE, ChargeAdjustment.Kind.CANCELLATION),
+        ).aggregate(t=Sum("amount"))["t"]
+        or 0
+    )
+    refunded = int(
+        Payment.objects.filter(
+            for_enrollment=enrollment, kind=Payment.Kind.REFUND, reversed_by__isnull=True
+        ).aggregate(t=Sum("amount"))["t"]
+        or 0
+    )
+    return max(0, min(taken_off - refunded, credit_of(enrollment.student_id)))
+
+
+def refund_on_leave(*, actor, enrollment, amount: int, method: PaymentMethod) -> Payment:
+    """Pay back the lessons not taken when a student leaves a group. Administrators may do
+    this one refund (owner's decision, SPEC §24); every other refund stays the Direktor's.
+    Only from the Kassa (a cash desk method), only up to leave_refundable()."""
+    require_perm(actor, "billing.refund.leave")
+    if not method.included_in_cash_close:
+        raise ValidationError(_("Choose a cash desk method."))
+    with transaction.atomic():
+        Student.objects.select_for_update().get(pk=enrollment.student_id)
+        limit = leave_refundable(enrollment)
+        if amount > limit:
+            raise ValidationError(
+                _("At most %(amount)s can be returned for this group.")
+                % {"amount": money_text(limit)}
+            )
+        reason = _("Left the group %(group)s: lessons not taken") % {"group": enrollment.group.name}
+        return _refund(
+            actor=actor,
+            student=enrollment.student,
+            amount=amount,
+            method=method,
+            reason=reason,
+            for_enrollment=enrollment,
+        )
+
+
+def _refund(*, actor, student, amount, method, reason, for_enrollment=None) -> Payment:
     ensure_branch_access(actor, student.branch_id)
     if not reason.strip():
         raise ValidationError(_("Write the reason."))
@@ -183,6 +239,7 @@ def refund(*, actor, student: Student, amount: int, method: PaymentMethod, reaso
             reason=reason.strip(),
             receipt_seq=seq,
             receipt_number=number,
+            for_enrollment=for_enrollment,
         )
         rebuild_for_student(student.pk)
         audit.record(

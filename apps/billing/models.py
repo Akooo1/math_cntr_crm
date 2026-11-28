@@ -525,6 +525,15 @@ class Payment(models.Model):
         "self", on_delete=models.PROTECT, null=True, blank=True, related_name="reversed_by"
     )
     reason = models.TextField(_("Reason"), blank=True)
+    # A refund of the lessons not taken after leaving this group (SPEC §24).
+    for_enrollment = models.ForeignKey(
+        "students.Enrollment",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="+",
+        verbose_name=_("Left the group"),
+    )
     receipt_seq = models.PositiveIntegerField()
     receipt_number = models.CharField(_("Receipt"), max_length=20)
     import_batch = models.ForeignKey(

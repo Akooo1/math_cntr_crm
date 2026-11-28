@@ -12,6 +12,7 @@ urlpatterns = [
     path("tolovlar/<int:pk>/chek/", views.receipt, name="receipt"),
     path("tolovlar/<int:pk>/bekor-qilish/", views.payment_reverse, name="reverse"),
     path("hisob/<int:pk>/pul-qaytarish/", views.refund, name="refund"),
+    path("chiqish/<int:pk>/pul-qaytarish/", views.leave_refund, name="leave_refund"),
     path("hisob/<int:pk>/chegirma/", views.discount_assign, name="discount_assign"),
     path("hisob/<int:pk>/qoshimcha/", views.manual_charge, name="manual_charge"),
     path("chegirmalar/<int:pk>/tugatish/", views.discount_end, name="discount_end"),

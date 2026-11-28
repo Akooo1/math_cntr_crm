@@ -23,6 +23,7 @@ for code, label, roles in (
     ("billing.cash.view", _("See the cash report"), {D, A}),
     ("billing.cash.close", _("Close the cash day"), {D}),
     ("billing.cash.reopen", _("Reopen a closed cash day"), {D}),
+    ("billing.refund.leave", _("Refund the lessons not taken when a student leaves"), {D, A}),
     ("billing.debtors.view", _("See debtors"), {D, A}),
     ("billing.payment_status.view", _("See whether a student has paid"), {D, A, M}),
 ):
@@ -147,10 +148,24 @@ def _account_panel(request, student):
 
     from . import selectors
 
+    from apps.core.permissions import has_perm
+    from apps.students.models import Enrollment
+
+    from .services.payments import leave_refundable
+
+    leave_refunds = []
+    if has_perm(request.user, "billing.refund.leave"):
+        for e in Enrollment.objects.filter(student=student, status="left").select_related(
+            "group"
+        ):
+            amount = leave_refundable(e)
+            if amount > 0:
+                leave_refunds.append({"enrollment": e, "amount": amount})
     return {
         "account": selectors.account(request.user, student),
         "student": student,
         "today": dates.today(),
+        "leave_refunds": leave_refunds,
     }
 
 

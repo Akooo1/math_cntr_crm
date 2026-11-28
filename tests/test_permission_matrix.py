@@ -240,6 +240,15 @@ def billing_cases(o) -> dict[str, list[Case]]:
             two("billing:receipt", "/tolovlar/{}/chek/", "payment", fin, fin_other),
             two("billing:reverse", "/tolovlar/{}/bekor-qilish/", "payment", director, director),
             two("billing:refund", "/hisob/{}/pul-qaytarish/", "student", director, director),
+            # Only for a group the student left with money to return; these are still
+            # studying, so 404 for the roles that may refund (tests/test_leave_refund.py).
+            two(
+                "billing:leave_refund",
+                "/chiqish/{}/pul-qaytarish/",
+                "enrollment",
+                expect({D: 404, A: 404}),
+                expect({D: 404, A: 404}),
+            ),
             two("billing:discount_assign", "/hisob/{}/chegirma/", "student", fin, fin_other),
             two("billing:manual_charge", "/hisob/{}/qoshimcha/", "student", director, director),
             two("billing:discount_end", "/chegirmalar/{}/tugatish/", "discount", fin, fin_other),

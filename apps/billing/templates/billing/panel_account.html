@@ -13,6 +13,7 @@
         <a href="{% url 'billing:manual_charge' s.pk %}" class="btn-ghost">{% icon "plus" "w-4 h-4" %}{% translate "Additional charge" %}</a>
         {% if a.balance > 0 %}<a href="{% url 'billing:refund' s.pk %}" class="btn-danger-soft">{% icon "refresh" "w-4 h-4" %}{% translate "Refund" %}</a>{% endif %}
       {% endif %}
+      {% for r in ctx.leave_refunds %}<a href="{% url 'billing:leave_refund' r.enrollment.pk %}" class="btn-danger-soft">{% icon "refresh" "w-4 h-4" %}{% blocktranslate with g=r.enrollment.group.name a=r.amount|som %}Return {{ a }} ({{ g }}){% endblocktranslate %}</a>{% endfor %}
     </div>
   </div>
 
