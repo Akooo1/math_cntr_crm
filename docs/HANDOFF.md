@@ -6,22 +6,15 @@ Rules and conventions live in `CLAUDE.md`; every business decision lives in `doc
 ## State (28.11.2026)
 
 - **Live site**: Railway, deploys from `main` (services web / worker / bot, one Postgres with
-  REAL data). `main` = SPEC §1–§23.
-- **Work branch** `claude/sweet-keller-1by08z` = `main` + SPEC §24 (owner's round):
-  To'lagan fix, registered-student check, reopening a cash day, the owner (Ega), several
-  groups in one window, refund on leave, Maosh avansi + salaries from the Kassa, local
-  `WEB_PORT`; and §25 (Ombor categories, deleting a never-used product, "Book" = Kitob,
-  store sale rules respect reopened days). **Waiting for the owner to say "main".**
-- New sessions get a new work branch name from the system; merge or rebase from
-  `claude/sweet-keller-1by08z` first if it isn't on `main` yet.
+  REAL data). `main` = SPEC §1–§25, released 28.11.2026.
+- The last work branch was `claude/sweet-keller-1by08z` (now equal to `main`). New sessions
+  get their own branch name: start it from `main`.
 
 ## Waiting for the owner
 
-1. Say "main" to release §24–§25. Before that: rehearse the upgrade (below), then fast-forward
-   `main` to the work branch.
-2. After the release: the owner makes themselves Ega (Sozlamalar → Foydalanuvchilar → own
-   row → Ega). Until then every Direktor manages users.
-3. Online demo with fake data: the owner decided it isn't needed. Don't build it.
+1. After the 28.11 release: the owner makes themselves Ega (Sozlamalar → Foydalanuvchilar →
+   own row → Ega). Until then every Direktor manages users.
+2. Online demo with fake data: the owner decided it isn't needed. Don't build it.
 
 ## How we work (the owner's standing rules)
 

@@ -5,7 +5,7 @@ Read `docs/HANDOFF.md` first (current state, what waits for the owner, how we wo
 ## Project status
 
 - Module 1 (CRM + students + billing), built in phases 0–5. Each phase ends with a stop: report what was built, how to run it and what to check, then **wait for the owner's approval** before starting the next phase.
-- Current phase: **§24–§25 on the work branch** (Ombor categories and deleting unused products; registered-student check, To'lagan fix, reopening a cash day, the owner (Ega), several groups in one window, refund on leave, Maosh avansi and salaries from the Kassa); §19–§23 are on `main`. Waiting for the owner's review before `main`. Production never has the demo app (`config/settings/prod.py`). Update this line and `docs/HANDOFF.md` at the end of each phase.
+- Current phase: **§19–§25 released to `main`** (latest: Ombor categories and deleting unused products; registered-student check, To'lagan fix, reopening a cash day, the owner (Ega), several groups in one window, refund on leave, Maosh avansi and salaries from the Kassa). Waiting for the owner's next request. Production never has the demo app (`config/settings/prod.py`). Update this line and `docs/HANDOFF.md` at the end of each phase.
 
 ## Ask the owner before
 
