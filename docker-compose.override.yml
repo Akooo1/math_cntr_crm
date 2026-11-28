@@ -15,7 +15,9 @@ services:
       DIRECTOR_NAME: ${DIRECTOR_NAME:-}
       DIRECTOR_PASSWORD: ${DIRECTOR_PASSWORD:-}
     ports:
-      - "8000:8000"
+      # Your computer's port (left) -> the app (right). Another program on 8000? Run
+      # `WEB_PORT=8001 docker compose up` or put WEB_PORT=8001 into .env.
+      - "${WEB_PORT:-8000}:8000"
     volumes:
       - .:/app
 
